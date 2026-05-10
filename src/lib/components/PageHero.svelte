@@ -60,7 +60,7 @@
 		position: relative;
 		min-height: calc(100svh - 96px);
 		overflow: hidden;
-		background: #ffffff;
+		background: var(--page-bg);
 	}
 
 	.page-hero.compact {
@@ -90,7 +90,7 @@
 			rgba(245, 245, 247, 0) 0%,
 			rgba(245, 245, 247, 0.18) 34%,
 			rgba(245, 245, 247, 0.52) 62%,
-			#f5f5f7 100%
+			var(--page-bg) 100%
 		);
 	}
 

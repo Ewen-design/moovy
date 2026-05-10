@@ -37,10 +37,14 @@
 		align-items: center;
 		width: 100%;
 		padding: 14px 18px;
-		background: #fbfbfc;
+		background: var(--surface-card);
 		border: 0;
+		color: var(--page-text);
 		cursor: pointer;
 		text-align: left;
+		transition:
+			background-color var(--theme-duration) var(--theme-ease),
+			color var(--theme-duration) var(--theme-ease);
 	}
 
 	.film-row.detailed {
@@ -89,7 +93,8 @@
 	.credits {
 		margin-top: 0.35rem;
 		font-size: 0.96rem;
-		color: #75757c;
+		color: var(--muted-text-strong);
+		transition: color var(--theme-duration) var(--theme-ease);
 	}
 
 	.description {
@@ -97,7 +102,8 @@
 		max-width: 76ch;
 		font-size: 0.98rem;
 		line-height: 1.45;
-		color: #2b2b2f;
+		color: var(--page-text);
+		transition: color var(--theme-duration) var(--theme-ease);
 	}
 
 	.row-action {

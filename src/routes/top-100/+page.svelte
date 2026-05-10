@@ -134,7 +134,7 @@
 
 	.catalog-head span {
 		font-size: 0.95rem;
-		color: #6f7683;
+		color: var(--muted-text);
 	}
 
 	.pager {

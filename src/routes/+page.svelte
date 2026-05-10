@@ -165,7 +165,7 @@
 		min-height: 520px;
 		overflow: hidden;
 		text-decoration: none;
-		background: #ffffff;
+		background: var(--surface-card);
 	}
 
 	.feature-block img {
