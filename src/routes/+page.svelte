@@ -125,7 +125,7 @@
 		/>
 	</section>
 
-	<FilmDetailSheet film={selectedFilm} {similarMovies} onClose={closeFilm} />
+	<FilmDetailSheet film={selectedFilm} {similarMovies} onClose={closeFilm} onSelect={openFilm} />
 </div>
 
 <style>

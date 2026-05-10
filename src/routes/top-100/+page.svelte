@@ -10,14 +10,12 @@
 
 	const heroSlides = [
 		{
-			kicker: 'Top 100',
 			title: 'Les 100 films a garder.',
 			button: 'Commencer par le debut',
 			href: '#list',
 			tint: 'tint-blue'
 		},
 		{
-			kicker: 'Classement',
 			title: 'Une liste nette, 20 par 20.',
 			button: 'Voir la suite',
 			href: '#list',
@@ -65,7 +63,6 @@
 	<section class="catalog-shell" id="list">
 		<div class="catalog-head">
 			<div>
-				<p>Top 100</p>
 				<h2>100 films, 20 par page.</h2>
 			</div>
 			<span>{currentPage * 20 + 1}-{Math.min((currentPage + 1) * 20, 100)} / 100</span>
@@ -102,13 +99,14 @@
 		film={selectedFilm}
 		similarMovies={selectedFilm ? getSimilarMovies(top100Movies, selectedFilm, 6) : []}
 		onClose={closeFilm}
+		onSelect={openFilm}
 	/>
 </div>
 
 <style>
 	.catalog-page {
 		display: grid;
-		gap: 10px;
+		gap: 42px;
 	}
 
 	.catalog-shell {
@@ -124,22 +122,12 @@
 		padding: 0 2px;
 	}
 
-	.catalog-head p,
 	.catalog-head h2,
 	.catalog-head span {
 		margin: 0;
 	}
 
-	.catalog-head p {
-		font-size: 0.8rem;
-		font-weight: 600;
-		letter-spacing: 0.14em;
-		text-transform: uppercase;
-		color: #6f7683;
-	}
-
 	.catalog-head h2 {
-		margin-top: 0.4rem;
 		font-size: clamp(2rem, 4vw, 3.4rem);
 		letter-spacing: -0.05em;
 	}
@@ -158,17 +146,27 @@
 	.pager button {
 		min-width: 44px;
 		height: 44px;
-		border: 0;
+		border: 1px solid transparent;
 		border-radius: 999px;
 		background: var(--accent-blue);
 		color: #ffffff;
 		font-size: 0.94rem;
 		font-weight: 600;
 		cursor: pointer;
+		box-shadow: 0 10px 24px rgba(47, 107, 255, 0.18);
+		transition:
+			background-color 240ms ease,
+			color 240ms ease,
+			border-color 240ms ease,
+			box-shadow 240ms ease,
+			opacity 240ms ease;
 	}
 
 	.pager button.active {
-		background: #0f4fce;
+		background: #ffffff;
+		color: var(--accent-blue);
+		border-color: var(--accent-blue);
+		box-shadow: 0 12px 28px rgba(47, 107, 255, 0.14);
 	}
 
 	.pager button:disabled {

@@ -6,14 +6,12 @@
 
 	const heroSlides = [
 		{
-			kicker: 'Recommandations',
 			title: '50 films a proposer avec plus de contexte.',
 			button: 'Voir la liste',
 			href: '#recommandations',
 			tint: 'tint-silver'
 		},
 		{
-			kicker: 'Editorial',
 			title: 'Une selection plus commentee.',
 			button: 'Explorer',
 			href: '#recommandations',
@@ -43,7 +41,6 @@
 
 	<section class="recommend-shell" id="recommandations">
 		<div class="recommend-head">
-			<p>Recommandations</p>
 			<h2>50 films avec un peu plus de contexte.</h2>
 		</div>
 
@@ -58,13 +55,14 @@
 		film={selectedFilm}
 		similarMovies={selectedFilm ? getSimilarMovies(recommendationMovies, selectedFilm, 6) : []}
 		onClose={closeFilm}
+		onSelect={openFilm}
 	/>
 </div>
 
 <style>
 	.recommend-page {
 		display: grid;
-		gap: 10px;
+		gap: 42px;
 	}
 
 	.recommend-shell {
@@ -72,21 +70,11 @@
 		gap: 16px;
 	}
 
-	.recommend-head p,
 	.recommend-head h2 {
 		margin: 0;
 	}
 
-	.recommend-head p {
-		font-size: 0.8rem;
-		font-weight: 600;
-		letter-spacing: 0.14em;
-		text-transform: uppercase;
-		color: #6f7683;
-	}
-
 	.recommend-head h2 {
-		margin-top: 0.4rem;
 		font-size: clamp(2rem, 4vw, 3.4rem);
 		letter-spacing: -0.05em;
 	}

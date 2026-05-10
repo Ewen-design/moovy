@@ -1,98 +1,123 @@
 <script>
+	import { tick } from 'svelte';
 	import { fly, fade } from 'svelte/transition';
 	import { heroImage } from '$lib/data/catalog';
 
-	let { film = null, similarMovies = [], onClose = () => {} } = $props();
+	let { film = null, similarMovies = [], onClose = () => {}, onSelect = () => {} } = $props();
+	/** @type {HTMLDivElement | null} */
+	let backdrop = $state(null);
 
 	const handleBackdropClick = () => onClose();
 	const handleCloseClick = () => onClose();
+	/** @param {{ id: string, genres: string[] }} movie */
+	const handleSimilarSelect = (movie) => onSelect(movie);
+
+	$effect(() => {
+		if (!film) return;
+
+		document.body.classList.add('sheet-open');
+		tick().then(() => {
+			backdrop?.scrollTo({ top: 0, behavior: 'auto' });
+		});
+
+		return () => {
+			document.body.classList.remove('sheet-open');
+		};
+	});
 </script>
 
 {#if film}
 	<div
 		class="sheet-backdrop"
+		bind:this={backdrop}
 		role="presentation"
 		onclick={handleBackdropClick}
 		transition:fade={{ duration: 180 }}
 	>
-		<div
-			class="sheet"
-			role="dialog"
-			aria-modal="true"
-			aria-label={film.title}
-			tabindex="-1"
-			onclick={(event) => event.stopPropagation()}
-			onkeydown={(event) => event.stopPropagation()}
-			transition:fly={{ y: 80, duration: 260 }}
-		>
-			<div class="sheet-hero">
-				<img src={heroImage} alt={film.title} />
-				<div class="sheet-overlay"></div>
-				<button class="close-button" type="button" aria-label="Fermer" onclick={handleCloseClick}>
-					×
-				</button>
+		{#key film.id}
+			<div
+				class="sheet"
+				role="dialog"
+				aria-modal="true"
+				aria-label={film.title}
+				tabindex="-1"
+				onclick={(event) => event.stopPropagation()}
+				onkeydown={(event) => event.stopPropagation()}
+				transition:fly={{ y: 80, duration: 260 }}
+			>
+				<div class="sheet-hero">
+					<img src={heroImage} alt={film.title} />
+					<div class="sheet-overlay"></div>
+					<button class="close-button" type="button" aria-label="Fermer" onclick={handleCloseClick}>
+						<span class="close-icon" aria-hidden="true"></span>
+					</button>
 
-				<div class="sheet-hero-copy">
-					<h2>{film.title}</h2>
-					<div class="sheet-actions">
-						<button type="button">Lecture</button>
-						<button type="button">+</button>
-						<button type="button">♡</button>
+					<div class="sheet-hero-copy">
+						<h2>{film.title}</h2>
+						<div class="sheet-actions">
+							<button type="button">Lecture</button>
+							<button type="button">+</button>
+							<button type="button">♡</button>
+						</div>
 					</div>
 				</div>
-			</div>
 
-			<div class="sheet-body">
-				<div class="sheet-main">
-					<p class="meta">
-						{film.year} · {film.duration} · {film.quality ?? 'HD'} · {film.maturity ?? '13+'}
-					</p>
-					<p class="summary">{film.summary ?? film.description}</p>
+				<div class="sheet-body">
+					<div class="sheet-main">
+						<p class="meta">
+							{film.year} · {film.duration} · {film.quality ?? 'HD'} · {film.maturity ?? '13+'}
+						</p>
+						<p class="summary">{film.summary ?? film.description}</p>
 
-					<div class="cast-grid">
-						{#each film.castMembers ?? [] as member}
-							<article class="cast-card">
-								<img src={member.image ?? heroImage} alt={member.name} loading="lazy" />
-								<div>
-									<h3>{member.name}</h3>
-									<p>{member.role}</p>
+						<div class="cast-grid">
+							{#each film.castMembers ?? [] as member}
+								<article class="cast-card">
+									<img src={member.image ?? heroImage} alt={member.name} loading="lazy" />
+									<div>
+										<h3>{member.name}</h3>
+										<p>{member.role}</p>
+									</div>
+								</article>
+							{/each}
+						</div>
+					</div>
+
+					<aside class="sheet-side">
+						<p><strong>Distribution :</strong> {film.cast.join(', ')}</p>
+						<p><strong>Genres :</strong> {film.genres.join(', ')}</p>
+						<p><strong>Realisateur :</strong> {film.director}</p>
+						<p><strong>Note :</strong> {film.rating} · {film.votes}</p>
+					</aside>
+				</div>
+
+				<div class="similar-section">
+					<h3>Titres similaires</h3>
+					<div class="similar-grid">
+						{#each similarMovies as movie}
+							<button class="similar-card" type="button" onclick={() => handleSimilarSelect(movie)}>
+								<img src={heroImage} alt={movie.title} loading="lazy" />
+								<div class="similar-copy">
+									<div class="similar-meta">
+										<span>{movie.duration}</span>
+										<span>{movie.year}</span>
+									</div>
+									<h4>{movie.title}</h4>
+									<p>{movie.description}</p>
 								</div>
-							</article>
+							</button>
 						{/each}
 					</div>
 				</div>
-
-				<aside class="sheet-side">
-					<p><strong>Distribution :</strong> {film.cast.join(', ')}</p>
-					<p><strong>Genres :</strong> {film.genres.join(', ')}</p>
-					<p><strong>Realisateur :</strong> {film.director}</p>
-					<p><strong>Note :</strong> {film.rating} · {film.votes}</p>
-				</aside>
 			</div>
-
-			<div class="similar-section">
-				<h3>Titres similaires</h3>
-				<div class="similar-grid">
-					{#each similarMovies as movie}
-						<article class="similar-card">
-							<img src={heroImage} alt={movie.title} loading="lazy" />
-							<div class="similar-copy">
-								<div class="similar-meta">
-									<span>{movie.duration}</span>
-									<span>{movie.year}</span>
-								</div>
-								<h4>{movie.title}</h4>
-								<p>{movie.description}</p>
-							</div>
-						</article>
-					{/each}
-				</div>
-			</div>
-		</div>
+		{/key}
 	</div>
 {/if}
 
 <style>
+	:global(body.sheet-open) {
+		overflow: hidden;
+	}
+
 	.sheet-backdrop {
 		position: fixed;
 		inset: 0;
@@ -148,9 +173,53 @@
 		border: 0;
 		border-radius: 999px;
 		background: rgba(24, 24, 24, 0.9);
-		color: #ffffff;
-		font-size: 2rem;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
 		cursor: pointer;
+		transition:
+			background-color 220ms ease,
+			transform 220ms ease;
+	}
+
+	.close-button:hover {
+		background: rgba(33, 33, 33, 0.96);
+	}
+
+	.close-icon {
+		position: relative;
+		width: 22px;
+		height: 22px;
+	}
+
+	.close-icon::before,
+	.close-icon::after {
+		content: '';
+		position: absolute;
+		top: 50%;
+		left: 50%;
+		width: 22px;
+		height: 2px;
+		border-radius: 999px;
+		background: #ffffff;
+		transform-origin: center;
+		transition: transform 620ms cubic-bezier(0.22, 1, 0.36, 1);
+	}
+
+	.close-icon::before {
+		transform: translate(-50%, -50%) rotate(45deg);
+	}
+
+	.close-icon::after {
+		transform: translate(-50%, -50%) rotate(-45deg);
+	}
+
+	.close-button:hover .close-icon::before {
+		transform: translate(-50%, -50%) rotate(405deg);
+	}
+
+	.close-button:hover .close-icon::after {
+		transform: translate(-50%, -50%) rotate(315deg);
 	}
 
 	.sheet-hero-copy {
@@ -279,21 +348,42 @@
 		grid-template-columns: repeat(3, minmax(0, 1fr));
 		gap: 22px;
 		margin-top: 1.2rem;
+		align-items: stretch;
 	}
 
 	.similar-card {
+		display: grid;
+		grid-template-rows: clamp(160px, 16vw, 220px) minmax(0, 1fr);
+		border: 0;
 		background: #2c2c2c;
 		overflow: hidden;
+		height: 100%;
+		padding: 0;
+		color: inherit;
+		text-align: left;
+		cursor: pointer;
+		transition:
+			transform 220ms ease,
+			background-color 220ms ease,
+			box-shadow 220ms ease;
+	}
+
+	.similar-card:hover {
+		background: #353535;
+		transform: translateY(-3px);
+		box-shadow: 0 16px 34px rgba(0, 0, 0, 0.28);
 	}
 
 	.similar-card img {
 		width: 100%;
-		aspect-ratio: 1.42;
+		height: 100%;
 		object-fit: cover;
 		display: block;
 	}
 
 	.similar-copy {
+		display: grid;
+		align-content: start;
 		padding: 14px;
 	}
 

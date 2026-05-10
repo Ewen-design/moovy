@@ -115,6 +115,7 @@
 		film={selectedFilm}
 		similarMovies={selectedFilm ? getSimilarMovies(searchableMovies, selectedFilm, 6) : []}
 		onClose={closeFilm}
+		onSelect={openFilm}
 	/>
 </div>
 
@@ -218,18 +219,23 @@
 		z-index: 1;
 		display: flex;
 		align-items: center;
-		gap: 1.25rem;
+		gap: 1.5rem;
 	}
 
 	.site-nav a {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		padding: 0.5rem 0.9rem;
 		font-size: 0.96rem;
+		font-weight: 600;
 		text-decoration: none;
 		color: rgba(255, 255, 255, 0.88);
+		transition: color 220ms ease;
 	}
 
 	.site-nav a.active {
 		color: #ffffff;
-		font-weight: 600;
 	}
 
 	.search-box {
@@ -328,7 +334,7 @@
 		}
 
 		.site-nav {
-			gap: 0.8rem;
+			gap: 0.95rem;
 			overflow: auto;
 		}
 

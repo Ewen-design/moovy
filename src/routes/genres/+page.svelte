@@ -8,14 +8,12 @@
 	const genres = Object.keys(genreMovieCollections);
 	const heroSlides = [
 		{
-			kicker: 'Genres',
 			title: 'Parcourir 50 films par ambiance.',
 			button: 'Changer de genre',
 			href: '#genres',
 			tint: 'tint-amber'
 		},
 		{
-			kicker: 'Navigation',
 			title: 'Action, drame, thriller, SF, comedie.',
 			button: 'Voir les listes',
 			href: '#genres',
@@ -46,10 +44,7 @@
 
 	<section class="genre-shell" id="genres">
 		<div class="genre-head">
-			<div>
-				<p>Genres</p>
-				<h2>50 films par selection.</h2>
-			</div>
+			<h2>50 films par selection.</h2>
 		</div>
 
 		<div class="genre-tabs">
@@ -79,13 +74,14 @@
 			? getSimilarMovies(genreMovieCollections[activeGenre], selectedFilm, 6)
 			: []}
 		onClose={closeFilm}
+		onSelect={openFilm}
 	/>
 </div>
 
 <style>
 	.genre-page {
 		display: grid;
-		gap: 10px;
+		gap: 42px;
 	}
 
 	.genre-shell {
@@ -93,21 +89,11 @@
 		gap: 16px;
 	}
 
-	.genre-head p,
-	h2 {
+	.genre-head h2 {
 		margin: 0;
 	}
 
-	.genre-head p {
-		font-size: 0.8rem;
-		font-weight: 600;
-		letter-spacing: 0.14em;
-		text-transform: uppercase;
-		color: #6f7683;
-	}
-
 	.genre-head h2 {
-		margin-top: 0.4rem;
 		font-size: clamp(2rem, 4vw, 3.4rem);
 		letter-spacing: -0.05em;
 	}
@@ -120,17 +106,26 @@
 
 	.genre-tabs button {
 		padding: 0.85rem 1.15rem;
-		border: 0;
+		border: 1px solid transparent;
 		border-radius: 999px;
 		background: var(--accent-blue);
 		color: #ffffff;
 		font-size: 0.95rem;
 		font-weight: 600;
 		cursor: pointer;
+		box-shadow: 0 10px 24px rgba(47, 107, 255, 0.18);
+		transition:
+			background-color 240ms ease,
+			color 240ms ease,
+			border-color 240ms ease,
+			box-shadow 240ms ease;
 	}
 
 	.genre-tabs button.active {
-		background: #0f4fce;
+		background: #ffffff;
+		color: var(--accent-blue);
+		border-color: var(--accent-blue);
+		box-shadow: 0 12px 28px rgba(47, 107, 255, 0.14);
 	}
 
 	.film-list {

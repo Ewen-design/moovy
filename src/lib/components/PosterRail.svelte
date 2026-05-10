@@ -2,13 +2,21 @@
 	import { onMount } from 'svelte';
 	import { heroImage } from '$lib/data/catalog';
 
-	let { items = [], title = '', dark = false, variant = 'large', onSelect = () => {} } = $props();
+	let {
+		items = [],
+		title = '',
+		dark = false,
+		variant = 'large',
+		centerActive = false,
+		onSelect = () => {}
+	} = $props();
 
 	/** @type {HTMLDivElement | undefined} */
 	let viewport;
 	/** @type {HTMLDivElement | undefined} */
 	let track;
 	let cardWidth = $state(0);
+	let viewportWidth = $state(0);
 	let gap = $state(0);
 	let index = $state(0);
 	let instant = $state(false);
@@ -20,9 +28,12 @@
 		const firstCard = /** @type {HTMLElement | null} */ (track.querySelector('.rail-card'));
 		if (!firstCard) return;
 		cardWidth = firstCard.offsetWidth;
+		viewportWidth = viewport?.offsetWidth ?? 0;
 		const style = getComputedStyle(track);
 		gap = Number.parseFloat(style.columnGap || style.gap || '0');
 	};
+
+	const offset = $derived(centerActive ? Math.max(0, (viewportWidth - cardWidth) / 2) : 0);
 
 	const step = () => {
 		if (!items.length) return;
@@ -65,7 +76,7 @@
 			class="rail-track"
 			bind:this={track}
 			ontransitionend={handleTransitionEnd}
-			style={`transform: translate3d(-${index * (cardWidth + gap)}px, 0, 0);`}
+			style={`transform: translate3d(-${Math.max(0, index * (cardWidth + gap) - offset)}px, 0, 0);`}
 		>
 			{#each clonedItems as item}
 				<button class="rail-card" type="button" onclick={() => onSelect(item)}>
@@ -136,8 +147,8 @@
 	}
 
 	.poster-rail.large .rail-card {
-		width: clamp(520px, 38vw, 760px);
-		height: clamp(292px, 23vw, 420px);
+		width: clamp(680px, 48vw, 980px);
+		height: clamp(382px, 29vw, 552px);
 	}
 
 	.rail-card img {
