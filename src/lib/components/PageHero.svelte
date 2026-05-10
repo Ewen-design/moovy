@@ -85,7 +85,13 @@
 	}
 
 	.page-hero.overlayBottom.lightBottom::after {
-		background: linear-gradient(180deg, rgba(255, 255, 255, 0) 0%, rgba(245, 245, 247, 0.94) 100%);
+		background: linear-gradient(
+			180deg,
+			rgba(245, 245, 247, 0) 0%,
+			rgba(245, 245, 247, 0.18) 34%,
+			rgba(245, 245, 247, 0.52) 62%,
+			#f5f5f7 100%
+		);
 	}
 
 	.hero-track {

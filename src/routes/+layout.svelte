@@ -1,5 +1,12 @@
 <script>
 	import { page } from '$app/state';
+	import FilmDetailSheet from '$lib/components/FilmDetailSheet.svelte';
+	import {
+		genreMovieCollections,
+		getSimilarMovies,
+		recommendationMovies,
+		top100Movies
+	} from '$lib/data/catalog';
 	import favicon from '$lib/assets/favicon.svg';
 	import { fade } from 'svelte/transition';
 
@@ -12,6 +19,37 @@
 		{ href: '/genres', label: 'Genres' }
 	];
 	let scrolled = $state(false);
+	let searchQuery = $state('');
+	/** @type {{ id: string, title: string, genres: string[] } | null} */
+	let selectedFilm = $state(null);
+
+	const searchableMovies = [
+		...top100Movies,
+		...recommendationMovies,
+		...Object.values(genreMovieCollections).flat()
+	].filter((movie, index, list) => index === list.findIndex((item) => item.title === movie.title));
+
+	const filteredMovies = $derived.by(() => {
+		const query = searchQuery.trim().toLowerCase();
+		if (!query) return [];
+		return searchableMovies
+			.filter(
+				(movie) =>
+					movie.title.toLowerCase().includes(query) ||
+					movie.genres.some((genre) => genre.toLowerCase().includes(query))
+			)
+			.slice(0, 8);
+	});
+
+	/** @param {{ id: string, title: string, genres: string[] }} film */
+	const openFilm = (film) => {
+		selectedFilm = film;
+		searchQuery = '';
+	};
+
+	const closeFilm = () => {
+		selectedFilm = null;
+	};
 </script>
 
 <svelte:head>
@@ -38,8 +76,20 @@
 		</div>
 
 		<div class="header-right">
-			<span>Recherche</span>
-			<span>Ma liste</span>
+			<div class="search-box">
+				<input bind:value={searchQuery} type="search" placeholder="Recherche un film..." />
+
+				{#if filteredMovies.length}
+					<div class="search-results">
+						{#each filteredMovies as movie}
+							<button type="button" onclick={() => openFilm(movie)}>
+								<strong>{movie.title}</strong>
+								<span>{movie.year} · {movie.genres.join(', ')}</span>
+							</button>
+						{/each}
+					</div>
+				{/if}
+			</div>
 		</div>
 	</header>
 
@@ -60,6 +110,12 @@
 			<span>© 2026</span>
 		</div>
 	</footer>
+
+	<FilmDetailSheet
+		film={selectedFilm}
+		similarMovies={selectedFilm ? getSimilarMovies(searchableMovies, selectedFilm, 6) : []}
+		onClose={closeFilm}
+	/>
 </div>
 
 <style>
@@ -119,8 +175,10 @@
 	.site-header::before {
 		background: linear-gradient(
 			180deg,
-			rgba(0, 0, 0, 0.96) 0%,
-			rgba(0, 0, 0, 0.58) 44%,
+			rgba(8, 8, 8, 0.94) 0%,
+			rgba(8, 8, 8, 0.78) 18%,
+			rgba(8, 8, 8, 0.48) 46%,
+			rgba(8, 8, 8, 0.16) 74%,
 			rgba(0, 0, 0, 0) 100%
 		);
 		opacity: 1;
@@ -172,6 +230,64 @@
 	.site-nav a.active {
 		color: #ffffff;
 		font-weight: 600;
+	}
+
+	.search-box {
+		position: relative;
+		width: min(320px, 34vw);
+	}
+
+	.search-box input {
+		width: 100%;
+		height: 42px;
+		padding: 0 14px;
+		border: 1px solid rgba(255, 255, 255, 0.16);
+		background: rgba(255, 255, 255, 0.08);
+		color: #ffffff;
+		font: inherit;
+		outline: none;
+	}
+
+	.search-box input::placeholder {
+		color: rgba(255, 255, 255, 0.62);
+	}
+
+	.search-results {
+		position: absolute;
+		top: calc(100% + 8px);
+		left: 0;
+		right: 0;
+		display: grid;
+		gap: 2px;
+		padding: 6px;
+		background: rgba(12, 12, 12, 0.98);
+		box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+	}
+
+	.search-results button {
+		display: grid;
+		gap: 0.2rem;
+		padding: 11px 12px;
+		border: 0;
+		background: transparent;
+		color: #ffffff;
+		text-align: left;
+		cursor: pointer;
+	}
+
+	.search-results strong,
+	.search-results span {
+		margin: 0;
+	}
+
+	.search-results strong {
+		font-size: 0.95rem;
+		font-weight: 700;
+	}
+
+	.search-results span {
+		font-size: 0.82rem;
+		color: rgba(255, 255, 255, 0.66);
 	}
 
 	.site-main {
