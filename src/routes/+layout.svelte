@@ -73,6 +73,7 @@
 
 	:global(html) {
 		scroll-behavior: smooth;
+		overscroll-behavior: none;
 	}
 
 	:global(*) {
@@ -81,6 +82,10 @@
 
 	:global(a) {
 		color: inherit;
+	}
+
+	:global(body) {
+		overscroll-behavior-y: none;
 	}
 
 	.app-shell {
