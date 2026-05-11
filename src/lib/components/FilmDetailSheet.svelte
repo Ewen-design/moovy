@@ -46,14 +46,29 @@
 				transition:fly={{ y: 80, duration: 260 }}
 			>
 				<div class="sheet-hero">
-					<img src={film.image ?? heroImage} alt={film.title} loading="lazy" decoding="async" />
+					<img
+						src={film.backdrop ?? film.image ?? heroImage}
+						alt={film.title}
+						loading="lazy"
+						decoding="async"
+					/>
 					<div class="sheet-overlay"></div>
 					<button class="close-button" type="button" aria-label="Fermer" onclick={handleCloseClick}>
 						<span class="close-icon" aria-hidden="true"></span>
 					</button>
 
 					<div class="sheet-hero-copy">
-						<h2>{film.title}</h2>
+						{#if film.clearlogo}
+							<img
+								class="clearlogo"
+								src={film.clearlogo}
+								alt={film.title}
+								loading="lazy"
+								decoding="async"
+							/>
+						{:else}
+							<h2>{film.title}</h2>
+						{/if}
 						<div class="sheet-actions">
 							<button type="button">Lecture</button>
 							<button type="button">+</button>
@@ -252,6 +267,15 @@
 		font-size: clamp(3rem, 7vw, 6rem);
 		line-height: 0.92;
 		letter-spacing: -0.06em;
+	}
+
+	.clearlogo {
+		display: block;
+		max-width: min(440px, 62vw);
+		max-height: 180px;
+		object-fit: contain;
+		object-position: left bottom;
+		filter: drop-shadow(0 10px 32px rgba(0, 0, 0, 0.38));
 	}
 
 	.sheet-actions {

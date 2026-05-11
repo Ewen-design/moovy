@@ -6,36 +6,65 @@
 	import { getSimilarMovies, recommendationMovies, top100Movies } from '$lib/data/catalog';
 	import { hydrateMoviePosters } from '$lib/posters';
 
-	const heroSlides = [
-		{
-			kicker: 'Moovy',
-			title: 'Recale',
-			button: 'Lecture',
-			href: '/recommandations',
-			tint: 'tint-blue'
-		},
-		{
-			kicker: 'Moovy',
-			title: 'Trouver quoi regarder ce soir.',
-			button: 'Plus d infos',
-			href: '/recommandations',
-			tint: 'tint-silver'
-		},
-		{
-			kicker: 'Moovy',
-			title: 'Les films les plus regardes.',
-			button: 'Voir le top 100',
-			href: '/top-100',
-			tint: 'tint-amber'
-		}
-	];
+	let heroVersion = $state(0);
+	const heroShowcaseMovies = [top100Movies[18], top100Movies[13], top100Movies[66]];
+	const featureShowcaseMovies = [top100Movies[2], top100Movies[17], top100Movies[63], top100Movies[54]];
+	const heroSlides = $derived.by(() => {
+		heroVersion;
+		return [
+			{
+				kicker: 'Moovy',
+				title: heroShowcaseMovies[0].title,
+				image: heroShowcaseMovies[0].backdrop ?? heroShowcaseMovies[0].image,
+				href: '/recommandations',
+				tint: 'tint-blue'
+			},
+			{
+				kicker: 'Moovy',
+				title: heroShowcaseMovies[1].title,
+				image: heroShowcaseMovies[1].backdrop ?? heroShowcaseMovies[1].image,
+				href: '/recommandations',
+				tint: 'tint-silver'
+			},
+			{
+				kicker: 'Moovy',
+				title: heroShowcaseMovies[2].title,
+				image: heroShowcaseMovies[2].backdrop ?? heroShowcaseMovies[2].image,
+				href: '/top-100',
+				tint: 'tint-amber'
+			}
+		];
+	});
 
-	const featureBlocks = [
-		{ title: 'Top 100', button: 'Ouvrir', href: '/top-100' },
-		{ title: 'Recommandations', button: 'Voir', href: '/recommandations' },
-		{ title: 'Ce soir', button: 'Choisir', href: '/recommandations' },
-		{ title: 'Par genre', button: 'Parcourir', href: '/genres' }
-	];
+	const featureBlocks = $derived.by(() => {
+		heroVersion;
+		return [
+			{
+				title: 'Top 100',
+				button: 'Ouvrir',
+				href: '/top-100',
+				image: featureShowcaseMovies[0].backdrop ?? featureShowcaseMovies[0].image
+			},
+			{
+				title: 'Recommandations',
+				button: 'Voir',
+				href: '/recommandations',
+				image: featureShowcaseMovies[1].backdrop ?? featureShowcaseMovies[1].image
+			},
+			{
+				title: 'Ce soir',
+				button: 'Choisir',
+				href: '/recommandations',
+				image: featureShowcaseMovies[2].backdrop ?? featureShowcaseMovies[2].image
+			},
+			{
+				title: 'Par genre',
+				button: 'Parcourir',
+				href: '/genres',
+				image: featureShowcaseMovies[3].backdrop ?? featureShowcaseMovies[3].image
+			}
+		];
+	});
 
 	const heroRailItems = recommendationMovies.slice(0, 10).map((film) => ({
 		...film,
@@ -71,7 +100,16 @@
 	);
 
 	onMount(() => {
-		hydrateMoviePosters([...heroRailItems, ...bottomRailItems, ...bottomMiniRailItems]);
+		(async () => {
+			await hydrateMoviePosters([
+				...heroRailItems,
+				...bottomRailItems,
+				...bottomMiniRailItems,
+				...heroShowcaseMovies,
+				...featureShowcaseMovies
+			]);
+			heroVersion += 1;
+		})();
 	});
 </script>
 
@@ -98,6 +136,7 @@
 				title="Series saluees par la critique"
 				items={heroRailItems}
 				variant="small"
+				orientation="portrait"
 				dark={true}
 				onSelect={openFilm}
 			/>
@@ -107,7 +146,7 @@
 	<section class="feature-grid" aria-label="Entrees de navigation">
 		{#each featureBlocks as block}
 			<a class="feature-block" href={block.href}>
-				<img src="/telephone2_parfum.webp" alt={block.title} loading="lazy" />
+				<img src={block.image ?? '/telephone2_parfum.webp'} alt={block.title} loading="lazy" decoding="async" />
 				<div class="feature-overlay"></div>
 				<div class="feature-copy">
 					<h2>{block.title}</h2>
@@ -122,12 +161,14 @@
 			title="Recommandations"
 			items={bottomRailItems}
 			variant="large"
+			orientation="portrait"
 			onSelect={openFilm}
 		/>
 		<PosterRail
 			title="A voir aussi"
 			items={bottomMiniRailItems}
 			variant="medium"
+			orientation="portrait"
 			onSelect={openFilm}
 		/>
 	</section>

@@ -6,20 +6,19 @@
 	import { getSimilarMovies, recommendationMovies } from '$lib/data/catalog';
 	import { hydrateMoviePosters } from '$lib/posters';
 
-	const heroSlides = [
-		{
-			title: '50 films a proposer avec plus de contexte.',
-			button: 'Voir la liste',
+	let heroVersion = $state(0);
+	const heroMovies = [recommendationMovies[0], recommendationMovies[8]];
+	const heroSlides = $derived.by(() => {
+		heroVersion;
+		return heroMovies.map((movie, index) => ({
+			title: movie.title,
+			logo: movie.clearlogo,
+			image: movie.backdrop ?? movie.image,
+			button: 'Découvrir',
 			href: '#recommandations',
-			tint: 'tint-silver'
-		},
-		{
-			title: 'Une selection plus commentee.',
-			button: 'Explorer',
-			href: '#recommandations',
-			tint: 'tint-blue'
-		}
-	];
+			tint: index === 0 ? 'tint-silver' : 'tint-blue'
+		}));
+	});
 
 	/** @type {{ id: string, title: string, genres: string[] } | null} */
 	let selectedFilm = $state(null);
@@ -35,7 +34,10 @@
 	};
 
 	onMount(() => {
-		hydrateMoviePosters(recommendationMovies);
+		(async () => {
+			await hydrateMoviePosters([...recommendationMovies, ...heroMovies]);
+			heroVersion += 1;
+		})();
 	});
 </script>
 

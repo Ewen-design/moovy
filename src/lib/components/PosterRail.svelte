@@ -7,6 +7,7 @@
 		title = '',
 		dark = false,
 		variant = 'large',
+		orientation = 'landscape',
 		centerActive = false,
 		onSelect = () => {}
 	} = $props();
@@ -65,7 +66,12 @@
 	});
 </script>
 
-<section class:dark class={`poster-rail ${variant}`} aria-label={title || 'Selection'}>
+<section
+	class:dark
+	class:portrait={orientation === 'portrait'}
+	class={`poster-rail ${variant}`}
+	aria-label={title || 'Selection'}
+>
 	{#if title}
 		<h3>{title}</h3>
 	{/if}
@@ -146,14 +152,29 @@
 		height: clamp(98px, 8vw, 140px);
 	}
 
+	.poster-rail.portrait.small .rail-card {
+		width: clamp(154px, 12vw, 208px);
+		height: clamp(230px, 19vw, 320px);
+	}
+
 	.poster-rail.medium .rail-card {
 		width: clamp(320px, 23vw, 460px);
 		height: clamp(180px, 13vw, 250px);
 	}
 
+	.poster-rail.portrait.medium .rail-card {
+		width: clamp(190px, 15vw, 260px);
+		height: clamp(286px, 23vw, 392px);
+	}
+
 	.poster-rail.large .rail-card {
 		width: clamp(680px, 48vw, 980px);
 		height: clamp(382px, 29vw, 552px);
+	}
+
+	.poster-rail.portrait.large .rail-card {
+		width: clamp(210px, 17vw, 290px);
+		height: clamp(315px, 25vw, 438px);
 	}
 
 	.rail-card img {
@@ -213,14 +234,29 @@
 			height: 24vw;
 		}
 
+		.poster-rail.portrait.small .rail-card {
+			width: 34vw;
+			height: 52vw;
+		}
+
 		.poster-rail.medium .rail-card {
 			width: 62vw;
 			height: 36vw;
 		}
 
+		.poster-rail.portrait.medium .rail-card {
+			width: 42vw;
+			height: 62vw;
+		}
+
 		.poster-rail.large .rail-card {
 			width: 86vw;
 			height: 49vw;
+		}
+
+		.poster-rail.portrait.large .rail-card {
+			width: 46vw;
+			height: 68vw;
 		}
 	}
 </style>

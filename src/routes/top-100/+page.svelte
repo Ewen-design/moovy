@@ -10,20 +10,19 @@
 	const pageCount = Math.ceil(top100Movies.length / pageSize);
 	const pages = Array.from({ length: pageCount }, (_, index) => index);
 
-	const heroSlides = [
-		{
-			title: 'Les 100 films a garder.',
-			button: 'Commencer par le debut',
+	let heroVersion = $state(0);
+	const heroMovies = [top100Movies[0], top100Movies[8]];
+	const heroSlides = $derived.by(() => {
+		heroVersion;
+		return heroMovies.map((movie, index) => ({
+			title: movie.title,
+			logo: movie.clearlogo,
+			image: movie.backdrop ?? movie.image,
+			button: 'Découvrir',
 			href: '#list',
-			tint: 'tint-blue'
-		},
-		{
-			title: 'Une liste nette, 20 par 20.',
-			button: 'Voir la suite',
-			href: '#list',
-			tint: 'tint-silver'
-		}
-	];
+			tint: index === 0 ? 'tint-blue' : 'tint-silver'
+		}));
+	});
 
 	let currentPage = $state(0);
 	/** @type {{ id: string, title: string, genres: string[] } | null} */
@@ -56,11 +55,17 @@
 	};
 
 	$effect(() => {
-		hydrateMoviePosters(visibleMovies());
+		(async () => {
+			await hydrateMoviePosters([...visibleMovies(), ...heroMovies]);
+			heroVersion += 1;
+		})();
 	});
 
 	onMount(() => {
-		hydrateMoviePosters(visibleMovies());
+		(async () => {
+			await hydrateMoviePosters([...visibleMovies(), ...heroMovies]);
+			heroVersion += 1;
+		})();
 	});
 </script>
 

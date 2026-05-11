@@ -36,7 +36,13 @@
 	<div class="hero-track" style={`transform: translateX(-${currentSlide * 100}%);`}>
 		{#each slides as slide}
 			<article class={`hero-slide ${slide.tint ?? 'tint-blue'}`}>
-				<img src={heroImage} alt={slide.title} loading="eager" fetchpriority="high" />
+				<img
+					src={slide.image ?? heroImage}
+					alt={slide.title}
+					loading="eager"
+					decoding="async"
+					fetchpriority="high"
+				/>
 				<div class="hero-overlay"></div>
 
 				{#if !hideCopy}
@@ -44,7 +50,11 @@
 						{#if slide.kicker}
 							<p>{slide.kicker}</p>
 						{/if}
-						<h1>{slide.title}</h1>
+						{#if slide.logo}
+							<img class="hero-logo" src={slide.logo} alt={slide.title} loading="lazy" decoding="async" />
+						{:else}
+							<h1>{slide.title}</h1>
+						{/if}
 						{#if slide.button}
 							<a href={slide.href ?? '#'}>{slide.button}</a>
 						{/if}
@@ -196,6 +206,15 @@
 		max-width: 12ch;
 	}
 
+	.hero-logo {
+		display: block;
+		max-width: min(520px, 70vw);
+		max-height: clamp(84px, 14vw, 180px);
+		object-fit: contain;
+		object-position: left center;
+		filter: drop-shadow(0 14px 36px rgba(0, 0, 0, 0.38));
+	}
+
 	.hero-copy a {
 		display: inline-flex;
 		align-items: center;
@@ -231,6 +250,11 @@
 
 		.hero-copy h1 {
 			font-size: clamp(2.8rem, 12vw, 4.6rem);
+		}
+
+		.hero-logo {
+			max-width: min(78vw, 360px);
+			max-height: 96px;
 		}
 	}
 </style>

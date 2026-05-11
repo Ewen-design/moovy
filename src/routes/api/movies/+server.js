@@ -93,7 +93,7 @@ const movieCache = new Map();
  *   overview?: string,
  *   image_url?: string
  * }} TvdbSearchResult
- * @typedef {{ id: number, title: string, overview: string, poster: string | null } | null} MovieRecord
+ * @typedef {{ id: number, title: string, overview: string, poster: string | null, backdrop: string | null, clearlogo: string | null } | null} MovieRecord
  */
 
 /** @param {string} title */
@@ -113,6 +113,19 @@ function sanitizePoster(poster) {
 	}
 
 	return poster;
+}
+
+/**
+ * @param {{ type?: number, image?: string | null, width?: number, height?: number }[]} artworks
+ * @param {number} type
+ */
+function pickArtwork(artworks, type) {
+	const candidates = artworks
+		.filter((artwork) => artwork?.type === type)
+		.map((artwork) => sanitizePoster(artwork.image ?? null))
+		.filter(Boolean);
+
+	return candidates[0] ?? null;
 }
 
 /** @param {string} title */
@@ -256,14 +269,17 @@ async function fetchMovieByTitle(fetch, title) {
 			return null;
 		}
 
-		const moviePayload = await tvdbFetch(fetch, `/movies/${movieId}/extended?short=true`);
+		const moviePayload = await tvdbFetch(fetch, `/movies/${movieId}/extended`);
 		const movie = moviePayload?.data;
+		const artworks = movie?.artworks ?? [];
 		const record = movie
 			? {
 					id: movie.id,
 					title: sourceTitle,
 					overview: movie.overview ?? bestMatch?.overview ?? '',
-					poster: sanitizePoster(movie.image ?? bestMatch?.image_url ?? null)
+					poster: sanitizePoster(movie.image ?? bestMatch?.image_url ?? null),
+					backdrop: pickArtwork(artworks, 15),
+					clearlogo: pickArtwork(artworks, 25)
 				}
 			: null;
 

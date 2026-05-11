@@ -3,28 +3,30 @@
 	import FilmDetailSheet from '$lib/components/FilmDetailSheet.svelte';
 	import FilmRow from '$lib/components/FilmRow.svelte';
 	import PageHero from '$lib/components/PageHero.svelte';
-	import { genreMovieCollections, getSimilarMovies } from '$lib/data/catalog';
+	import { genreMovieCollections, getSimilarMovies, top100Movies } from '$lib/data/catalog';
 	import { hydrateMoviePosters } from '$lib/posters';
 
 	const genres = Object.keys(genreMovieCollections);
-	const heroSlides = [
-		{
-			title: 'Parcourir 50 films par ambiance.',
-			button: 'Changer de genre',
-			href: '#genres',
-			tint: 'tint-amber'
-		},
-		{
-			title: 'Action, drame, thriller, SF, comedie.',
-			button: 'Voir les listes',
-			href: '#genres',
-			tint: 'tint-blue'
-		}
-	];
 
 	let activeGenre = $state(genres[0]);
+	let heroVersion = $state(0);
 	/** @type {{ id: string, title: string, genres: string[] } | null} */
 	let selectedFilm = $state(null);
+	const heroMovies = $derived.by(() => {
+		const matches = top100Movies.filter((movie) => movie.genres.includes(activeGenre)).slice(0, 2);
+		return matches.length ? matches : top100Movies.slice(0, 2);
+	});
+	const heroSlides = $derived.by(() => {
+		heroVersion;
+		return heroMovies.map((movie, index) => ({
+			title: movie.title,
+			logo: movie.clearlogo,
+			image: movie.backdrop ?? movie.image,
+			button: 'Découvrir',
+			href: '#genres',
+			tint: index === 0 ? 'tint-amber' : 'tint-blue'
+		}));
+	});
 
 	/** @param {{ id: string, title: string, genres: string[] }} film */
 	const openFilm = (film) => {
@@ -37,7 +39,10 @@
 	};
 
 	$effect(() => {
-		hydrateMoviePosters(genreMovieCollections[activeGenre]);
+		(async () => {
+			await hydrateMoviePosters([...genreMovieCollections[activeGenre], ...heroMovies]);
+			heroVersion += 1;
+		})();
 	});
 </script>
 

@@ -172,6 +172,8 @@ function makeMovie(title, index) {
 		id: `top-${index + 1}`,
 		title,
 		image: /** @type {string | null} */ (null),
+		backdrop: /** @type {string | null} */ (null),
+		clearlogo: /** @type {string | null} */ (null),
 		rank: index + 1,
 		year: baseYear,
 		duration: minutesToDuration(duration),
@@ -227,6 +229,8 @@ function makeGenreMovie(genre, title, index) {
 		id: `${genre}-${index + 1}`,
 		title,
 		image: /** @type {string | null} */ (null),
+		backdrop: /** @type {string | null} */ (null),
+		clearlogo: /** @type {string | null} */ (null),
 		year: 1982 + ((index * 3) % 43),
 		duration: minutesToDuration(92 + ((index * 5) % 64)),
 		rating: `${(8.9 - index * 0.016).toFixed(1).replace('.', ',')}`,
@@ -359,7 +363,7 @@ function hashValue(value) {
 }
 
 /**
- * @typedef {{ id: number, title: string, overview: string, poster: string | null }} PosterEntry
+ * @typedef {{ id: number, title: string, overview: string, poster: string | null, backdrop?: string | null, clearlogo?: string | null }} PosterEntry
  */
 
 /**
@@ -378,6 +382,8 @@ export function applyMovieArtwork(entries) {
 			const match = byTitle.get(normalizeMovieTitle(movie.title));
 			if (!match?.poster) continue;
 			movie.image = match.poster;
+			movie.backdrop = match.backdrop ?? null;
+			movie.clearlogo = match.clearlogo ?? null;
 		}
 	}
 }
