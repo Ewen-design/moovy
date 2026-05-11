@@ -8,7 +8,7 @@
 
 <button class:detailed class="film-row" type="button" onclick={handleSelect}>
 	<div class="poster-wrap">
-		<img src={heroImage} alt={film.title} loading="lazy" />
+		<img src={film.image ?? heroImage} alt={film.title} loading="lazy" decoding="async" />
 		{#if rank}
 			<span class="rank-chip">#{rank}</span>
 		{/if}

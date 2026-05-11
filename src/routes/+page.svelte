@@ -1,8 +1,10 @@
 <script>
+	import { onMount } from 'svelte';
 	import FilmDetailSheet from '$lib/components/FilmDetailSheet.svelte';
 	import PageHero from '$lib/components/PageHero.svelte';
 	import PosterRail from '$lib/components/PosterRail.svelte';
 	import { getSimilarMovies, recommendationMovies, top100Movies } from '$lib/data/catalog';
+	import { hydrateMoviePosters } from '$lib/posters';
 
 	const heroSlides = [
 		{
@@ -50,11 +52,12 @@
 		tag: film.genres[0]
 	}));
 
-	/** @type {{ id: string, genres: string[] } | null} */
+	/** @type {{ id: string, title: string, genres: string[] } | null} */
 	let selectedFilm = $state(null);
-	/** @param {{ id: string, genres: string[] }} film */
+	/** @param {{ id: string, title: string, genres: string[] }} film */
 	const openFilm = (film) => {
 		selectedFilm = film;
+		hydrateMoviePosters([film, ...getSimilarMovies([...recommendationMovies, ...top100Movies], film, 6)]);
 	};
 
 	const closeFilm = () => {
@@ -66,6 +69,10 @@
 			? getSimilarMovies([...recommendationMovies, ...top100Movies], selectedFilm, 6)
 			: []
 	);
+
+	onMount(() => {
+		hydrateMoviePosters([...heroRailItems, ...bottomRailItems, ...bottomMiniRailItems]);
+	});
 </script>
 
 <svelte:head>

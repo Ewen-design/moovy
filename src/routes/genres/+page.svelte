@@ -4,6 +4,7 @@
 	import FilmRow from '$lib/components/FilmRow.svelte';
 	import PageHero from '$lib/components/PageHero.svelte';
 	import { genreMovieCollections, getSimilarMovies } from '$lib/data/catalog';
+	import { hydrateMoviePosters } from '$lib/posters';
 
 	const genres = Object.keys(genreMovieCollections);
 	const heroSlides = [
@@ -22,17 +23,22 @@
 	];
 
 	let activeGenre = $state(genres[0]);
-	/** @type {{ id: string, genres: string[] } | null} */
+	/** @type {{ id: string, title: string, genres: string[] } | null} */
 	let selectedFilm = $state(null);
 
-	/** @param {{ id: string, genres: string[] }} film */
+	/** @param {{ id: string, title: string, genres: string[] }} film */
 	const openFilm = (film) => {
 		selectedFilm = film;
+		hydrateMoviePosters([film, ...getSimilarMovies(genreMovieCollections[activeGenre], film, 6)]);
 	};
 
 	const closeFilm = () => {
 		selectedFilm = null;
 	};
+
+	$effect(() => {
+		hydrateMoviePosters(genreMovieCollections[activeGenre]);
+	});
 </script>
 
 <svelte:head>

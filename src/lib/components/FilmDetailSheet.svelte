@@ -46,7 +46,7 @@
 				transition:fly={{ y: 80, duration: 260 }}
 			>
 				<div class="sheet-hero">
-					<img src={heroImage} alt={film.title} />
+					<img src={film.image ?? heroImage} alt={film.title} loading="lazy" decoding="async" />
 					<div class="sheet-overlay"></div>
 					<button class="close-button" type="button" aria-label="Fermer" onclick={handleCloseClick}>
 						<span class="close-icon" aria-hidden="true"></span>
@@ -72,7 +72,12 @@
 						<div class="cast-grid">
 							{#each film.castMembers ?? [] as member}
 								<article class="cast-card">
-									<img src={member.image ?? heroImage} alt={member.name} loading="lazy" />
+									<img
+										src={member.image ?? heroImage}
+										alt={member.name}
+										loading="lazy"
+										decoding="async"
+									/>
 									<div>
 										<h3>{member.name}</h3>
 										<p>{member.role}</p>
@@ -95,7 +100,12 @@
 					<div class="similar-grid">
 						{#each similarMovies as movie}
 							<button class="similar-card" type="button" onclick={() => handleSimilarSelect(movie)}>
-								<img src={heroImage} alt={movie.title} loading="lazy" />
+								<img
+									src={movie.image ?? heroImage}
+									alt={movie.title}
+									loading="lazy"
+									decoding="async"
+								/>
 								<div class="similar-copy">
 									<div class="similar-meta">
 										<span>{movie.duration}</span>

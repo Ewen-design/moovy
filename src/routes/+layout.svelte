@@ -1,6 +1,7 @@
 <script>
 	import { browser } from '$app/environment';
 	import { page } from '$app/state';
+	import { onMount } from 'svelte';
 	import FilmDetailSheet from '$lib/components/FilmDetailSheet.svelte';
 	import {
 		genreMovieCollections,
@@ -9,6 +10,7 @@
 		top100Movies
 	} from '$lib/data/catalog';
 	import favicon from '$lib/assets/favicon.svg';
+	import { hydrateMoviePosters, seedPosterLibrary } from '$lib/posters';
 	import { fade } from 'svelte/transition';
 
 	let { children } = $props();
@@ -47,6 +49,7 @@
 	const openFilm = (film) => {
 		selectedFilm = film;
 		searchQuery = '';
+		hydrateMoviePosters([film, ...getSimilarMovies(searchableMovies, film, 6)]);
 	};
 
 	const closeFilm = () => {
@@ -69,6 +72,10 @@
 		if (!browser) return;
 		const savedTheme = localStorage.getItem('moovy-theme');
 		applyTheme(savedTheme === 'dark' ? 'dark' : 'light');
+	});
+
+	onMount(() => {
+		seedPosterLibrary();
 	});
 </script>
 

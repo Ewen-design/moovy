@@ -80,7 +80,12 @@
 		>
 			{#each clonedItems as item}
 				<button class="rail-card" type="button" onclick={() => onSelect(item)}>
-					<img src={item.image ?? heroImage} alt={item.title} loading="lazy" />
+					<img
+						src={item.image ?? heroImage}
+						alt={item.title}
+						loading="lazy"
+						decoding="async"
+					/>
 					<div class="rail-overlay"></div>
 					<div class="rail-copy">
 						{#if item.tag}

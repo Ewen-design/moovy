@@ -1,8 +1,10 @@
 <script>
+	import { onMount } from 'svelte';
 	import FilmDetailSheet from '$lib/components/FilmDetailSheet.svelte';
 	import FilmRow from '$lib/components/FilmRow.svelte';
 	import PageHero from '$lib/components/PageHero.svelte';
 	import { getSimilarMovies, top100Movies } from '$lib/data/catalog';
+	import { hydrateMoviePosters } from '$lib/posters';
 
 	const pageSize = 20;
 	const pageCount = Math.ceil(top100Movies.length / pageSize);
@@ -24,7 +26,7 @@
 	];
 
 	let currentPage = $state(0);
-	/** @type {{ id: string, genres: string[] } | null} */
+	/** @type {{ id: string, title: string, genres: string[] } | null} */
 	let selectedFilm = $state(null);
 
 	/** @param {number} page */
@@ -43,14 +45,23 @@
 	const visibleMovies = () =>
 		top100Movies.slice(currentPage * pageSize, currentPage * pageSize + pageSize);
 
-	/** @param {{ id: string, genres: string[] }} film */
+	/** @param {{ id: string, title: string, genres: string[] }} film */
 	const openFilm = (film) => {
 		selectedFilm = film;
+		hydrateMoviePosters([film, ...getSimilarMovies(top100Movies, film, 6)]);
 	};
 
 	const closeFilm = () => {
 		selectedFilm = null;
 	};
+
+	$effect(() => {
+		hydrateMoviePosters(visibleMovies());
+	});
+
+	onMount(() => {
+		hydrateMoviePosters(visibleMovies());
+	});
 </script>
 
 <svelte:head>

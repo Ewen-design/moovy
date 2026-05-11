@@ -171,6 +171,7 @@ function makeMovie(title, index) {
 	return {
 		id: `top-${index + 1}`,
 		title,
+		image: /** @type {string | null} */ (null),
 		rank: index + 1,
 		year: baseYear,
 		duration: minutesToDuration(duration),
@@ -225,6 +226,7 @@ function makeGenreMovie(genre, title, index) {
 	return {
 		id: `${genre}-${index + 1}`,
 		title,
+		image: /** @type {string | null} */ (null),
 		year: 1982 + ((index * 3) % 43),
 		duration: minutesToDuration(92 + ((index * 5) % 64)),
 		rating: `${(8.9 - index * 0.016).toFixed(1).replace('.', ',')}`,
@@ -323,8 +325,8 @@ export const genreMovieCollections = Object.fromEntries(
 );
 
 /**
- * @param {{id: string, genres: string[], rank?: number}[]} movies
- * @param {{id: string, genres: string[]}} film
+ * @param {{id: string, title: string, genres: string[], rank?: number}[]} movies
+ * @param {{id: string, title: string, genres: string[]}} film
  * @param {number} count
  */
 export function getSimilarMovies(movies, film, count = 6) {
@@ -333,4 +335,81 @@ export function getSimilarMovies(movies, film, count = 6) {
 		item.genres.some((genre) => film.genres.includes(genre))
 	);
 	return [...sameGenre, ...source].slice(0, count);
+}
+
+/** @param {string} title */
+function normalizeMovieTitle(title) {
+	return title
+		.normalize('NFD')
+		.replaceAll(/[\u0300-\u036f]/g, '')
+		.toLowerCase()
+		.replaceAll(/[^a-z0-9]+/g, ' ')
+		.trim();
+}
+
+const allMovieCollections = [top100Movies, recommendationMovies, ...Object.values(genreMovieCollections)];
+
+/** @param {string} value */
+function hashValue(value) {
+	let hash = 0;
+	for (let index = 0; index < value.length; index += 1) {
+		hash = (hash * 31 + value.charCodeAt(index)) >>> 0;
+	}
+	return hash;
+}
+
+/**
+ * @typedef {{ id: number, title: string, overview: string, poster: string | null }} PosterEntry
+ */
+
+/**
+ * @param {PosterEntry[]} entries
+ */
+export function applyMovieArtwork(entries) {
+	/** @type {Map<string, PosterEntry>} */
+	const byTitle = new Map(
+		entries
+			.map((entry) => /** @type {[string, PosterEntry]} */ ([normalizeMovieTitle(entry.title), entry]))
+			.filter(([, entry]) => Boolean(entry?.poster))
+	);
+
+	for (const collection of allMovieCollections) {
+		for (const movie of collection) {
+			const match = byTitle.get(normalizeMovieTitle(movie.title));
+			if (!match?.poster) continue;
+			movie.image = match.poster;
+		}
+	}
+}
+
+export function applyFallbackArtwork() {
+	/** @type {Map<string, string[]>} */
+	const postersByGenre = new Map();
+	/** @type {string[]} */
+	const globalPosters = [];
+
+	for (const collection of allMovieCollections) {
+		for (const movie of collection) {
+			if (!movie.image) continue;
+
+			globalPosters.push(movie.image);
+			for (const genre of movie.genres) {
+				const posters = postersByGenre.get(genre) ?? [];
+				posters.push(movie.image);
+				postersByGenre.set(genre, posters);
+			}
+		}
+	}
+
+	if (!globalPosters.length) return;
+
+	for (const collection of allMovieCollections) {
+		for (const movie of collection) {
+			if (movie.image) continue;
+
+			const genrePool = movie.genres.flatMap((genre) => postersByGenre.get(genre) ?? []);
+			const pool = genrePool.length ? genrePool : globalPosters;
+			movie.image = pool[hashValue(`${movie.title}-${movie.genres.join('-')}`) % pool.length] ?? null;
+		}
+	}
 }
