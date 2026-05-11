@@ -54,7 +54,7 @@
 			{
 				title: 'Ce soir',
 				button: 'Choisir',
-				href: '/recommandations',
+				href: '/ce-soir',
 				image: featureShowcaseMovies[2].backdrop ?? featureShowcaseMovies[2].image
 			},
 			{

@@ -69,11 +69,6 @@
 						{:else}
 							<h2>{film.title}</h2>
 						{/if}
-						<div class="sheet-actions">
-							<button type="button">Lecture</button>
-							<button type="button">+</button>
-							<button type="button">♡</button>
-						</div>
 					</div>
 				</div>
 
@@ -276,32 +271,6 @@
 		object-fit: contain;
 		object-position: left bottom;
 		filter: drop-shadow(0 10px 32px rgba(0, 0, 0, 0.38));
-	}
-
-	.sheet-actions {
-		display: flex;
-		gap: 12px;
-		margin-top: 1.5rem;
-	}
-
-	.sheet-actions button {
-		display: inline-flex;
-		align-items: center;
-		justify-content: center;
-		min-width: 64px;
-		height: 64px;
-		padding: 0 1.4rem;
-		border: 0;
-		border-radius: 999px;
-		background: rgba(255, 255, 255, 0.12);
-		color: #ffffff;
-		font-size: 1rem;
-		font-weight: 600;
-	}
-
-	.sheet-actions button:first-child {
-		background: #ffffff;
-		color: #111111;
 	}
 
 	.sheet-body {

@@ -254,78 +254,98 @@ function makeGenreMovie(genre, title, index) {
 	};
 }
 
-const genreTitleSets = {
-	Action: buildGenreTitles(
-		[
-			'Mission',
-			'Impact',
-			'Fuite',
-			'Derniere',
-			'Zone',
-			'Charge',
-			'Replique',
-			'Assaut',
-			'Rupture',
-			'Traque'
-		],
-		['Finale', 'Noire', 'Directe', 'Totale', 'Terminale']
-	),
-	Drame: buildGenreTitles(
-		[
-			'Saison',
-			'Memoire',
-			'Silence',
-			'Distance',
-			'Promesse',
-			'Hiver',
-			'Maison',
-			'Visage',
-			'Passage',
-			'Absence'
-		],
-		['Lente', 'Brulee', 'Fragile', 'Claire', 'Interieure']
-	),
-	Thriller: buildGenreTitles(
-		['Nuit', 'Signal', 'Doute', 'Trace', 'Faille', 'Enigme', 'Ligne', 'Ombre', 'Alerte', 'Chambre'],
-		['Froide', 'Cassee', 'Invisible', 'Sombre', 'Interdite']
-	),
-	'Science-fiction': buildGenreTitles(
-		[
-			'Orbital',
-			'Echo',
-			'Planete',
-			'Sillage',
-			'Hyperion',
-			'Colonie',
-			'Vector',
-			'Prisme',
-			'Satellite',
-			'Nebula'
-		],
-		['Zero', 'Quantique', 'Bleu', 'Prime', 'Infini']
-	),
-	Comedie: buildGenreTitles(
-		[
-			'Weekend',
-			'Quiproquo',
-			'Vacances',
-			'Bistro',
-			'Bande',
-			'Retour',
-			'Bazar',
-			'Souper',
-			'Detour',
-			'Pari'
-		],
-		['Parfait', 'Rate', 'Express', 'Impro', 'Surprise']
-	)
+const genreSourceMovies = [...top100Movies, ...recommendationMovies].filter(
+	(movie, index, list) => index === list.findIndex((item) => item.title === movie.title)
+);
+
+const genreMembership = {
+	Action: new Set([
+		'The Dark Knight',
+		'Matrix',
+		'Gladiator',
+		'Django Unchained',
+		'Mad Max: Fury Road',
+		'The Batman',
+		'Dune',
+		'Sicario',
+		'The Killer',
+		'Challengers'
+	]),
+	Drame: new Set([
+		'Forrest Gump',
+		'Parasite',
+		'Whiplash',
+		'Moonlight',
+		'Past Lives',
+		'Aftersun',
+		'Marriage Story',
+		'Minari',
+		'The Holdovers',
+		'Perfect Days'
+	]),
+	Thriller: new Set([
+		'Seven',
+		'Le Silence des agneaux',
+		'Prisoners',
+		'Gone Girl',
+		'Zodiac',
+		'Shutter Island',
+		'Decision to Leave',
+		'Enemy',
+		'Oldboy',
+		'The Killer'
+	]),
+	'Science-fiction': new Set([
+		'Inception',
+		'Interstellar',
+		'Arrival',
+		'Blade Runner 2049',
+		'Children of Men',
+		'Dune',
+		'The Batman',
+		'Poor Things',
+		'Everything Everywhere All at Once',
+		'The Zone of Interest'
+	]),
+	Comedie: new Set([
+		'The Grand Budapest Hotel',
+		'The Truman Show',
+		'La La Land',
+		'Toy Story',
+		'The Holdovers',
+		'Poor Things',
+		'The Worst Person in the World',
+		'Perfect Days',
+		'The Banshees of Inisherin',
+		'Lost in Translation'
+	])
 };
 
+/**
+ * @param {string} genre
+ * @param {typeof top100Movies[number]} movie
+ * @param {number} index
+ */
+function cloneMovieForGenre(genre, movie, index) {
+	return {
+		...movie,
+		id: `${genre}-${index + 1}`,
+		genres: [genre],
+		image: movie.image ?? null,
+		backdrop: movie.backdrop ?? null,
+		clearlogo: movie.clearlogo ?? null
+	};
+}
+
 export const genreMovieCollections = Object.fromEntries(
-	Object.entries(genreTitleSets).map(([genre, titles]) => [
-		genre,
-		titles.slice(0, 50).map((title, index) => makeGenreMovie(genre, title, index))
-	])
+	Object.entries(genreMembership).map(([genre, titles]) => {
+		const source = genreSourceMovies.filter((movie) => titles.has(movie.title));
+		const pool = source.length ? source : genreSourceMovies;
+		return [
+			genre,
+			Array.from({ length: 50 }, (_, index) => cloneMovieForGenre(genre, pool[index % pool.length], index))
+		];
+	})
 );
 
 /**

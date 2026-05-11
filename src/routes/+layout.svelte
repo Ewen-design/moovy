@@ -19,7 +19,7 @@
 		{ href: '/', label: 'Accueil' },
 		{ href: '/top-100', label: 'Top 100' },
 		{ href: '/recommandations', label: 'Recommandations' },
-		{ href: '/genres', label: 'Genres' }
+		{ href: '/genres', label: 'Par genres' }
 	];
 	let scrolled = $state(false);
 	let searchQuery = $state('');

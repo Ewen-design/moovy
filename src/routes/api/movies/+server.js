@@ -41,7 +41,7 @@ const TITLE_ALIASES = {
 	'Seven': ['Se7en'],
 	'Le Voyage de Chihiro': ['Spirited Away', 'Sen to Chihiro no kamikakushi'],
 	'La Ligne verte': ['The Green Mile'],
-	'La Vie est belle': ['Life Is Beautiful', 'La vita è bella', 'La vita e bella'],
+	'La Vie est belle': ['La vita è bella', 'La vita e bella', 'Life Is Beautiful'],
 	'Le Fabuleux Destin d Amelie Poulain': ['Amelie', 'Amélie'],
 	'Le Labyrinthe de Pan': ["Pan's Labyrinth", 'El laberinto del fauno'],
 	'Anatomie d une chute': ['Anatomy of a Fall'],
@@ -58,23 +58,7 @@ const TITLE_ALIASES = {
 };
 /** @type {Record<string, string | number>} */
 const TITLE_OVERRIDES = {
-	'Les Evades': 278,
-	'Le Parrain': 421,
-	'Le Parrain, 2e partie': 780,
-	'12 Hommes en colere': 1243,
-	'Le Seigneur des anneaux : Le Retour du roi': 1216,
-	'La Liste de Schindler': 437,
-	'Les Affranchis': 767,
-	'Le Silence des agneaux': 247,
-	'Le Voyage de Chihiro': 276,
-	'La Ligne verte': 308,
-	'La Vie est belle': 604,
-	'Le Fabuleux Destin d Amelie Poulain': 809,
-	'Le Labyrinthe de Pan': 1415,
-	'Le Tombeau des lucioles': 1980,
-	'City of God': 1733,
-	Oldboy: 1200,
-	'Anatomie d une chute': 345695
+	'La Vie est belle': 604
 };
 
 let authToken = '';
