@@ -10,6 +10,7 @@
 		orientation = 'landscape',
 		density = 'default',
 		overlayStyle = 'default',
+		layout = 'default',
 		centerActive = false,
 		onSelect = () => {}
 	} = $props();
@@ -73,6 +74,7 @@
 	class:portrait={orientation === 'portrait'}
 	class:expanded={density === 'expanded'}
 	class:homeOverlay={overlayStyle === 'home'}
+	class:topTen={layout === 'top10'}
 	class={`poster-rail ${variant}`}
 	aria-label={title || 'Selection'}
 >
@@ -90,19 +92,33 @@
 		>
 			{#each clonedItems as item}
 				<button class="rail-card" type="button" onclick={() => onSelect(item)}>
-					<img
-						src={item.image ?? heroImage}
-						alt={item.title}
-						loading="lazy"
-						decoding="async"
-					/>
-					<div class="rail-overlay"></div>
-					<div class="rail-copy">
-						{#if item.tag}
-							<span>{item.tag}</span>
-						{/if}
-						<strong>{item.title}</strong>
-					</div>
+					{#if layout === 'top10'}
+						<div class="ranked-poster">
+							<span class:double-rank={item.rank >= 10} class="rail-rank" aria-hidden="true">
+								{item.rank}
+							</span>
+							<img
+								src={item.image ?? heroImage}
+								alt={item.title}
+								loading="lazy"
+								decoding="async"
+							/>
+						</div>
+					{:else}
+						<img
+							src={item.image ?? heroImage}
+							alt={item.title}
+							loading="lazy"
+							decoding="async"
+						/>
+						<div class="rail-overlay"></div>
+						<div class="rail-copy">
+							{#if item.tag}
+								<span>{item.tag}</span>
+							{/if}
+							<strong>{item.title}</strong>
+						</div>
+					{/if}
 				</button>
 			{/each}
 		</div>
@@ -151,6 +167,17 @@
 		cursor: pointer;
 	}
 
+	.poster-rail.topTen .rail-track {
+		gap: 168px;
+	}
+
+	.poster-rail.topTen .rail-card {
+		width: clamp(296px, 22vw, 372px);
+		height: clamp(314px, 24vw, 438px);
+		background: transparent;
+		overflow: visible;
+	}
+
 	.poster-rail.small .rail-card {
 		width: clamp(172px, 14vw, 246px);
 		height: clamp(98px, 8vw, 140px);
@@ -191,6 +218,55 @@
 		height: 100%;
 		object-fit: cover;
 		display: block;
+	}
+
+	.ranked-poster {
+		--rail-rank-gap: 4.8rem;
+		--rail-rank-overlap: 0.82rem;
+		position: relative;
+		display: flex;
+		align-items: stretch;
+		justify-content: flex-start;
+		width: 100%;
+		height: 100%;
+		padding-left: var(--rail-rank-gap);
+		overflow: visible;
+	}
+
+	.poster-rail.topTen .ranked-poster img {
+		position: relative;
+		z-index: 1;
+		width: clamp(188px, 14vw, 258px);
+	}
+
+	.rail-rank {
+		position: absolute;
+		right: calc(100% - (var(--rail-rank-gap) + var(--rail-rank-overlap)));
+		top: 50%;
+		z-index: 0;
+		transform: translateY(-50%);
+		font-size: clamp(13.4rem, 18vw, 21rem);
+		line-height: 0.82;
+		font-weight: 900;
+		letter-spacing: -0.24em;
+		color: var(--rank-number);
+		text-shadow:
+			5px 0 0 var(--rank-number-stroke),
+			-5px 0 0 var(--rank-number-stroke),
+			0 5px 0 var(--rank-number-stroke),
+			0 -5px 0 var(--rank-number-stroke),
+			5px 5px 0 var(--rank-number-stroke),
+			-5px -5px 0 var(--rank-number-stroke),
+			5px -5px 0 var(--rank-number-stroke),
+			-5px 5px 0 var(--rank-number-stroke);
+		white-space: nowrap;
+		pointer-events: none;
+	}
+
+	.rail-rank.double-rank {
+		--rail-rank-overlap: 2.25rem;
+		font-size: clamp(10rem, 13.6vw, 15rem);
+		letter-spacing: -0.74em;
 	}
 
 	.rail-overlay {
@@ -243,6 +319,15 @@
 		letter-spacing: -0.04em;
 	}
 
+	.poster-rail.topTen .rail-overlay,
+	.poster-rail.topTen .rail-copy {
+		display: none;
+	}
+
+	.poster-rail.topTen h3 {
+		font-size: 1.18rem;
+	}
+
 	@media (max-width: 640px) {
 		.poster-rail.small .rail-card {
 			width: 42vw;
@@ -277,6 +362,35 @@
 		.poster-rail.portrait.large.expanded .rail-card {
 			width: 74vw;
 			height: 108vw;
+		}
+
+		.poster-rail.topTen .rail-card {
+			width: 62vw;
+			height: 88vw;
+		}
+
+		.poster-rail.topTen .rail-track {
+			gap: 88px;
+		}
+
+		.poster-rail.topTen .ranked-poster {
+			--rail-rank-gap: 3.2rem;
+			--rail-rank-overlap: 0.52rem;
+		}
+
+		.poster-rail.topTen .ranked-poster img {
+			width: 42vw;
+		}
+
+		.poster-rail.topTen .rail-rank {
+			font-size: clamp(9.2rem, 32vw, 14rem);
+			letter-spacing: -0.2em;
+		}
+
+		.poster-rail.topTen .rail-rank.double-rank {
+			--rail-rank-overlap: 1.5rem;
+			font-size: clamp(6.6rem, 23vw, 9.6rem);
+			letter-spacing: -0.64em;
 		}
 	}
 </style>

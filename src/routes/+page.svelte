@@ -87,7 +87,7 @@
 
 	const bottomMiniRailItems = $derived.by(() => {
 		$posterVersion;
-		return recommendationMovies.slice(18, 28).map((film) => ({
+		return top100Movies.slice(0, 10).map((film) => ({
 			...film,
 			tag: film.genres[0]
 		}));
@@ -182,11 +182,12 @@
 			onSelect={openFilm}
 		/>
 		<PosterRail
-			title="A voir aussi"
+			title="Top 10"
 			items={bottomMiniRailItems}
 			variant="medium"
 			orientation="portrait"
 			overlayStyle="home"
+			layout="top10"
 			onSelect={openFilm}
 		/>
 	</section>
