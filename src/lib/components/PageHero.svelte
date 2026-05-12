@@ -30,6 +30,7 @@
 	class:compact
 	class:fullBleed
 	class:lightBottom={overlayTone === 'light'}
+	class:simpleBottom={imageOverlay === 'bottom-only'}
 	class="page-hero"
 	aria-label="Selection editoriale"
 >
@@ -98,6 +99,15 @@
 		height: 42%;
 		background: linear-gradient(180deg, rgba(10, 10, 10, 0) 0%, rgba(10, 10, 10, 0.22) 38%, rgba(10, 10, 10, 0.94) 100%);
 		pointer-events: none;
+	}
+
+	.page-hero.simpleBottom .hero-bottom-overlay {
+		height: 34%;
+		background: linear-gradient(180deg, rgba(10, 10, 10, 0) 0%, rgba(10, 10, 10, 0.92) 100%);
+	}
+
+	.page-hero.simpleBottom .hero-bottom-overlay.lightBottom {
+		background: linear-gradient(180deg, rgba(245, 245, 247, 0) 0%, var(--page-bg) 100%);
 	}
 
 	.hero-bottom-overlay.lightBottom {
