@@ -7,7 +7,8 @@
 		fullBleed = false,
 		overlayBottom = false,
 		overlayTone = 'dark',
-		hideCopy = false
+		hideCopy = false,
+		imageOverlay = 'full'
 	} = $props();
 
 	let currentSlide = $state(0);
@@ -28,7 +29,6 @@
 <section
 	class:compact
 	class:fullBleed
-	class:overlayBottom
 	class:lightBottom={overlayTone === 'light'}
 	class="page-hero"
 	aria-label="Selection editoriale"
@@ -43,7 +43,12 @@
 					decoding="async"
 					fetchpriority="high"
 				/>
-				<div class="hero-overlay"></div>
+				{#if imageOverlay === 'full'}
+					<div class="hero-overlay"></div>
+				{/if}
+				{#if overlayBottom}
+					<div class:lightBottom={overlayTone === 'light'} class="hero-bottom-overlay"></div>
+				{/if}
 
 				{#if !hideCopy}
 					<div class="hero-copy">
@@ -74,7 +79,8 @@
 	}
 
 	.page-hero.compact {
-		min-height: 31svh;
+		height: 100svh;
+		min-height: 100svh;
 	}
 
 	.page-hero.fullBleed {
@@ -83,18 +89,18 @@
 		margin-top: -10px;
 	}
 
-	.page-hero.overlayBottom::after {
-		content: '';
+	.hero-bottom-overlay {
 		position: absolute;
 		left: 0;
 		right: 0;
 		bottom: 0;
-		height: 34%;
-		background: linear-gradient(180deg, rgba(10, 10, 10, 0) 0%, rgba(10, 10, 10, 0.9) 100%);
+		z-index: 1;
+		height: 42%;
+		background: linear-gradient(180deg, rgba(10, 10, 10, 0) 0%, rgba(10, 10, 10, 0.22) 38%, rgba(10, 10, 10, 0.94) 100%);
 		pointer-events: none;
 	}
 
-	.page-hero.overlayBottom.lightBottom::after {
+	.hero-bottom-overlay.lightBottom {
 		background: linear-gradient(
 			180deg,
 			rgba(245, 245, 247, 0) 0%,
@@ -107,6 +113,7 @@
 	.hero-track {
 		display: flex;
 		height: 100%;
+		min-height: 100%;
 		transition: transform 780ms cubic-bezier(0.22, 1, 0.36, 1);
 		will-change: transform;
 	}
@@ -114,7 +121,7 @@
 	.hero-slide {
 		position: relative;
 		min-width: 100%;
-		min-height: inherit;
+		height: 100%;
 		overflow: hidden;
 	}
 
@@ -128,6 +135,7 @@
 	.hero-overlay {
 		position: absolute;
 		inset: 0;
+		z-index: 1;
 		background:
 			linear-gradient(
 				90deg,
@@ -175,7 +183,7 @@
 		position: absolute;
 		left: clamp(22px, 4vw, 52px);
 		bottom: clamp(22px, 4vw, 44px);
-		z-index: 1;
+		z-index: 2;
 		max-width: 620px;
 		color: #ffffff;
 	}
@@ -221,12 +229,18 @@
 		justify-content: center;
 		margin-top: 1.2rem;
 		padding: 0.9rem 1.3rem;
+		border: 1px solid transparent;
 		border-radius: 999px;
 		background: #2f6bff;
 		color: #ffffff;
 		font-size: 0.98rem;
 		font-weight: 600;
 		text-decoration: none;
+		transition:
+			background-color 240ms ease,
+			color 240ms ease,
+			border-color 240ms ease,
+			box-shadow 240ms ease;
 	}
 
 	@media (max-width: 640px) {
@@ -235,7 +249,8 @@
 		}
 
 		.page-hero.compact {
-			min-height: 24svh;
+			height: 100svh;
+			min-height: 100svh;
 		}
 
 		.page-hero.fullBleed {

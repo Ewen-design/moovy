@@ -5,12 +5,14 @@
 	import PosterRail from '$lib/components/PosterRail.svelte';
 	import { getSimilarMovies, recommendationMovies, top100Movies } from '$lib/data/catalog';
 	import { hydrateMoviePosters } from '$lib/posters';
+	import { posterVersion } from '$lib/poster-state';
 
 	let heroVersion = $state(0);
 	const heroShowcaseMovies = [top100Movies[18], top100Movies[13], top100Movies[66]];
 	const featureShowcaseMovies = [top100Movies[2], top100Movies[17], top100Movies[63], top100Movies[54]];
 	const heroSlides = $derived.by(() => {
 		heroVersion;
+		$posterVersion;
 		return [
 			{
 				kicker: 'Moovy',
@@ -38,6 +40,7 @@
 
 	const featureBlocks = $derived.by(() => {
 		heroVersion;
+		$posterVersion;
 		return [
 			{
 				title: 'Top 100',
@@ -52,7 +55,7 @@
 				image: featureShowcaseMovies[1].backdrop ?? featureShowcaseMovies[1].image
 			},
 			{
-				title: 'Ce soir',
+				title: 'Pour ce soir',
 				button: 'Choisir',
 				href: '/ce-soir',
 				image: featureShowcaseMovies[2].backdrop ?? featureShowcaseMovies[2].image
@@ -66,20 +69,29 @@
 		];
 	});
 
-	const heroRailItems = recommendationMovies.slice(0, 10).map((film) => ({
-		...film,
-		tag: film.genres[0]
-	}));
+	const heroRailItems = $derived.by(() => {
+		$posterVersion;
+		return recommendationMovies.slice(0, 10).map((film) => ({
+			...film,
+			tag: film.genres[0]
+		}));
+	});
 
-	const bottomRailItems = recommendationMovies.slice(10, 18).map((film) => ({
-		...film,
-		tag: film.genres[0]
-	}));
+	const bottomRailItems = $derived.by(() => {
+		$posterVersion;
+		return recommendationMovies.slice(10, 18).map((film) => ({
+			...film,
+			tag: film.genres[0]
+		}));
+	});
 
-	const bottomMiniRailItems = recommendationMovies.slice(18, 28).map((film) => ({
-		...film,
-		tag: film.genres[0]
-	}));
+	const bottomMiniRailItems = $derived.by(() => {
+		$posterVersion;
+		return recommendationMovies.slice(18, 28).map((film) => ({
+			...film,
+			tag: film.genres[0]
+		}));
+	});
 
 	/** @type {{ id: string, title: string, genres: string[] } | null} */
 	let selectedFilm = $state(null);
@@ -124,19 +136,22 @@
 <div class="home">
 	<section class="hero-shell">
 		<PageHero
+			compact={true}
 			slides={heroSlides}
 			fullBleed={true}
 			overlayBottom={true}
 			overlayTone="light"
+			imageOverlay="bottom-only"
 			hideCopy={true}
 		/>
 
 		<div class="hero-rail">
 			<PosterRail
-				title="Series saluees par la critique"
+				title="Immanquables"
 				items={heroRailItems}
 				variant="small"
 				orientation="portrait"
+				overlayStyle="home"
 				dark={true}
 				onSelect={openFilm}
 			/>
@@ -162,6 +177,8 @@
 			items={bottomRailItems}
 			variant="large"
 			orientation="portrait"
+			density="expanded"
+			overlayStyle="home"
 			onSelect={openFilm}
 		/>
 		<PosterRail
@@ -169,6 +186,7 @@
 			items={bottomMiniRailItems}
 			variant="medium"
 			orientation="portrait"
+			overlayStyle="home"
 			onSelect={openFilm}
 		/>
 	</section>
@@ -210,7 +228,7 @@
 
 	.feature-block {
 		position: relative;
-		min-height: 520px;
+		height: 450px;
 		overflow: hidden;
 		text-decoration: none;
 		background: var(--surface-card);
@@ -227,8 +245,8 @@
 		position: absolute;
 		inset: 0;
 		background:
-			linear-gradient(180deg, rgba(8, 8, 10, 0.02) 0%, rgba(8, 8, 10, 0.44) 100%),
-			linear-gradient(90deg, rgba(8, 8, 10, 0.3) 0%, rgba(8, 8, 10, 0.08) 100%);
+			linear-gradient(180deg, rgba(8, 8, 10, 0.02) 0%, rgba(8, 8, 10, 0.22) 36%, rgba(8, 8, 10, 0.82) 100%),
+			linear-gradient(90deg, rgba(8, 8, 10, 0.42) 0%, rgba(8, 8, 10, 0.14) 100%);
 	}
 
 	.feature-copy {
@@ -242,7 +260,8 @@
 
 	.feature-copy h2 {
 		margin: 0;
-		max-width: 8ch;
+		max-width: none;
+		white-space: nowrap;
 		font-size: clamp(2.3rem, 4vw, 4.2rem);
 		line-height: 0.94;
 		letter-spacing: -0.06em;
@@ -254,11 +273,17 @@
 		justify-content: center;
 		margin-top: 1rem;
 		padding: 0.9rem 1.3rem;
+		border: 1px solid transparent;
 		border-radius: 999px;
 		background: var(--accent-blue);
 		color: #ffffff;
 		font-size: 0.98rem;
 		font-weight: 600;
+		transition:
+			background-color 240ms ease,
+			color 240ms ease,
+			border-color 240ms ease,
+			box-shadow 240ms ease;
 	}
 
 	.bottom-slider {
@@ -280,7 +305,7 @@
 		}
 
 		.feature-block {
-			min-height: 420px;
+			height: 360px;
 		}
 
 		.bottom-slider {

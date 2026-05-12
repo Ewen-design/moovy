@@ -111,13 +111,18 @@
 		align-items: center;
 		justify-content: center;
 		padding: 0.85rem 1.15rem;
+		border: 1px solid transparent;
 		border-radius: 999px;
 		background: var(--accent-blue);
 		color: #ffffff;
 		font-size: 0.92rem;
 		font-weight: 600;
 		text-decoration: none;
-		border: 0;
+		transition:
+			background-color 240ms ease,
+			color 240ms ease,
+			border-color 240ms ease,
+			box-shadow 240ms ease;
 	}
 
 	@media (max-width: 720px) {

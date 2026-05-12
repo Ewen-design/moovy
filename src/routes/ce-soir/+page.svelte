@@ -5,6 +5,7 @@
 	import PageHero from '$lib/components/PageHero.svelte';
 	import { getSimilarMovies, recommendationMovies, top100Movies } from '$lib/data/catalog';
 	import { hydrateMoviePosters } from '$lib/posters';
+	import { posterVersion } from '$lib/poster-state';
 
 	const quizMovies = [...recommendationMovies, ...top100Movies].filter(
 		(movie, index, list) => index === list.findIndex((item) => item.title === movie.title)
@@ -82,6 +83,7 @@
 	const heroMovies = [top100Movies[18], top100Movies[34]];
 	const heroSlides = $derived.by(() => {
 		heroVersion;
+		$posterVersion;
 		return heroMovies.map((movie, index) => ({
 			title: movie.title,
 			logo: movie.clearlogo,
@@ -127,11 +129,12 @@
 	}
 
 	const selectedCount = $derived(Object.keys(answers).length);
-	const suggestedMovies = $derived.by(() =>
-		[...quizMovies]
+	const suggestedMovies = $derived.by(() => {
+		$posterVersion;
+		return [...quizMovies]
 			.sort((left, right) => scoreMovie(right) - scoreMovie(left))
-			.slice(0, selectedCount === questions.length ? 10 : 0)
-	);
+			.slice(0, selectedCount === questions.length ? 10 : 0);
+	});
 
 	/** @param {typeof quizMovies[number]} film */
 	const openFilm = (film) => {
@@ -156,7 +159,7 @@
 </svelte:head>
 
 <div class="tonight-page">
-	<PageHero compact={true} fullBleed={true} slides={heroSlides} />
+	<PageHero compact={true} fullBleed={true} overlayBottom={true} slides={heroSlides} />
 
 	<section class="tonight-shell" id="quiz">
 		<div class="tonight-head">

@@ -1,107 +1,106 @@
 export const heroImage = '/telephone2_parfum.webp';
 
 const top100Titles = [
-	'Les Evades',
+	'Les Évadés',
 	'Le Parrain',
-	'The Dark Knight',
-	'Le Parrain, 2e partie',
-	'12 Hommes en colere',
-	'Le Seigneur des anneaux : Le Retour du roi',
-	'Pulp Fiction',
-	'La Liste de Schindler',
-	'Inception',
 	'Fight Club',
 	'Forrest Gump',
-	'Matrix',
+	'Se7en',
+	'The Truman Show',
+	'Pulp Fiction',
+	'La vie est belle',
+	'Sept vies',
+	'Le Parrain, 2e partie',
+	'La Ligne verte',
+	'La Liste de Schindler',
+	'Scarface',
+	'Le Prestige',
+	'Titanic',
 	'Les Affranchis',
+	'Whiplash',
+	'Drive',
+	'Intouchables',
+	'Invictus',
+	'La Haine',
+	'Ocean’s Eleven',
+	'Heat',
+	'Le Mans 66',
+	'Lost in Translation',
+	'Ocean’s Twelve',
+	'Gladiator',
+	'Parasite',
+	'Inception',
 	'Interstellar',
 	'Le Silence des agneaux',
-	'Seven',
-	'Parasite',
-	'Whiplash',
-	'Gladiator',
+	'La Cité de Dieu',
+	'12 Hommes en colère',
+	'À la recherche du bonheur',
+	'Ocean’s Thirteen',
 	'Le Voyage de Chihiro',
-	'La Ligne verte',
-	'Le Prestige',
-	'Memento',
 	'Apocalypse Now',
-	'Casablanca',
-	'City of God',
-	'Django Unchained',
-	'Oldboy',
-	'Toy Story',
-	'La Vie est belle',
-	'Heat',
-	'Reservoir Dogs',
-	'La Haine',
-	'In the Mood for Love',
-	'Moonlight',
-	'Blade Runner 2049',
-	'Prisoners',
-	'Arrival',
-	'No Country for Old Men',
-	'Mad Max: Fury Road',
-	'The Social Network',
-	'Her',
-	'Children of Men',
+	'Le Pianiste',
+	'Anatomie d’une chute',
+	'Vol au-dessus d’un nid de coucou',
 	'The Grand Budapest Hotel',
-	'Drive',
-	'The Truman Show',
-	'There Will Be Blood',
-	'Le Tombeau des lucioles',
-	'The Departed',
-	'The Pianist',
-	'Le Fabuleux Destin d Amelie Poulain',
-	'Le Labyrinthe de Pan',
-	'Spotlight',
-	'The Banshees of Inisherin',
-	'Anatomie d une chute',
-	'Portrait de la jeune fille en feu',
-	'The Holdovers',
-	'Everything Everywhere All at Once',
-	'The Zone of Interest',
-	'The Fabelmans',
-	'Aftersun',
-	'Past Lives',
-	'The Batman',
-	'Dune',
-	'La La Land',
+	'The Social Network',
+	'Amadeus',
+	'Her',
 	'Oppenheimer',
-	'Poor Things',
-	'The Florida Project',
-	'Sound of Metal',
-	'The Lighthouse',
-	'Memories of Murder',
-	'Decision to Leave',
-	'Incendies',
-	'Enemy',
-	'Sicario',
-	'Roma',
-	'Marriage Story',
-	'Birdman',
-	'Inside Llewyn Davis',
-	'Phantom Thread',
-	'The Master',
-	'Black Swan',
-	'Lost in Translation',
 	'Eternal Sunshine of the Spotless Mind',
-	'Gone Girl',
-	'Zodiac',
+	'Les Infiltrés',
+	'12 Years a Slave',
+	'Le Grand Bleu',
+	'Will Hunting',
+	'Le Bon, la Brute et le Truand',
+	'Le Parrain, 3e partie',
+	'Au revoir là-haut',
+	'Il faut sauver le soldat Ryan',
+	'Inglourious Basterds',
 	'Shutter Island',
-	'The Revenant',
-	'The Iron Claw',
-	'Perfect Days',
-	'The Killer',
-	'La Chimera',
-	'A Monster Calls',
-	'Minari',
-	'The Worst Person in the World',
-	'Portrait of a Lady on Fire',
-	'The Tree of Life',
-	'Burning',
-	'The Handmaiden',
-	'All of Us Strangers',
-	'Challengers'
+	'Joker',
+	'Taxi Driver',
+	'Requiem for a Dream',
+	'The Usual Suspects',
+	'Le Fabuleux Destin d’Amélie Poulain',
+	'Your Name',
+	'The Wolf of Wall Street',
+	'Catch Me If You Can',
+	'8 Mile',
+	'Casino',
+	'La Cité de la peur',
+	'The Expendables',
+	'Seul contre tous',
+	'Eiffel',
+	'Sully',
+	'Monuments Men',
+	'Le Come Back',
+	'Insaisissables',
+	'La Môme',
+	'Le Cercle des poètes disparus',
+	'Big Fish',
+	'Rocky',
+	'Once Upon a Time in Hollywood',
+	'V pour Vendetta',
+	'Retour vers le futur',
+	'American Psycho',
+	'Shining',
+	'Insaisissables 2',
+	'Top Gun',
+	'Gran Torino',
+	'Il était une fois dans l’Ouest',
+	'Bruce tout-puissant',
+	'Didier',
+	'Rain Man',
+	'Into the Wild',
+	'Je suis une légende',
+	'La Chèvre',
+	'Le Dîner de cons',
+	'Legend',
+	'Les Gamins',
+	'The Mask',
+	'Taken',
+	'O’Brother',
+	'Yes Man'
 ];
 
 const genreCycle = [
@@ -134,6 +133,15 @@ const descriptionOpeners = [
 	'Un film qui avance avec une tension constante.',
 	'Une proposition visuelle forte, pensee pour durer.'
 ];
+
+/**
+ * @param {string} name
+ * @param {number} index
+ */
+function actorPortrait(name, index) {
+	const seed = encodeURIComponent(`${name}-${index}`);
+	return `https://i.pravatar.cc/320?u=${seed}`;
+}
 
 /** @param {number} minutes */
 function minutesToDuration(minutes) {
@@ -191,7 +199,7 @@ function makeMovie(title, index) {
 		castMembers: cast.map((name, castIndex) => ({
 			name,
 			role: ['Role principal', 'Second role', 'Distribution'][castIndex],
-			image: heroImage
+			image: actorPortrait(name, castIndex)
 		})),
 		maturity: ['13+', '16+', '10+', '18+'][index % 4],
 		quality: 'HD',
@@ -247,7 +255,7 @@ function makeGenreMovie(genre, title, index) {
 		castMembers: cast.map((name, castIndex) => ({
 			name,
 			role: ['Role principal', 'Second role', 'Distribution'][castIndex],
-			image: heroImage
+			image: actorPortrait(name, castIndex)
 		})),
 		maturity: ['13+', '16+', '10+'][index % 3],
 		quality: 'HD'
@@ -260,64 +268,66 @@ const genreSourceMovies = [...top100Movies, ...recommendationMovies].filter(
 
 const genreMembership = {
 	Action: new Set([
-		'The Dark Knight',
-		'Matrix',
 		'Gladiator',
-		'Django Unchained',
-		'Mad Max: Fury Road',
-		'The Batman',
-		'Dune',
-		'Sicario',
-		'The Killer',
-		'Challengers'
+		'Ocean’s Eleven',
+		'Ocean’s Twelve',
+		'Ocean’s Thirteen',
+		'Le Mans 66',
+		'Inception',
+		'Inglourious Basterds',
+		'The Expendables',
+		'Insaisissables',
+		'Top Gun',
+		'Taken'
 	]),
 	Drame: new Set([
 		'Forrest Gump',
 		'Parasite',
 		'Whiplash',
-		'Moonlight',
-		'Past Lives',
-		'Aftersun',
-		'Marriage Story',
-		'Minari',
-		'The Holdovers',
-		'Perfect Days'
+		'La vie est belle',
+		'Sept vies',
+		'Intouchables',
+		'Invictus',
+		'À la recherche du bonheur',
+		'Will Hunting',
+		'12 Years a Slave',
+		'Rain Man'
 	]),
 	Thriller: new Set([
-		'Seven',
+		'Se7en',
 		'Le Silence des agneaux',
-		'Prisoners',
-		'Gone Girl',
-		'Zodiac',
+		'Heat',
+		'Parasite',
 		'Shutter Island',
-		'Decision to Leave',
-		'Enemy',
-		'Oldboy',
-		'The Killer'
+		'Joker',
+		'Taxi Driver',
+		'Requiem for a Dream',
+		'The Usual Suspects',
+		'American Psycho',
+		'Taken'
 	]),
 	'Science-fiction': new Set([
 		'Inception',
 		'Interstellar',
-		'Arrival',
-		'Blade Runner 2049',
-		'Children of Men',
-		'Dune',
-		'The Batman',
-		'Poor Things',
-		'Everything Everywhere All at Once',
-		'The Zone of Interest'
+		'The Truman Show',
+		'Her',
+		'Retour vers le futur',
+		'Je suis une légende',
+		'V pour Vendetta',
+		'Your Name'
 	]),
 	Comedie: new Set([
 		'The Grand Budapest Hotel',
 		'The Truman Show',
-		'La La Land',
-		'Toy Story',
-		'The Holdovers',
-		'Poor Things',
-		'The Worst Person in the World',
-		'Perfect Days',
-		'The Banshees of Inisherin',
-		'Lost in Translation'
+		'Lost in Translation',
+		'La Cité de la peur',
+		'Le Dîner de cons',
+		'Bruce tout-puissant',
+		'Didier',
+		'The Mask',
+		'O’Brother',
+		'Yes Man',
+		'Le Come Back'
 	])
 };
 
@@ -383,7 +393,40 @@ function hashValue(value) {
 }
 
 /**
- * @typedef {{ id: number, title: string, overview: string, poster: string | null, backdrop?: string | null, clearlogo?: string | null }} PosterEntry
+ * @param {string} title
+ * @param {number | null | undefined} year
+ * @param {string[] | null | undefined} genres
+ * @param {string | null | undefined} director
+ * @param {string | null | undefined} duration
+ */
+function buildFrenchMovieCopy(title, year, genres, director, duration) {
+	const genreLabel = genres?.filter(Boolean).slice(0, 2).join(', ') || 'drame';
+	const yearLabel = year ? `sorti en ${year}` : 'du cinema';
+	const directorLabel = director ? ` mis en scene par ${director}` : '';
+	const durationLabel = duration ? ` sur ${duration}` : '';
+
+	return {
+		summary: `${title} est un film ${genreLabel.toLowerCase()} ${yearLabel}${directorLabel}, construit autour d une narration forte et d un vrai souffle de mise en scene.`,
+		description: `${title} propose une experience ${genreLabel.toLowerCase()} marquante${durationLabel}, avec des personnages memorables et une ambiance immediatement lisible.`,
+		editorial: `${title} s impose comme une recommandation solide pour son ton, son rythme et la precision de son univers cinematographique.`
+	};
+}
+
+/**
+ * @typedef {{
+ *   id: number,
+ *   title: string,
+ *   overview: string,
+ *   poster: string | null,
+ *   backdrop?: string | null,
+ *   clearlogo?: string | null,
+ *   year?: number | null,
+ *   duration?: string | null,
+ *   genres?: string[] | null,
+ *   director?: string | null,
+ *   cast?: string[] | null,
+ *   castMembers?: { name: string, role: string, image: string }[] | null
+ * }} PosterEntry
  */
 
 /**
@@ -404,6 +447,22 @@ export function applyMovieArtwork(entries) {
 			movie.image = match.poster;
 			movie.backdrop = match.backdrop ?? null;
 			movie.clearlogo = match.clearlogo ?? null;
+			movie.year = match.year ?? movie.year;
+			movie.duration = match.duration ?? movie.duration;
+			movie.genres = match.genres?.length ? match.genres : movie.genres;
+			movie.director = match.director ?? movie.director;
+			movie.cast = match.cast?.length ? match.cast : movie.cast;
+			movie.castMembers = match.castMembers?.length ? match.castMembers : movie.castMembers;
+			const frenchCopy = buildFrenchMovieCopy(
+				movie.title,
+				match.year ?? movie.year,
+				match.genres?.length ? match.genres : movie.genres,
+				match.director ?? movie.director,
+				match.duration ?? movie.duration
+			);
+			movie.summary = frenchCopy.summary;
+			movie.description = frenchCopy.description;
+			movie.editorial = frenchCopy.editorial;
 		}
 	}
 }

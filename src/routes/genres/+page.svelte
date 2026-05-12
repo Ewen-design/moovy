@@ -5,6 +5,7 @@
 	import PageHero from '$lib/components/PageHero.svelte';
 	import { genreMovieCollections, getSimilarMovies, top100Movies } from '$lib/data/catalog';
 	import { hydrateMoviePosters } from '$lib/posters';
+	import { posterVersion } from '$lib/poster-state';
 
 	const genres = Object.keys(genreMovieCollections);
 
@@ -13,11 +14,14 @@
 	/** @type {{ id: string, title: string, genres: string[] } | null} */
 	let selectedFilm = $state(null);
 	const heroMovies = $derived.by(() => {
-		const matches = top100Movies.filter((movie) => movie.genres.includes(activeGenre)).slice(0, 2);
-		return matches.length ? matches : top100Movies.slice(0, 2);
+		const matches = top100Movies.filter(
+			(movie) => movie.genres.includes(activeGenre) && movie.backdrop && movie.clearlogo
+		);
+		return matches.length ? matches.slice(0, 2) : top100Movies.filter((movie) => movie.backdrop && movie.clearlogo).slice(0, 2);
 	});
 	const heroSlides = $derived.by(() => {
 		heroVersion;
+		$posterVersion;
 		return heroMovies.map((movie, index) => ({
 			title: movie.title,
 			logo: movie.clearlogo,
@@ -38,9 +42,14 @@
 		selectedFilm = null;
 	};
 
+	const activeMovies = $derived.by(() => {
+		$posterVersion;
+		return genreMovieCollections[activeGenre];
+	});
+
 	$effect(() => {
 		(async () => {
-			await hydrateMoviePosters([...genreMovieCollections[activeGenre], ...heroMovies]);
+			await hydrateMoviePosters([...activeMovies, ...heroMovies]);
 			heroVersion += 1;
 		})();
 	});
@@ -51,7 +60,7 @@
 </svelte:head>
 
 <div class="genre-page">
-	<PageHero compact={true} fullBleed={true} slides={heroSlides} />
+	<PageHero compact={true} fullBleed={true} overlayBottom={true} slides={heroSlides} />
 
 	<section class="genre-shell" id="genres">
 		<div class="genre-head">
@@ -72,7 +81,7 @@
 
 		{#key activeGenre}
 			<div class="film-list" transition:fade={{ duration: 220 }}>
-				{#each genreMovieCollections[activeGenre] as film}
+				{#each activeMovies as film}
 					<FilmRow {film} onSelect={openFilm} />
 				{/each}
 			</div>

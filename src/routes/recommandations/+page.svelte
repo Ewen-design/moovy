@@ -5,11 +5,14 @@
 	import PageHero from '$lib/components/PageHero.svelte';
 	import { getSimilarMovies, recommendationMovies } from '$lib/data/catalog';
 	import { hydrateMoviePosters } from '$lib/posters';
+	import { posterVersion } from '$lib/poster-state';
 
+	const heroCandidates = recommendationMovies.filter((movie) => movie.backdrop && movie.clearlogo);
 	let heroVersion = $state(0);
-	const heroMovies = [recommendationMovies[0], recommendationMovies[8]];
+	const heroMovies = heroCandidates.slice(0, 2);
 	const heroSlides = $derived.by(() => {
 		heroVersion;
+		$posterVersion;
 		return heroMovies.map((movie, index) => ({
 			title: movie.title,
 			logo: movie.clearlogo,
@@ -22,6 +25,10 @@
 
 	/** @type {{ id: string, title: string, genres: string[] } | null} */
 	let selectedFilm = $state(null);
+	const visibleMovies = $derived.by(() => {
+		$posterVersion;
+		return recommendationMovies;
+	});
 
 	/** @param {{ id: string, title: string, genres: string[] }} film */
 	const openFilm = (film) => {
@@ -35,7 +42,7 @@
 
 	onMount(() => {
 		(async () => {
-			await hydrateMoviePosters([...recommendationMovies, ...heroMovies]);
+			await hydrateMoviePosters([...visibleMovies, ...heroMovies]);
 			heroVersion += 1;
 		})();
 	});
@@ -46,15 +53,15 @@
 </svelte:head>
 
 <div class="recommend-page">
-	<PageHero compact={true} fullBleed={true} slides={heroSlides} />
+	<PageHero compact={true} fullBleed={true} overlayBottom={true} slides={heroSlides} />
 
 	<section class="recommend-shell" id="recommandations">
 		<div class="recommend-head">
-			<h2>50 films avec un peu plus de contexte.</h2>
+			<h2>50 recommandations découvertes</h2>
 		</div>
 
 		<div class="film-list">
-			{#each recommendationMovies as film}
+			{#each visibleMovies as film}
 				<FilmRow {film} detailed={true} onSelect={openFilm} />
 			{/each}
 		</div>

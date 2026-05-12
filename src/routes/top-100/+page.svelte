@@ -1,19 +1,22 @@
 <script>
-	import { onMount } from 'svelte';
+	import { onMount, tick } from 'svelte';
 	import FilmDetailSheet from '$lib/components/FilmDetailSheet.svelte';
 	import FilmRow from '$lib/components/FilmRow.svelte';
 	import PageHero from '$lib/components/PageHero.svelte';
 	import { getSimilarMovies, top100Movies } from '$lib/data/catalog';
 	import { hydrateMoviePosters } from '$lib/posters';
+	import { posterVersion } from '$lib/poster-state';
 
 	const pageSize = 20;
 	const pageCount = Math.ceil(top100Movies.length / pageSize);
 	const pages = Array.from({ length: pageCount }, (_, index) => index);
+	const heroCandidates = top100Movies.filter((movie) => movie.backdrop && movie.clearlogo);
 
 	let heroVersion = $state(0);
-	const heroMovies = [top100Movies[0], top100Movies[8]];
+	const heroMovies = heroCandidates.slice(0, 2);
 	const heroSlides = $derived.by(() => {
 		heroVersion;
+		$posterVersion;
 		return heroMovies.map((movie, index) => ({
 			title: movie.title,
 			logo: movie.clearlogo,
@@ -27,22 +30,34 @@
 	let currentPage = $state(0);
 	/** @type {{ id: string, title: string, genres: string[] } | null} */
 	let selectedFilm = $state(null);
+	/** @type {HTMLElement | null} */
+	let listSection = $state(null);
+
+	const scrollToListTop = async () => {
+		await tick();
+		listSection?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+	};
 
 	/** @param {number} page */
 	const goToPage = (page) => {
 		currentPage = page;
+		scrollToListTop();
 	};
 
 	const previousPage = () => {
 		currentPage = Math.max(0, currentPage - 1);
+		scrollToListTop();
 	};
 
 	const nextPage = () => {
 		currentPage = Math.min(pageCount - 1, currentPage + 1);
+		scrollToListTop();
 	};
 
-	const visibleMovies = () =>
-		top100Movies.slice(currentPage * pageSize, currentPage * pageSize + pageSize);
+	const visibleMovies = $derived.by(() => {
+		$posterVersion;
+		return top100Movies.slice(currentPage * pageSize, currentPage * pageSize + pageSize);
+	});
 
 	/** @param {{ id: string, title: string, genres: string[] }} film */
 	const openFilm = (film) => {
@@ -56,14 +71,14 @@
 
 	$effect(() => {
 		(async () => {
-			await hydrateMoviePosters([...visibleMovies(), ...heroMovies]);
+			await hydrateMoviePosters([...visibleMovies, ...heroMovies]);
 			heroVersion += 1;
 		})();
 	});
 
 	onMount(() => {
 		(async () => {
-			await hydrateMoviePosters([...visibleMovies(), ...heroMovies]);
+			await hydrateMoviePosters([...visibleMovies, ...heroMovies]);
 			heroVersion += 1;
 		})();
 	});
@@ -74,12 +89,12 @@
 </svelte:head>
 
 <div class="catalog-page">
-	<PageHero compact={true} fullBleed={true} slides={heroSlides} />
+	<PageHero compact={true} fullBleed={true} overlayBottom={true} slides={heroSlides} />
 
-	<section class="catalog-shell" id="list">
+	<section class="catalog-shell" id="list" bind:this={listSection}>
 		<div class="catalog-head">
 			<div>
-				<h2>100 films, 20 par page.</h2>
+				<h2>Notre top 100</h2>
 			</div>
 			<span>{currentPage * 20 + 1}-{Math.min((currentPage + 1) * 20, 100)} / 100</span>
 		</div>
@@ -95,7 +110,7 @@
 		</nav>
 
 		<div class="film-list">
-			{#each visibleMovies() as film}
+			{#each visibleMovies as film}
 				<FilmRow {film} rank={film.rank} onSelect={openFilm} />
 			{/each}
 		</div>

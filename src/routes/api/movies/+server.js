@@ -1,64 +1,82 @@
 import { json } from '@sveltejs/kit';
 import { TVDB_API_KEY } from '$env/static/private';
-import { top100Movies } from '$lib/data/catalog';
+import { heroImage, top100Movies } from '$lib/data/catalog';
 
 const TVDB_BASE_URL = 'https://api4.thetvdb.com/v4';
 const TOKEN_TTL_MS = 28 * 24 * 60 * 60 * 1000;
 const DEFAULT_TITLES = [
-	'Gladiator',
-	'Toy Story',
-	'Arrival',
-	'Oldboy',
+	'Les Évadés',
+	'Le Parrain',
+	'Fight Club',
+	'Forrest Gump',
+	'Se7en',
 	'Heat',
-	'Blade Runner 2049',
-	'Moonlight',
+	'Interstellar',
 	'The Prestige',
 	'La Haine',
-	'Django Unchained',
 	'The Truman Show',
-	'La La Land',
-	'Interstellar',
-	'The Dark Knight',
-	'Casablanca',
 	'Apocalypse Now',
 	'The Social Network',
-	'Mad Max: Fury Road',
 	'The Grand Budapest Hotel',
 	'Le Voyage de Chihiro'
 ];
 /** @type {Record<string, string[]>} */
 const TITLE_ALIASES = {
-	'Les Evades': ['The Shawshank Redemption'],
+	'Les Évadés': ['The Shawshank Redemption'],
 	'Le Parrain': ['The Godfather'],
 	'Le Parrain, 2e partie': ['The Godfather Part II', 'The Godfather: Part II'],
-	'12 Hommes en colere': ['12 Angry Men'],
-	'Le Seigneur des anneaux : Le Retour du roi': [
-		'The Lord of the Rings: The Return of the King'
-	],
+	'Le Parrain, 3e partie': ['The Godfather Part III', 'The Godfather: Part III'],
+	'12 Hommes en colère': ['12 Angry Men'],
 	'La Liste de Schindler': ["Schindler's List"],
 	'Les Affranchis': ['Goodfellas'],
 	'Le Silence des agneaux': ['The Silence of the Lambs'],
-	'Seven': ['Se7en'],
+	'Se7en': ['Seven'],
 	'Le Voyage de Chihiro': ['Spirited Away', 'Sen to Chihiro no kamikakushi'],
 	'La Ligne verte': ['The Green Mile'],
-	'La Vie est belle': ['La vita è bella', 'La vita e bella', 'Life Is Beautiful'],
-	'Le Fabuleux Destin d Amelie Poulain': ['Amelie', 'Amélie'],
-	'Le Labyrinthe de Pan': ["Pan's Labyrinth", 'El laberinto del fauno'],
-	'Anatomie d une chute': ['Anatomy of a Fall'],
-	'Portrait de la jeune fille en feu': ['Portrait of a Lady on Fire'],
-	'Le Tombeau des lucioles': ['Grave of the Fireflies', 'Hotaru no haka'],
-	'City of God': ['Cidade de Deus'],
-	Oldboy: ['Oldeuboi', '올드보이'],
+	'La vie est belle': ['La vita è bella', 'La vita e bella', 'Life Is Beautiful'],
+	'Sept vies': ['Seven Pounds'],
+	'La Cité de Dieu': ['City of God', 'Cidade de Deus'],
+	'À la recherche du bonheur': ['The Pursuit of Happyness'],
+	'Anatomie d’une chute': ['Anatomy of a Fall'],
+	'Vol au-dessus d’un nid de coucou': ["One Flew Over the Cuckoo's Nest"],
+	'Les Infiltrés': ['The Departed'],
+	'Le Grand Bleu': ['The Big Blue', 'Le Grand Bleu'],
+	'Will Hunting': ['Good Will Hunting'],
+	'Le Bon, la Brute et le Truand': ['The Good, the Bad and the Ugly'],
+	'Au revoir là-haut': ['See You Up There', 'Au revoir là-haut'],
+	'Il faut sauver le soldat Ryan': ['Saving Private Ryan'],
+	'Le Fabuleux Destin d’Amélie Poulain': ['Amelie', 'Amélie'],
+	'Your Name': ['Your Name.', 'Kimi no Na wa.'],
+	'Seul contre tous': ['Concussion'],
+	'Monuments Men': ['The Monuments Men'],
+	'Le Come Back': ['Music and Lyrics'],
+	'Insaisissables': ['Now You See Me'],
+	'Insaisissables 2': ['Now You See Me 2'],
+	'La Môme': ['La Vie en Rose', 'La Mome'],
+	'Le Cercle des poètes disparus': ['Dead Poets Society'],
+	'V pour Vendetta': ['V for Vendetta'],
+	'Retour vers le futur': ['Back to the Future'],
+	'Je suis une légende': ['I Am Legend'],
+	'La Chèvre': ['La Chevre'],
+	'Le Dîner de cons': ['The Dinner Game', 'Le Diner de cons'],
+	'O’Brother': ['O Brother, Where Art Thou?'],
+	'Ocean’s Eleven': ["Ocean's Eleven"],
+	'Ocean’s Twelve': ["Ocean's Twelve"],
+	'Ocean’s Thirteen': ["Ocean's Thirteen"],
+	'Le Mans 66': ["Ford v Ferrari", "Le Mans '66"],
+	'Le Pianiste': ['The Pianist'],
 	'La Haine': ['La haine'],
-	'Memories of Murder': ['Salinui chueok'],
-	'Decision to Leave': ['Heojil kyolshim'],
-	'Burning': ['Beoning'],
-	'The Handmaiden': ['Ah-ga-ssi'],
-	'Perfect Days': ['Pāfekuto Deizu']
+	'Il était une fois dans l’Ouest': ['Once Upon a Time in the West'],
+	'Bruce tout-puissant': ['Bruce Almighty'],
+	'Shining': ['The Shining']
 };
 /** @type {Record<string, string | number>} */
 const TITLE_OVERRIDES = {
-	'La Vie est belle': 604
+	'La vie est belle': 604,
+	Se7en: 268,
+	'La Cité de Dieu': 1733,
+	'Vol au-dessus d’un nid de coucou': 785,
+	'Your Name': 197
 };
 
 let authToken = '';
@@ -77,7 +95,20 @@ const movieCache = new Map();
  *   overview?: string,
  *   image_url?: string
  * }} TvdbSearchResult
- * @typedef {{ id: number, title: string, overview: string, poster: string | null, backdrop: string | null, clearlogo: string | null } | null} MovieRecord
+ * @typedef {{
+ *   id: number,
+ *   title: string,
+ *   overview: string,
+ *   poster: string | null,
+ *   backdrop: string | null,
+ *   clearlogo: string | null,
+ *   year: number | null,
+ *   duration: string | null,
+ *   genres: string[],
+ *   director: string | null,
+ *   cast: string[],
+ *   castMembers: { name: string, role: string, image: string }[]
+ * } | null} MovieRecord
  */
 
 /** @param {string} title */
@@ -99,17 +130,76 @@ function sanitizePoster(poster) {
 	return poster;
 }
 
+/** @param {number | null | undefined} runtime */
+function formatRuntime(runtime) {
+	if (!runtime || !Number.isFinite(runtime)) return null;
+	const hours = Math.floor(runtime / 60);
+	const minutes = runtime % 60;
+	return `${hours}h ${String(minutes).padStart(2, '0')}m`;
+}
+
+/** @param {string | null | undefined} genre */
+function translateGenre(genre) {
+	/** @type {Record<string, string>} */
+	const dictionary = {
+		Action: 'Action',
+		Adventure: 'Aventure',
+		Animation: 'Animation',
+		Comedy: 'Comedie',
+		Crime: 'Crime',
+		Drama: 'Drame',
+		Family: 'Famille',
+		Fantasy: 'Fantastique',
+		History: 'Historique',
+		Horror: 'Horreur',
+		Music: 'Musique',
+		Mystery: 'Mystere',
+		Romance: 'Romance',
+		'Sci-Fi': 'Science-fiction',
+		'Science Fiction': 'Science-fiction',
+		Thriller: 'Thriller',
+		War: 'Guerre',
+		Western: 'Western'
+	};
+
+	return dictionary[genre ?? ''] ?? genre ?? 'Drame';
+}
+
 /**
- * @param {{ type?: number, image?: string | null, width?: number, height?: number }[]} artworks
+ * @param {{ type?: number, image?: string | null, width?: number, height?: number, language?: string | null }[]} artworks
  * @param {number} type
  */
 function pickArtwork(artworks, type) {
 	const candidates = artworks
 		.filter((artwork) => artwork?.type === type)
-		.map((artwork) => sanitizePoster(artwork.image ?? null))
-		.filter(Boolean);
+		.map((artwork) => ({
+			image: sanitizePoster(artwork.image ?? null),
+			language: artwork.language ?? null
+		}))
+		.filter((artwork) => Boolean(artwork.image));
 
-	return candidates[0] ?? null;
+	if (!candidates.length) return null;
+	if (type === 14) {
+		return (
+			candidates.find((artwork) => artwork.language === 'fra')?.image ??
+			candidates.find((artwork) => artwork.language === 'eng')?.image ??
+			candidates[0]?.image ??
+			null
+		);
+	}
+
+	return candidates[0]?.image ?? null;
+}
+
+/**
+ * @param {any[]} characters
+ * @param {number} type
+ * @param {string} peopleType
+ */
+function pickPeople(characters, type, peopleType) {
+	return (characters ?? [])
+		.filter((character) => character?.type === type || character?.peopleType === peopleType)
+		.sort((left, right) => (left?.sort ?? 999) - (right?.sort ?? 999));
 }
 
 /** @param {string} title */
@@ -256,14 +346,33 @@ async function fetchMovieByTitle(fetch, title) {
 		const moviePayload = await tvdbFetch(fetch, `/movies/${movieId}/extended`);
 		const movie = moviePayload?.data;
 		const artworks = movie?.artworks ?? [];
+		const characters = movie?.characters ?? [];
+		const castMembers = pickPeople(characters, 3, 'Actor')
+			.slice(0, 6)
+			.map((member) => ({
+				name: member?.personName ?? member?.name ?? 'Acteur',
+				role: member?.name ?? 'Distribution',
+				image: sanitizePoster(member?.personImgURL ?? member?.image ?? null) ?? heroImage
+			}));
+		const directors = pickPeople(characters, 1, 'Director');
 		const record = movie
 			? {
 					id: movie.id,
 					title: sourceTitle,
 					overview: movie.overview ?? bestMatch?.overview ?? '',
-					poster: sanitizePoster(movie.image ?? bestMatch?.image_url ?? null),
+					poster:
+						pickArtwork(artworks, 14) ??
+						sanitizePoster(movie.image ?? bestMatch?.image_url ?? null),
 					backdrop: pickArtwork(artworks, 15),
-					clearlogo: pickArtwork(artworks, 25)
+					clearlogo: pickArtwork(artworks, 25),
+					year: Number.parseInt(movie.year ?? '', 10) || null,
+					duration: formatRuntime(movie.runtime),
+					genres: (movie.genres ?? [])
+						.map((/** @type {{ name?: string }} */ genre) => translateGenre(genre?.name))
+						.filter(Boolean),
+					director: directors.at(-1)?.personName ?? null,
+					cast: castMembers.slice(0, 3).map((member) => member.name),
+					castMembers
 				}
 			: null;
 
@@ -276,6 +385,29 @@ async function fetchMovieByTitle(fetch, title) {
 	}
 }
 
+/**
+ * @template T, R
+ * @param {T[]} items
+ * @param {number} limit
+ * @param {(item: T) => Promise<R>} mapper
+ */
+async function mapWithLimit(items, limit, mapper) {
+	/** @type {R[]} */
+	const results = [];
+	let currentIndex = 0;
+
+	async function worker() {
+		while (currentIndex < items.length) {
+			const index = currentIndex;
+			currentIndex += 1;
+			results[index] = await mapper(items[index]);
+		}
+	}
+
+	await Promise.all(Array.from({ length: Math.min(limit, items.length) }, () => worker()));
+	return results;
+}
+
 export async function GET({ fetch, url }) {
 	if (!TVDB_API_KEY) {
 		return json({ error: 'TVDB_API_KEY is missing.' }, { status: 500 });
@@ -283,9 +415,9 @@ export async function GET({ fetch, url }) {
 
 	try {
 		const titles = pickTitles(url);
-		const movies = (
-			await Promise.all(titles.map((title) => fetchMovieByTitle(fetch, title)))
-		).filter(Boolean);
+		const movies = (await mapWithLimit(titles, 4, (title) => fetchMovieByTitle(fetch, title))).filter(
+			Boolean
+		);
 
 		return json(movies);
 	} catch (error) {

@@ -1,8 +1,9 @@
 <script>
 	import { browser } from '$app/environment';
 	import { page } from '$app/state';
-	import { onMount } from 'svelte';
+	import { onMount, tick } from 'svelte';
 	import FilmDetailSheet from '$lib/components/FilmDetailSheet.svelte';
+	import { applyFallbackArtwork, applyMovieArtwork } from '$lib/data/catalog';
 	import {
 		genreMovieCollections,
 		getSimilarMovies,
@@ -11,19 +12,26 @@
 	} from '$lib/data/catalog';
 	import favicon from '$lib/assets/favicon.svg';
 	import { hydrateMoviePosters, seedPosterLibrary } from '$lib/posters';
+	import { posterVersion } from '$lib/poster-state';
 	import { fade } from 'svelte/transition';
 
-	let { children } = $props();
+	let { children, data } = $props();
 
 	const navItems = [
 		{ href: '/', label: 'Accueil' },
+		{ href: '/ce-soir', label: 'Pour ce soir' },
 		{ href: '/top-100', label: 'Top 100' },
 		{ href: '/recommandations', label: 'Recommandations' },
 		{ href: '/genres', label: 'Par genres' }
 	];
 	let scrolled = $state(false);
 	let searchQuery = $state('');
+	let searchOpen = $state(false);
 	let theme = $state('light');
+	/** @type {HTMLDivElement | null} */
+	let searchBox = $state(null);
+	/** @type {HTMLInputElement | null} */
+	let searchInput = $state(null);
 	/** @type {{ id: string, title: string, genres: string[] } | null} */
 	let selectedFilm = $state(null);
 
@@ -49,6 +57,7 @@
 	const openFilm = (film) => {
 		selectedFilm = film;
 		searchQuery = '';
+		searchOpen = false;
 		hydrateMoviePosters([film, ...getSimilarMovies(searchableMovies, film, 6)]);
 	};
 
@@ -68,14 +77,51 @@
 		applyTheme(theme === 'dark' ? 'light' : 'dark');
 	};
 
+	const getDefaultTheme = () => {
+		const hour = new Date().getHours();
+		return hour >= 12 && hour < 19 ? 'light' : 'dark';
+	};
+
+	const toggleSearch = async () => {
+		searchOpen = !searchOpen;
+		if (!searchOpen) {
+			searchQuery = '';
+			return;
+		}
+		await tick();
+		searchInput?.focus();
+	};
+
+	$effect(() => {
+		const posters = data?.posters ?? [];
+		if (!posters.length) return;
+		applyMovieArtwork(posters);
+		applyFallbackArtwork();
+		posterVersion.update((value) => value + 1);
+	});
+
 	$effect(() => {
 		if (!browser) return;
 		const savedTheme = localStorage.getItem('moovy-theme');
-		applyTheme(savedTheme === 'dark' ? 'dark' : 'light');
+		applyTheme(savedTheme === 'dark' || savedTheme === 'light' ? savedTheme : getDefaultTheme());
 	});
 
 	onMount(() => {
 		seedPosterLibrary();
+
+		/** @param {PointerEvent} event */
+		const handlePointerDown = (event) => {
+			if (!searchOpen || !searchBox) return;
+			if (searchBox.contains(/** @type {Node} */ (event.target))) return;
+			searchOpen = false;
+			searchQuery = '';
+		};
+
+		document.addEventListener('pointerdown', handlePointerDown);
+
+		return () => {
+			document.removeEventListener('pointerdown', handlePointerDown);
+		};
 	});
 </script>
 
@@ -103,18 +149,23 @@
 		</div>
 
 		<div class="header-right">
-			<button
-				class="theme-toggle"
-				type="button"
-				aria-label={theme === 'dark' ? 'Passer en mode clair' : 'Passer en mode nuit'}
-				onclick={toggleTheme}
-			>
-				<span class="theme-icon" aria-hidden="true">{theme === 'dark' ? '☀' : '☾'}</span>
-			</button>
-			<div class="search-box">
-				<input bind:value={searchQuery} type="search" placeholder="Recherche un film..." />
+			<div class:open={searchOpen} class="search-box" bind:this={searchBox}>
+				<button
+					class="search-toggle"
+					type="button"
+					aria-label={searchOpen ? 'Fermer la recherche' : 'Ouvrir la recherche'}
+					onclick={toggleSearch}
+				>
+					<span class="search-icon" aria-hidden="true"></span>
+				</button>
+				<input
+					bind:this={searchInput}
+					bind:value={searchQuery}
+					type="search"
+					placeholder="Recherche un film..."
+				/>
 
-				{#if filteredMovies.length}
+				{#if searchOpen && filteredMovies.length}
 					<div class="search-results">
 						{#each filteredMovies as movie}
 							<button type="button" onclick={() => openFilm(movie)}>
@@ -126,6 +177,17 @@
 				{/if}
 			</div>
 		</div>
+
+		<button
+			class="theme-toggle"
+			type="button"
+			aria-label={theme === 'dark' ? 'Passer en mode clair' : 'Passer en mode nuit'}
+			onclick={toggleTheme}
+		>
+			<span class:moon={theme !== 'dark'} class:sun={theme === 'dark'} class="theme-icon" aria-hidden="true">
+				{theme === 'dark' ? '☀' : '☾'}
+			</span>
+		</button>
 	</header>
 
 	<main class="site-main">
@@ -139,10 +201,13 @@
 	<footer class="site-footer">
 		<p>Moovy</p>
 		<div class="footer-meta">
-			<span>Mentions legales</span>
+			<a href="/mentions-legales">Mentions legales</a>
 			<span>Confidentialite</span>
 			<span>Cookies</span>
 			<span>© 2026</span>
+			<a href="https://agence3terres.fr" target="_blank" rel="noreferrer">
+				Developpe par Agence 3 Terres
+			</a>
 		</div>
 	</footer>
 
@@ -228,6 +293,7 @@
 
 	:global(*) {
 		box-sizing: border-box;
+		letter-spacing: normal !important;
 	}
 
 	:global(a) {
@@ -268,7 +334,7 @@
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
-		padding: 14px 28px 18px;
+		padding: 14px 88px 18px 28px;
 		background: transparent;
 		color: #ffffff;
 		transition: padding 260ms ease;
@@ -301,7 +367,7 @@
 	}
 
 	.site-header.scrolled {
-		padding: 12px 28px;
+		padding: 12px 88px 12px 28px;
 	}
 
 	.site-header.scrolled::before {
@@ -334,6 +400,7 @@
 
 	.header-right {
 		gap: 0.85rem;
+		margin-left: auto;
 	}
 
 	.site-nav a {
@@ -344,7 +411,7 @@
 		font-size: 0.96rem;
 		font-weight: 600;
 		text-decoration: none;
-		color: rgba(255, 255, 255, 0.88);
+		color: rgba(255, 255, 255, 0.54);
 		transition: color 220ms ease;
 	}
 
@@ -353,47 +420,135 @@
 	}
 
 	.theme-toggle {
+		position: fixed;
+		top: 16px;
+		right: 18px;
+		z-index: 72;
 		display: inline-flex;
 		align-items: center;
 		justify-content: center;
-		width: 42px;
-		height: 42px;
+		width: 56px;
+		height: 56px;
 		padding: 0;
-		border: 1px solid rgba(255, 255, 255, 0.14);
+		border: 0;
 		border-radius: 999px;
-		background: rgba(255, 255, 255, 0.08);
+		background: transparent;
 		color: #ffffff;
 		font: inherit;
 		font-size: 1rem;
 		line-height: 1;
 		cursor: pointer;
+		transition:
+			background-color var(--theme-duration) var(--theme-ease),
+			border-color var(--theme-duration) var(--theme-ease),
+			color var(--theme-duration) var(--theme-ease);
 	}
 
 	.theme-icon {
 		display: inline-flex;
 		align-items: center;
 		justify-content: center;
-		width: 100%;
-		height: 100%;
-		font-size: 1.05rem;
+		width: 23px;
+		height: 23px;
+		font-size: 1.15rem;
 		line-height: 1;
-		transform: translateY(-0.5px);
+		transform: translateY(-4px);
+	}
+
+	.theme-icon.sun {
+		font-size: 1.12rem;
+	}
+
+	.theme-icon.moon {
+		font-size: 1.12rem;
+		transform: translateY(-4px) translateX(0.5px);
 	}
 
 	.search-box {
 		position: relative;
+		width: 56px;
+		height: 56px;
+		margin-top: 4px;
+		transition: width 340ms cubic-bezier(0.22, 1, 0.36, 1);
+	}
+
+	.search-box.open {
 		width: min(320px, 34vw);
+	}
+
+	.search-toggle {
+		position: absolute;
+		top: 0;
+		left: 0;
+		z-index: 1;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 56px;
+		height: 56px;
+		padding: 0;
+		border: 0;
+		background: transparent;
+		color: var(--search-text);
+		font: inherit;
+		cursor: pointer;
+	}
+
+	.search-icon {
+		position: relative;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 23px;
+		height: 23px;
+		transform: translateY(-5px);
+	}
+
+	.search-icon::before,
+	.search-icon::after {
+		content: '';
+		position: absolute;
+		display: block;
+	}
+
+	.search-icon::before {
+		top: 2px;
+		left: 2px;
+		width: 13px;
+		height: 13px;
+		border: 1.75px solid currentColor;
+		border-radius: 999px;
+	}
+
+	.search-icon::after {
+		right: 3px;
+		bottom: 4px;
+		width: 8px;
+		height: 1.75px;
+		background: currentColor;
+		border-radius: 999px;
+		transform: rotate(45deg);
+		transform-origin: center;
 	}
 
 	.search-box input {
 		width: 100%;
 		height: 42px;
-		padding: 0 14px;
-		border: 1px solid var(--search-border);
-		background: var(--search-bg);
+		padding: 0 14px 0 52px;
+		border: 0;
+		background: transparent;
+		box-shadow: none;
 		color: var(--search-text);
 		font: inherit;
 		outline: none;
+		opacity: 0;
+		pointer-events: none;
+		transition: opacity 180ms ease;
+	}
+
+	.search-box.open input {
+		opacity: 1;
+		pointer-events: auto;
 	}
 
 	.search-box input::placeholder {
@@ -462,17 +617,35 @@
 		color: var(--muted-text-soft);
 	}
 
+	.footer-meta a:last-child {
+		margin-left: auto;
+	}
+
+	.footer-meta a {
+		color: inherit;
+		text-decoration: none;
+	}
+
+	:global(.page-hero .hero-copy a:hover),
+	:global(.film-row:hover .row-action),
+	:global(.feature-block:hover .feature-copy span) {
+		background: #ffffff;
+		color: var(--accent-blue);
+		border-color: var(--accent-blue);
+		box-shadow: 0 12px 28px rgba(47, 107, 255, 0.14);
+	}
+
 	@media (max-width: 720px) {
 		.app-shell {
 			padding: 8px;
 		}
 
 		.site-header {
-			padding: 12px 16px 16px;
+			padding: 12px 72px 16px 16px;
 		}
 
 		.site-header.scrolled {
-			padding: 11px 16px;
+			padding: 11px 72px 11px 16px;
 		}
 
 		.site-nav {

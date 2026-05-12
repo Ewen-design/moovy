@@ -8,6 +8,8 @@
 		dark = false,
 		variant = 'large',
 		orientation = 'landscape',
+		density = 'default',
+		overlayStyle = 'default',
 		centerActive = false,
 		onSelect = () => {}
 	} = $props();
@@ -69,6 +71,8 @@
 <section
 	class:dark
 	class:portrait={orientation === 'portrait'}
+	class:expanded={density === 'expanded'}
+	class:homeOverlay={overlayStyle === 'home'}
 	class={`poster-rail ${variant}`}
 	aria-label={title || 'Selection'}
 >
@@ -177,6 +181,11 @@
 		height: clamp(315px, 25vw, 438px);
 	}
 
+	.poster-rail.portrait.large.expanded .rail-card {
+		width: clamp(344px, 27vw, 478px);
+		height: clamp(516px, 40vw, 716px);
+	}
+
 	.rail-card img {
 		width: 100%;
 		height: 100%;
@@ -190,6 +199,12 @@
 		background:
 			linear-gradient(180deg, rgba(8, 8, 8, 0.02) 0%, rgba(8, 8, 8, 0.38) 100%),
 			linear-gradient(90deg, rgba(8, 8, 8, 0.18) 0%, rgba(8, 8, 8, 0.02) 100%);
+	}
+
+	.poster-rail.homeOverlay .rail-overlay {
+		background:
+			linear-gradient(180deg, rgba(8, 8, 8, 0.02) 0%, rgba(8, 8, 8, 0.24) 38%, rgba(8, 8, 8, 0.82) 100%),
+			linear-gradient(90deg, rgba(8, 8, 8, 0.28) 0%, rgba(8, 8, 8, 0.08) 100%);
 	}
 
 	.rail-copy {
@@ -257,6 +272,11 @@
 		.poster-rail.portrait.large .rail-card {
 			width: 46vw;
 			height: 68vw;
+		}
+
+		.poster-rail.portrait.large.expanded .rail-card {
+			width: 74vw;
+			height: 108vw;
 		}
 	}
 </style>

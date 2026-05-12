@@ -1,4 +1,5 @@
 import { applyFallbackArtwork, applyMovieArtwork } from '$lib/data/catalog';
+import { posterVersion } from '$lib/poster-state';
 
 const requestedTitles = new Set();
 let seedLoaded = false;
@@ -40,6 +41,7 @@ export async function hydrateMoviePosters(movies) {
 		const payload = await response.json();
 		applyMovieArtwork(Array.isArray(payload) ? payload : []);
 		applyFallbackArtwork();
+		posterVersion.update((value) => value + 1);
 	} catch (error) {
 		console.error('Unable to hydrate movie posters', error);
 		for (const title of missingTitles) {
@@ -62,6 +64,7 @@ export async function seedPosterLibrary() {
 		const payload = await response.json();
 		applyMovieArtwork(Array.isArray(payload) ? payload : []);
 		applyFallbackArtwork();
+		posterVersion.update((value) => value + 1);
 	} catch (error) {
 		console.error('Unable to seed poster library', error);
 		seedLoaded = false;
