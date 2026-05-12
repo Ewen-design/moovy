@@ -6,12 +6,12 @@
 	const handleSelect = () => onSelect(film);
 </script>
 
-<button class:detailed class="film-row" type="button" onclick={handleSelect}>
+<button class:detailed class:ranked={rank} class="film-row" type="button" onclick={handleSelect}>
 	<div class="poster-wrap">
-		<img src={film.image ?? heroImage} alt={film.title} loading="lazy" decoding="async" />
 		{#if rank}
-			<span class="rank-chip">#{rank}</span>
+			<span class="rank-backdrop" aria-hidden="true">{rank}</span>
 		{/if}
+		<img src={film.image ?? heroImage} alt={film.title} loading="lazy" decoding="async" />
 	</div>
 
 	<div class="film-copy">
@@ -52,8 +52,25 @@
 		padding: 18px;
 	}
 
+	.film-row.ranked {
+		grid-template-columns: 196px minmax(0, 1fr) auto;
+		padding-left: 188px;
+	}
+
 	.poster-wrap {
 		position: relative;
+		display: flex;
+		align-items: center;
+		justify-content: flex-end;
+		min-width: 0;
+		overflow: visible;
+	}
+
+	.film-row.ranked .poster-wrap {
+		--rank-gap: 4.8rem;
+		--rank-overlap: 0.78rem;
+		justify-content: flex-start;
+		padding-left: var(--rank-gap);
 	}
 
 	.poster-wrap img {
@@ -61,20 +78,32 @@
 		aspect-ratio: 3 / 4.2;
 		object-fit: cover;
 		display: block;
+		position: relative;
+		z-index: 1;
 	}
 
-	.rank-chip {
+	.rank-backdrop {
 		position: absolute;
-		top: 8px;
-		left: 8px;
-		display: inline-flex;
-		align-items: center;
-		justify-content: center;
-		padding: 0.35rem 0.6rem;
-		background: var(--accent-blue);
-		color: #ffffff;
-		font-size: 0.86rem;
-		font-weight: 700;
+		right: calc(100% - (var(--rank-gap) + var(--rank-overlap)));
+		top: 50%;
+		z-index: 0;
+		transform: translateY(-50%);
+		font-size: clamp(6.7rem, 10vw, 10rem);
+		line-height: 0.82;
+		font-weight: 900;
+		letter-spacing: -0.56em;
+		color: var(--rank-number);
+		text-shadow:
+			1px 0 0 var(--rank-number-stroke),
+			-1px 0 0 var(--rank-number-stroke),
+			0 1px 0 var(--rank-number-stroke),
+			0 -1px 0 var(--rank-number-stroke),
+			1px 1px 0 var(--rank-number-stroke),
+			-1px -1px 0 var(--rank-number-stroke),
+			1px -1px 0 var(--rank-number-stroke),
+			-1px 1px 0 var(--rank-number-stroke);
+		pointer-events: none;
+		white-space: nowrap;
 	}
 
 	h3,
@@ -130,6 +159,22 @@
 		.film-row.detailed {
 			grid-template-columns: 78px minmax(0, 1fr);
 			padding: 12px;
+		}
+
+		.film-row.ranked,
+		.film-row.ranked.detailed {
+			grid-template-columns: 136px minmax(0, 1fr);
+			padding-left: 108px;
+		}
+
+		.film-row.ranked .poster-wrap {
+			--rank-gap: 2.9rem;
+			--rank-overlap: 0.46rem;
+			padding-left: var(--rank-gap);
+		}
+
+		.rank-backdrop {
+			font-size: clamp(4.8rem, 16vw, 6.6rem);
 		}
 
 		.row-action {

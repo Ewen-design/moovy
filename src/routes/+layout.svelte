@@ -231,6 +231,8 @@
 		--muted-text-soft: #8f8f94;
 		--surface-card: #fbfbfc;
 		--surface-card-strong: #ffffff;
+		--rank-number: var(--page-bg);
+		--rank-number-stroke: var(--accent-blue);
 		--surface-elevated: #ffffff;
 		--surface-subtle: #eef3ff;
 		--surface-subtle-hover: #dde8ff;
@@ -266,6 +268,8 @@
 		--muted-text-soft: #8993a6;
 		--surface-card: #141820;
 		--surface-card-strong: #181d26;
+		--rank-number: #000000;
+		--rank-number-stroke: var(--accent-blue);
 		--surface-elevated: #181818;
 		--surface-subtle: #232323;
 		--surface-subtle-hover: #353535;
