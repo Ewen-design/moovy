@@ -10,10 +10,11 @@
 	const pageSize = 20;
 	const pageCount = Math.ceil(top100Movies.length / pageSize);
 	const pages = Array.from({ length: pageCount }, (_, index) => index);
-	const heroCandidates = top100Movies.filter((movie) => movie.backdrop && movie.clearlogo);
-
 	let heroVersion = $state(0);
-	const heroMovies = heroCandidates.slice(0, 2);
+	const heroMovies = $derived.by(() => {
+		$posterVersion;
+		return top100Movies.filter((movie) => movie.backdrop && movie.clearlogo).slice(0, 2);
+	});
 	const heroSlides = $derived.by(() => {
 		heroVersion;
 		$posterVersion;
@@ -89,7 +90,13 @@
 </svelte:head>
 
 <div class="catalog-page">
-	<PageHero compact={true} fullBleed={true} overlayBottom={true} slides={heroSlides} />
+	<PageHero
+		compact={true}
+		fullBleed={true}
+		overlayBottom={true}
+		imageOverlay="vertical"
+		slides={heroSlides}
+	/>
 
 	<section class="catalog-shell" id="list" bind:this={listSection}>
 		<div class="catalog-head">

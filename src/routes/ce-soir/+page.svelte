@@ -80,7 +80,10 @@
 	/** @type {{ id: string, title: string, genres: string[] } | null} */
 	let selectedFilm = $state(null);
 
-	const heroMovies = [top100Movies[18], top100Movies[34]];
+	const heroMovies = $derived.by(() => {
+		$posterVersion;
+		return [top100Movies[18], top100Movies[34]];
+	});
 	const heroSlides = $derived.by(() => {
 		heroVersion;
 		$posterVersion;
@@ -159,7 +162,13 @@
 </svelte:head>
 
 <div class="tonight-page">
-	<PageHero compact={true} fullBleed={true} overlayBottom={true} slides={heroSlides} />
+	<PageHero
+		compact={true}
+		fullBleed={true}
+		overlayBottom={true}
+		imageOverlay="vertical"
+		slides={heroSlides}
+	/>
 
 	<section class="tonight-shell" id="quiz">
 		<div class="tonight-head">

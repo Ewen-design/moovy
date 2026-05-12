@@ -452,19 +452,19 @@
 		display: inline-flex;
 		align-items: center;
 		justify-content: center;
-		width: 23px;
-		height: 23px;
-		font-size: 1.15rem;
+		width: 28px;
+		height: 28px;
+		font-size: 1.4rem;
 		line-height: 1;
 		transform: translateY(-4px);
 	}
 
 	.theme-icon.sun {
-		font-size: 1.12rem;
+		font-size: 1.36rem;
 	}
 
 	.theme-icon.moon {
-		font-size: 1.12rem;
+		font-size: 1.36rem;
 		transform: translateY(-4px) translateX(0.5px);
 	}
 

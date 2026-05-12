@@ -43,6 +43,12 @@
 		$posterVersion;
 		return [
 			{
+				title: 'Pour ce soir',
+				button: 'Choisir',
+				href: '/ce-soir',
+				image: featureShowcaseMovies[2].backdrop ?? featureShowcaseMovies[2].image
+			},
+			{
 				title: 'Top 100',
 				button: 'Ouvrir',
 				href: '/top-100',
@@ -55,12 +61,6 @@
 				image: featureShowcaseMovies[1].backdrop ?? featureShowcaseMovies[1].image
 			},
 			{
-				title: 'Pour ce soir',
-				button: 'Choisir',
-				href: '/ce-soir',
-				image: featureShowcaseMovies[2].backdrop ?? featureShowcaseMovies[2].image
-			},
-			{
 				title: 'Par genre',
 				button: 'Parcourir',
 				href: '/genres',
@@ -71,26 +71,17 @@
 
 	const heroRailItems = $derived.by(() => {
 		$posterVersion;
-		return recommendationMovies.slice(0, 10).map((film) => ({
-			...film,
-			tag: film.genres[0]
-		}));
+		return recommendationMovies.slice(0, 10);
 	});
 
 	const bottomRailItems = $derived.by(() => {
 		$posterVersion;
-		return recommendationMovies.slice(10, 18).map((film) => ({
-			...film,
-			tag: film.genres[0]
-		}));
+		return recommendationMovies.slice(10, 18);
 	});
 
 	const bottomMiniRailItems = $derived.by(() => {
 		$posterVersion;
-		return top100Movies.slice(0, 10).map((film) => ({
-			...film,
-			tag: film.genres[0]
-		}));
+		return top100Movies.slice(0, 10);
 	});
 
 	/** @type {{ id: string, title: string, genres: string[] } | null} */

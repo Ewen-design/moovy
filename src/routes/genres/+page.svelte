@@ -14,6 +14,7 @@
 	/** @type {{ id: string, title: string, genres: string[] } | null} */
 	let selectedFilm = $state(null);
 	const heroMovies = $derived.by(() => {
+		$posterVersion;
 		const matches = top100Movies.filter(
 			(movie) => movie.genres.includes(activeGenre) && movie.backdrop && movie.clearlogo
 		);
@@ -60,7 +61,13 @@
 </svelte:head>
 
 <div class="genre-page">
-	<PageHero compact={true} fullBleed={true} overlayBottom={true} slides={heroSlides} />
+	<PageHero
+		compact={true}
+		fullBleed={true}
+		overlayBottom={true}
+		imageOverlay="vertical"
+		slides={heroSlides}
+	/>
 
 	<section class="genre-shell" id="genres">
 		<div class="genre-head">

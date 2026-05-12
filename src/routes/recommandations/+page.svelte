@@ -7,9 +7,11 @@
 	import { hydrateMoviePosters } from '$lib/posters';
 	import { posterVersion } from '$lib/poster-state';
 
-	const heroCandidates = recommendationMovies.filter((movie) => movie.backdrop && movie.clearlogo);
 	let heroVersion = $state(0);
-	const heroMovies = heroCandidates.slice(0, 2);
+	const heroMovies = $derived.by(() => {
+		$posterVersion;
+		return recommendationMovies.filter((movie) => movie.backdrop && movie.clearlogo).slice(0, 2);
+	});
 	const heroSlides = $derived.by(() => {
 		heroVersion;
 		$posterVersion;
@@ -53,7 +55,13 @@
 </svelte:head>
 
 <div class="recommend-page">
-	<PageHero compact={true} fullBleed={true} overlayBottom={true} slides={heroSlides} />
+	<PageHero
+		compact={true}
+		fullBleed={true}
+		overlayBottom={true}
+		imageOverlay="vertical"
+		slides={heroSlides}
+	/>
 
 	<section class="recommend-shell" id="recommandations">
 		<div class="recommend-head">

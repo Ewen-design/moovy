@@ -31,6 +31,7 @@
 	class:fullBleed
 	class:lightBottom={overlayTone === 'light'}
 	class:simpleBottom={imageOverlay === 'bottom-only'}
+	class:verticalOnly={imageOverlay === 'vertical'}
 	class="page-hero"
 	aria-label="Selection editoriale"
 >
@@ -44,7 +45,7 @@
 					decoding="async"
 					fetchpriority="high"
 				/>
-				{#if imageOverlay === 'full'}
+				{#if imageOverlay === 'full' || imageOverlay === 'vertical'}
 					<div class="hero-overlay"></div>
 				{/if}
 				{#if overlayBottom}
@@ -102,12 +103,43 @@
 	}
 
 	.page-hero.simpleBottom .hero-bottom-overlay {
-		height: 34%;
-		background: linear-gradient(180deg, rgba(10, 10, 10, 0) 0%, rgba(10, 10, 10, 0.92) 100%);
+		height: 42%;
+		background: linear-gradient(
+			180deg,
+			rgba(10, 10, 10, 0) 0%,
+			rgba(10, 10, 10, 0.04) 22%,
+			rgba(10, 10, 10, 0.12) 42%,
+			rgba(10, 10, 10, 0.3) 64%,
+			rgba(10, 10, 10, 0.62) 84%,
+			rgba(10, 10, 10, 1) 100%
+		);
 	}
 
 	.page-hero.simpleBottom .hero-bottom-overlay.lightBottom {
-		background: linear-gradient(180deg, rgba(245, 245, 247, 0) 0%, var(--page-bg) 100%);
+		height: 34%;
+		background: linear-gradient(
+			180deg,
+			rgba(245, 245, 247, 0) 0%,
+			rgba(245, 245, 247, 0.02) 26%,
+			rgba(245, 245, 247, 0.08) 52%,
+			rgba(245, 245, 247, 0.22) 74%,
+			rgba(245, 245, 247, 0.5) 90%,
+			var(--page-bg) 100%
+		);
+	}
+
+	:global(body.theme-dark) .page-hero.simpleBottom .hero-bottom-overlay.lightBottom {
+		height: 72%;
+		background: linear-gradient(
+			180deg,
+			rgba(8, 10, 14, 0) 0%,
+			rgba(8, 10, 14, 0.08) 10%,
+			rgba(8, 10, 14, 0.22) 22%,
+			rgba(8, 10, 14, 0.44) 38%,
+			rgba(8, 10, 14, 0.7) 56%,
+			rgba(8, 10, 14, 0.9) 74%,
+			rgba(8, 10, 14, 1) 100%
+		);
 	}
 
 	.hero-bottom-overlay.lightBottom {
@@ -187,6 +219,10 @@
 				rgba(26, 26, 28, 0.08) 100%
 			),
 			linear-gradient(180deg, rgba(180, 188, 204, 0.18) 0%, rgba(26, 26, 28, 0.16) 100%);
+	}
+
+	.page-hero.verticalOnly .hero-slide .hero-overlay {
+		background: linear-gradient(180deg, rgba(255, 255, 255, 0.03) 0%, rgba(10, 15, 24, 0.28) 100%);
 	}
 
 	.hero-copy {
