@@ -68,6 +68,7 @@ const TITLE_ALIASES = {
 	'La Haine': ['La haine'],
 	'Il était une fois dans l’Ouest': ['Once Upon a Time in the West'],
 	'Bruce tout-puissant': ['Bruce Almighty'],
+	Alliés: ['Allied'],
 	'Shining': ['The Shining']
 };
 /** @type {Record<string, string | number>} */
@@ -76,7 +77,8 @@ const TITLE_OVERRIDES = {
 	Se7en: 268,
 	'La Cité de Dieu': 1733,
 	'Vol au-dessus d’un nid de coucou': 785,
-	'Your Name': 197
+	'Your Name': 197,
+	Alliés: 1523
 };
 
 let authToken = '';
