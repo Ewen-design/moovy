@@ -1,12 +1,27 @@
 <script>
 	import { heroImage } from '$lib/data/catalog';
 
-	let { film, rank = null, detailed = false, onSelect = () => {} } = $props();
+	let {
+		film,
+		rank = null,
+		detailed = false,
+		mobileCard = false,
+		mobileExpanded = false,
+		onSelect = () => {}
+	} = $props();
 
 	const handleSelect = () => onSelect(film);
 </script>
 
-<button class:detailed class:ranked={rank} class="film-row" type="button" onclick={handleSelect}>
+<button
+	class:detailed
+	class:ranked={rank}
+	class:mobile-card={mobileCard}
+	class:mobile-expanded={mobileExpanded}
+	class="film-row"
+	type="button"
+	onclick={handleSelect}
+>
 	<div class="poster-wrap">
 		{#if rank}
 			<span class="rank-backdrop" aria-hidden="true">{rank}</span>
@@ -258,6 +273,67 @@
 		.film-row.ranked .row-action {
 			margin-top: 0.38rem;
 		}
+
+		.film-row.mobile-card,
+		.film-row.mobile-card.detailed {
+			grid-template-columns: 132px minmax(0, 1fr);
+			gap: 14px;
+			padding: 14px 12px;
+			align-items: center;
+		}
+
+		.film-row.mobile-card .poster-wrap {
+			align-self: center;
+			justify-content: center;
+		}
+
+		.film-row.mobile-card .poster-wrap img {
+			width: 132px;
+			max-width: 100%;
+		}
+
+		.film-row.mobile-card .content-stack {
+			grid-template-columns: 1fr;
+			align-content: center;
+			align-self: center;
+			gap: 0.62rem;
+			min-height: 0;
+		}
+
+		.film-row.mobile-card .film-copy {
+			display: grid;
+			gap: 0.58rem;
+		}
+
+		.film-row.mobile-card .meta,
+		.film-row.mobile-card .credits,
+		.film-row.mobile-card .description {
+			margin-top: 0;
+			line-height: 1.42;
+		}
+
+		.film-row.mobile-card .row-action {
+			margin-top: 0.28rem;
+		}
+
+		.film-row.mobile-card.mobile-expanded,
+		.film-row.mobile-card.mobile-expanded.detailed {
+			grid-template-columns: 144px minmax(0, 1fr);
+			gap: 16px;
+			padding: 15px 13px;
+		}
+
+		.film-row.mobile-card.mobile-expanded .poster-wrap img {
+			width: 144px;
+		}
+
+		.film-row.mobile-card.mobile-expanded .content-stack {
+			gap: 0.68rem;
+		}
+
+		.film-row.mobile-card.mobile-expanded .film-copy {
+			gap: 0.62rem;
+		}
 	}
 
 	@media (max-width: 480px) {
@@ -336,6 +412,60 @@
 
 		.film-row.ranked .row-action {
 			margin-top: 0.32rem;
+		}
+
+		.film-row.mobile-card,
+		.film-row.mobile-card.detailed {
+			grid-template-columns: 120px minmax(0, 1fr);
+			gap: 12px;
+			padding: 12px 10px;
+			align-items: center;
+		}
+
+		.film-row.mobile-card .poster-wrap img {
+			width: 120px;
+		}
+
+		.film-row.mobile-card .content-stack {
+			grid-template-columns: 1fr;
+			align-content: center;
+			align-self: center;
+			gap: 0.56rem;
+		}
+
+		.film-row.mobile-card .film-copy {
+			display: grid;
+			gap: 0.54rem;
+		}
+
+		.film-row.mobile-card .meta,
+		.film-row.mobile-card .credits,
+		.film-row.mobile-card .description {
+			margin-top: 0;
+			line-height: 1.38;
+		}
+
+		.film-row.mobile-card .row-action {
+			margin-top: 0.24rem;
+		}
+
+		.film-row.mobile-card.mobile-expanded,
+		.film-row.mobile-card.mobile-expanded.detailed {
+			grid-template-columns: 130px minmax(0, 1fr);
+			gap: 13px;
+			padding: 13px 10px;
+		}
+
+		.film-row.mobile-card.mobile-expanded .poster-wrap img {
+			width: 130px;
+		}
+
+		.film-row.mobile-card.mobile-expanded .content-stack {
+			gap: 0.6rem;
+		}
+
+		.film-row.mobile-card.mobile-expanded .film-copy {
+			gap: 0.58rem;
 		}
 
 	}

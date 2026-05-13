@@ -111,7 +111,7 @@
 		{#key activeGenre}
 			<div class="film-list" transition:fade={{ duration: 220 }}>
 				{#each activeMovies as film}
-					<FilmRow {film} onSelect={openFilm} />
+					<FilmRow {film} mobileCard={true} onSelect={openFilm} />
 				{/each}
 			</div>
 		{/key}

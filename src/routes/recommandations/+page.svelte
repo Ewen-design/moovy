@@ -72,7 +72,13 @@
 
 		<div class="film-list">
 			{#each visibleMovies as film}
-				<FilmRow {film} detailed={true} onSelect={openFilm} />
+				<FilmRow
+					{film}
+					detailed={true}
+					mobileCard={true}
+					mobileExpanded={true}
+					onSelect={openFilm}
+				/>
 			{/each}
 		</div>
 	</section>

@@ -288,7 +288,7 @@
 
 				<div class="film-list">
 					{#each suggestedMovies as film}
-						<FilmRow {film} onSelect={openFilm} />
+						<FilmRow {film} mobileCard={true} onSelect={openFilm} />
 					{/each}
 				</div>
 			</section>
