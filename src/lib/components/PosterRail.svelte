@@ -182,6 +182,12 @@
 		gap: 168px;
 	}
 
+	@media (min-width: 1600px) {
+		.poster-rail.topTen .rail-track {
+			gap: 228px;
+		}
+	}
+
 	.poster-rail.topTen .rail-card {
 		width: clamp(296px, 22vw, 372px);
 		height: auto;
