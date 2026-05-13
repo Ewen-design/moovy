@@ -96,7 +96,15 @@
 					{#if layout === 'top10'}
 						<div class="ranked-poster">
 							<span class:double-rank={item.rank >= 10} class="rail-rank" aria-hidden="true">
-								{item.rank}
+								{#if item.rank >= 10}
+									<span class="rail-rank-digits">
+										{#each String(item.rank).split('') as digit}
+											<span>{digit}</span>
+										{/each}
+									</span>
+								{:else}
+									{item.rank}
+								{/if}
 							</span>
 							<img
 								src={item.image ?? heroImage}
@@ -270,8 +278,27 @@
 
 	.rail-rank.double-rank {
 		--rail-rank-overlap: 2.25rem;
-		font-size: clamp(10rem, 13.6vw, 15rem);
-		letter-spacing: -0.74em;
+		font-size: clamp(10.7rem, 14.3vw, 15.8rem);
+	}
+
+	.poster-rail.topTen .rail-rank {
+		right: calc(100% - (var(--rail-rank-gap) + 2.75rem));
+		color: var(--surface-card);
+		text-shadow: none;
+	}
+
+	.rail-rank-digits {
+		display: inline-flex;
+		gap: 0;
+	}
+
+	.poster-rail.topTen .rail-rank.double-rank .rail-rank-digits {
+		gap: 0;
+		transform: translateX(0.55rem);
+	}
+
+	.poster-rail.topTen .rail-rank.double-rank .rail-rank-digits span + span {
+		margin-left: -1.35rem;
 	}
 
 	.rail-overlay {
@@ -395,8 +422,15 @@
 
 		.poster-rail.topTen .rail-rank.double-rank {
 			--rail-rank-overlap: 1.5rem;
-			font-size: clamp(6.6rem, 23vw, 9.6rem);
-			letter-spacing: -0.64em;
+			font-size: clamp(7rem, 24vw, 10rem);
+		}
+
+		.poster-rail.topTen .rail-rank.double-rank .rail-rank-digits {
+			transform: translateX(0.34rem);
+		}
+
+		.poster-rail.topTen .rail-rank.double-rank .rail-rank-digits span + span {
+			margin-left: -0.9rem;
 		}
 	}
 </style>
