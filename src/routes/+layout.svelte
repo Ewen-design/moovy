@@ -108,6 +108,15 @@
 		applyTheme(savedTheme === 'dark' || savedTheme === 'light' ? savedTheme : getDefaultTheme());
 	});
 
+	$effect(() => {
+		if (!browser) return;
+		document.body.classList.toggle('preloader-open', showPreloader);
+
+		return () => {
+			document.body.classList.remove('preloader-open');
+		};
+	});
+
 	onMount(() => {
 		seedPosterLibrary();
 		const leaveTimer = window.setTimeout(() => {
@@ -278,6 +287,10 @@
 		transition:
 			background-color var(--theme-duration) var(--theme-ease),
 			color var(--theme-duration) var(--theme-ease);
+	}
+
+	:global(body.preloader-open) {
+		overflow: hidden;
 	}
 
 	:global(body.theme-dark) {
