@@ -74,16 +74,14 @@
 
 				<div class="sheet-body">
 					<div class="sheet-main">
-						<p class="meta">
-							{film.year} · {film.duration} · {film.quality ?? 'HD'} · {film.maturity ?? '13+'}
-						</p>
+						<p class="meta">{film.year} · {film.duration} · {film.maturity ?? '13+'}</p>
 						<p class="summary">{film.summary ?? film.description}</p>
 
 						<div class="cast-grid">
 							{#each film.castMembers ?? [] as member}
 								<article class="cast-card">
 									<img
-										src={member.image ?? heroImage}
+										src={member.image ?? '/photo.webp'}
 										alt={member.name}
 										loading="lazy"
 										decoding="async"
@@ -101,7 +99,6 @@
 						<p><strong>Distribution :</strong> {film.cast.join(', ')}</p>
 						<p><strong>Genres :</strong> {film.genres.join(', ')}</p>
 						<p><strong>Realisateur :</strong> {film.director}</p>
-						<p><strong>Note :</strong> {film.rating} · {film.votes}</p>
 					</aside>
 				</div>
 
@@ -110,18 +107,33 @@
 					<div class="similar-grid">
 						{#each similarMovies as movie}
 							<button class="similar-card" type="button" onclick={() => handleSimilarSelect(movie)}>
-								<img
-									src={movie.image ?? heroImage}
-									alt={movie.title}
-									loading="lazy"
-									decoding="async"
-								/>
+								<div class="similar-visual">
+									<img
+										src={movie.backdrop ?? movie.image ?? heroImage}
+										alt={movie.title}
+										loading="lazy"
+										decoding="async"
+									/>
+									<div class="similar-overlay"></div>
+									<div class="similar-brand">
+										{#if movie.clearlogo}
+											<img
+												class="similar-clearlogo"
+												src={movie.clearlogo}
+												alt={movie.title}
+												loading="lazy"
+												decoding="async"
+											/>
+										{:else}
+											<h4>{movie.title}</h4>
+										{/if}
+									</div>
+								</div>
 								<div class="similar-copy">
 									<div class="similar-meta">
 										<span>{movie.duration}</span>
 										<span>{movie.year}</span>
 									</div>
-									<h4>{movie.title}</h4>
 									<p>{movie.description}</p>
 								</div>
 							</button>
@@ -381,17 +393,56 @@
 			color var(--theme-duration) var(--theme-ease);
 	}
 
+	.similar-visual {
+		position: relative;
+		overflow: hidden;
+		background: #0d0d0f;
+	}
+
 	.similar-card:hover {
 		background: var(--sheet-block-hover);
-		transform: translateY(-3px);
 		box-shadow: 0 16px 34px rgba(0, 0, 0, 0.28);
 	}
 
-	.similar-card img {
+	.similar-visual > img {
 		width: 100%;
 		height: 100%;
 		object-fit: cover;
 		display: block;
+	}
+
+	.similar-overlay {
+		position: absolute;
+		inset: 0;
+		background:
+			linear-gradient(180deg, rgba(8, 8, 10, 0.04) 0%, rgba(8, 8, 10, 0.16) 48%, rgba(8, 8, 10, 0.78) 100%),
+			linear-gradient(90deg, rgba(8, 8, 10, 0.18) 0%, rgba(8, 8, 10, 0.04) 100%);
+	}
+
+	.similar-brand {
+		position: absolute;
+		left: 14px;
+		right: 14px;
+		bottom: 14px;
+		z-index: 1;
+	}
+
+	.similar-brand h4 {
+		margin: 0;
+		font-size: 1.2rem;
+		line-height: 0.95;
+		letter-spacing: -0.04em;
+		color: #ffffff;
+		text-shadow: 0 8px 22px rgba(0, 0, 0, 0.42);
+	}
+
+	.similar-clearlogo {
+		display: block;
+		max-width: min(180px, 100%);
+		max-height: 58px;
+		object-fit: contain;
+		object-position: left bottom;
+		filter: drop-shadow(0 10px 24px rgba(0, 0, 0, 0.42));
 	}
 
 	.similar-copy {

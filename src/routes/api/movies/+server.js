@@ -1,6 +1,6 @@
 import { json } from '@sveltejs/kit';
 import { TVDB_API_KEY } from '$env/static/private';
-import { heroImage, top100Movies } from '$lib/data/catalog';
+import { top100Movies } from '$lib/data/catalog';
 
 const TVDB_BASE_URL = 'https://api4.thetvdb.com/v4';
 const TOKEN_TTL_MS = 28 * 24 * 60 * 60 * 1000;
@@ -352,7 +352,7 @@ async function fetchMovieByTitle(fetch, title) {
 			.map((member) => ({
 				name: member?.personName ?? member?.name ?? 'Acteur',
 				role: member?.name ?? 'Distribution',
-				image: sanitizePoster(member?.personImgURL ?? member?.image ?? null) ?? heroImage
+				image: sanitizePoster(member?.personImgURL ?? member?.image ?? null) ?? '/photo.webp'
 			}));
 		const directors = pickPeople(characters, 1, 'Director');
 		const record = movie
