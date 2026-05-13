@@ -16,7 +16,9 @@
 	import { posterVersion } from '$lib/poster-state';
 import { fade } from 'svelte/transition';
 
-	let { children, data } = $props();
+let { children, data } = $props();
+const siteUrl = 'https://moovy.agence3terres.fr';
+const shareImage = `${siteUrl}/moovy-showcase.svg`;
 
 	const navItems = [
 		{ href: '/', label: 'Accueil' },
@@ -224,6 +226,23 @@ import { fade } from 'svelte/transition';
 		name="description"
 		content="Moovy propose une home cinema moderne avec selections, top films, genres et recommandations."
 	/>
+	<link rel="canonical" href={`${siteUrl}${page.url.pathname}`} />
+	<meta property="og:site_name" content="Moovy" />
+	<meta property="og:title" content="Moovy" />
+	<meta
+		property="og:description"
+		content="Moovy propose une home cinema moderne avec selections, top films, genres et recommandations."
+	/>
+	<meta property="og:type" content="website" />
+	<meta property="og:url" content={`${siteUrl}${page.url.pathname}`} />
+	<meta property="og:image" content={shareImage} />
+	<meta name="twitter:card" content="summary_large_image" />
+	<meta name="twitter:title" content="Moovy" />
+	<meta
+		name="twitter:description"
+		content="Moovy propose une home cinema moderne avec selections, top films, genres et recommandations."
+	/>
+	<meta name="twitter:image" content={shareImage} />
 	<link rel="icon" href={favicon} />
 </svelte:head>
 
