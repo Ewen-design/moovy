@@ -173,7 +173,7 @@
 
 	.poster-rail.topTen .rail-card {
 		width: clamp(296px, 22vw, 372px);
-		height: clamp(314px, 24vw, 438px);
+		height: auto;
 		background: transparent;
 		overflow: visible;
 	}
@@ -225,10 +225,10 @@
 		--rail-rank-overlap: 0.82rem;
 		position: relative;
 		display: flex;
-		align-items: stretch;
+		align-items: flex-end;
 		justify-content: flex-start;
 		width: 100%;
-		height: 100%;
+		height: auto;
 		padding-left: var(--rail-rank-gap);
 		overflow: visible;
 	}
@@ -237,6 +237,8 @@
 		position: relative;
 		z-index: 1;
 		width: clamp(188px, 14vw, 258px);
+		height: auto;
+		object-fit: contain;
 	}
 
 	.rail-rank {
@@ -366,7 +368,7 @@
 
 		.poster-rail.topTen .rail-card {
 			width: 62vw;
-			height: 88vw;
+			height: auto;
 		}
 
 		.poster-rail.topTen .rail-track {
@@ -380,6 +382,7 @@
 
 		.poster-rail.topTen .ranked-poster img {
 			width: 42vw;
+			height: auto;
 		}
 
 		.poster-rail.topTen .rail-rank {

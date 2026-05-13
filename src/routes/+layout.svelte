@@ -227,9 +227,7 @@
 		<p>Moovy</p>
 		<div class="footer-meta">
 			<a href="/mentions-legales">Mentions legales</a>
-			<span>Confidentialite</span>
-			<span>Cookies</span>
-			<span>© 2026</span>
+			<span>2026</span>
 			<a href="https://agence3terres.fr" target="_blank" rel="noreferrer">
 				Developpe par Agence 3 Terres
 			</a>

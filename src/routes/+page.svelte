@@ -193,9 +193,10 @@
 <style>
 	.home {
 		display: grid;
-		gap: 10px;
+		gap: 78px;
 		margin-left: calc(50% - 50vw);
 		margin-right: calc(50% - 50vw);
+		padding-bottom: 52px;
 	}
 
 	.hero-shell {
@@ -218,8 +219,8 @@
 	.feature-grid {
 		display: grid;
 		grid-template-columns: repeat(2, minmax(0, 1fr));
-		gap: 10px;
-		padding: 0 10px;
+		gap: 18px;
+		padding: 158px 28px 82px;
 	}
 
 	.feature-block {
@@ -284,8 +285,8 @@
 
 	.bottom-slider {
 		display: grid;
-		gap: 12px;
-		padding: 0 10px 10px;
+		gap: 152px;
+		padding: 138px 28px 118px;
 	}
 
 	@media (max-width: 900px) {
@@ -297,7 +298,8 @@
 
 		.feature-grid {
 			grid-template-columns: 1fr;
-			padding: 0 8px;
+			gap: 18px;
+			padding: 94px 16px 44px;
 		}
 
 		.feature-block {
@@ -305,13 +307,18 @@
 		}
 
 		.bottom-slider {
-			padding: 0 8px 8px;
+			gap: 72px;
+			padding: 82px 16px 68px;
 		}
 	}
 
 	@media (max-width: 640px) {
+		.home {
+			gap: 62px;
+		}
+
 		.bottom-slider {
-			gap: 8px;
+			gap: 76px;
 		}
 	}
 </style>
