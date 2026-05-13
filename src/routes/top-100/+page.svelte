@@ -144,12 +144,12 @@
 <style>
 	.catalog-page {
 		display: grid;
-		gap: 42px;
+		gap: 144px;
 	}
 
 	.catalog-shell {
 		display: grid;
-		gap: 16px;
+		gap: 42px;
 	}
 
 	.catalog-head {
@@ -229,7 +229,10 @@
 	}
 
 	@media (max-width: 640px) {
-		.catalog-page,
+		.catalog-page {
+			gap: 72px;
+		}
+
 		.film-list {
 			gap: 8px;
 		}

@@ -306,12 +306,12 @@
 <style>
 	.tonight-page {
 		display: grid;
-		gap: 42px;
+		gap: 144px;
 	}
 
 	.tonight-shell {
 		display: grid;
-		gap: 22px;
+		gap: 48px;
 	}
 
 	.tonight-head,
@@ -405,6 +405,10 @@
 	}
 
 	@media (max-width: 800px) {
+		.tonight-page {
+			gap: 72px;
+		}
+
 		.quiz-grid {
 			grid-template-columns: 1fr;
 		}

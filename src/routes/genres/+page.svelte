@@ -130,12 +130,12 @@
 <style>
 	.genre-page {
 		display: grid;
-		gap: 42px;
+		gap: 144px;
 	}
 
 	.genre-shell {
 		display: grid;
-		gap: 16px;
+		gap: 42px;
 	}
 
 	.genre-head h2 {
@@ -189,7 +189,10 @@
 	}
 
 	@media (max-width: 640px) {
-		.genre-page,
+		.genre-page {
+			gap: 72px;
+		}
+
 		.film-list {
 			gap: 8px;
 		}
