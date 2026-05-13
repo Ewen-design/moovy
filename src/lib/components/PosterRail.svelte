@@ -287,6 +287,14 @@
 		text-shadow: none;
 	}
 
+	:global(body:not(.theme-dark)) .poster-rail.topTen .rail-rank {
+		text-shadow:
+			1px 0 0 var(--accent-blue),
+			-1px 0 0 var(--accent-blue),
+			0 1px 0 var(--accent-blue),
+			0 -1px 0 var(--accent-blue);
+	}
+
 	.rail-rank-digits {
 		display: inline-flex;
 		gap: 0;
