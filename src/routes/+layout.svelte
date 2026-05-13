@@ -82,10 +82,7 @@
 		applyTheme(theme === 'dark' ? 'light' : 'dark');
 	};
 
-	const getDefaultTheme = () => {
-		const hour = new Date().getHours();
-		return hour >= 12 && hour < 19 ? 'light' : 'dark';
-	};
+	const getDefaultTheme = () => 'dark';
 
 	const toggleSearch = async () => {
 		searchOpen = !searchOpen;
@@ -358,7 +355,7 @@
 		z-index: 140;
 		display: grid;
 		place-items: center;
-		background: var(--page-bg);
+		background: #0b0d11;
 		opacity: 1;
 		transition:
 			opacity 520ms cubic-bezier(0.22, 1, 0.36, 1),
