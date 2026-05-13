@@ -26,7 +26,7 @@
 	let index = $state(0);
 	let instant = $state(false);
 
-	const clonedItems = $derived([...items, ...items.slice(0, 6)]);
+	const clonedItems = $derived([...items, ...items]);
 
 	const measure = () => {
 		if (!track) return;
