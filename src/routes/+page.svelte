@@ -176,6 +176,8 @@
 			density="expanded"
 			overlayStyle="home"
 			showCardCopy={false}
+			enableHoverPreview={false}
+			pauseOnHover={false}
 			onSelect={openFilm}
 		/>
 		<PosterRail

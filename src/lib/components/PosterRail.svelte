@@ -12,10 +12,16 @@
 		overlayStyle = 'default',
 		layout = 'default',
 		showCardCopy = true,
+		enableHoverPreview = true,
+		pauseOnHover = true,
 		centerActive = false,
 		onSelect = () => {}
 	} = $props();
 
+	const previewDelayMs = 1000;
+
+	/** @type {HTMLDivElement | undefined} */
+	let railRoot;
 	/** @type {HTMLDivElement | undefined} */
 	let viewport;
 	/** @type {HTMLDivElement | undefined} */
@@ -25,6 +31,12 @@
 	let gap = $state(0);
 	let index = $state(0);
 	let instant = $state(false);
+	let paused = $state(false);
+	let previewVisible = $state(false);
+	let previewItem = $state(null);
+	let previewStyle = $state('');
+	let hoverTimer = null;
+	let previewUnmountTimer = null;
 
 	const clonedItems = $derived([...items, ...items]);
 
@@ -41,9 +53,70 @@
 	const offset = $derived(centerActive ? Math.max(0, (viewportWidth - cardWidth) / 2) : 0);
 
 	const step = () => {
-		if (!items.length) return;
+		if (!items.length || paused) return;
 		instant = false;
 		index += 1;
+	};
+
+	const clearHoverTimer = () => {
+		if (!hoverTimer) return;
+		clearTimeout(hoverTimer);
+		hoverTimer = null;
+	};
+
+	const clearPreviewUnmountTimer = () => {
+		if (!previewUnmountTimer) return;
+		clearTimeout(previewUnmountTimer);
+		previewUnmountTimer = null;
+	};
+
+	const hidePreview = () => {
+		clearHoverTimer();
+		clearPreviewUnmountTimer();
+		previewVisible = false;
+		previewUnmountTimer = setTimeout(() => {
+			previewItem = null;
+			previewUnmountTimer = null;
+		}, 520);
+	};
+
+	/**
+	 * @param {{ title: string, image?: string | null, backdrop?: string | null, clearlogo?: string | null, duration?: string, year?: number, description?: string }} item
+	 * @param {EventTarget | null} target
+	 */
+	const showPreview = (item, target) => {
+		if (!railRoot || !(target instanceof HTMLElement)) return;
+		clearPreviewUnmountTimer();
+		const rootRect = railRoot.getBoundingClientRect();
+		const cardRect = target.getBoundingClientRect();
+		const previewWidth = layout === 'top10' ? 430 : 396;
+		const previewHeight = 372;
+		const rawLeft = cardRect.left - rootRect.left + cardRect.width / 2 - previewWidth / 2;
+		const maxLeft = Math.max(0, rootRect.width - previewWidth);
+		const left = Math.min(Math.max(0, rawLeft), maxLeft);
+		const rawTop = cardRect.top - rootRect.top + cardRect.height / 2 - previewHeight / 2 + 12;
+		const top = Math.max(0, rawTop);
+
+		previewItem = item;
+		previewStyle = `left:${left}px;top:${top}px;width:${previewWidth}px;`;
+		requestAnimationFrame(() => {
+			previewVisible = true;
+		});
+	};
+
+	/** @param {{ currentTarget: EventTarget | null }} event */
+	const handleCardEnter = (item, event) => {
+		if (!enableHoverPreview) return;
+		const target = event.currentTarget;
+		clearHoverTimer();
+		previewVisible = false;
+		hoverTimer = setTimeout(() => {
+			showPreview(item, target);
+		}, previewDelayMs);
+	};
+
+	const handleCardLeave = () => {
+		hidePreview();
 	};
 
 	const handleTransitionEnd = () => {
@@ -66,11 +139,14 @@
 		return () => {
 			resizeObserver.disconnect();
 			clearInterval(interval);
+			clearHoverTimer();
+			clearPreviewUnmountTimer();
 		};
 	});
 </script>
 
 <section
+	bind:this={railRoot}
 	class:dark
 	class:portrait={orientation === 'portrait'}
 	class:expanded={density === 'expanded'}
@@ -78,9 +154,50 @@
 	class:topTen={layout === 'top10'}
 	class={`poster-rail ${variant}`}
 	aria-label={title || 'Selection'}
+	onmouseenter={() => {
+		if (pauseOnHover) paused = true;
+	}}
+	onmouseleave={() => {
+		paused = false;
+		hidePreview();
+	}}
 >
 	{#if title}
 		<h3>{title}</h3>
+	{/if}
+
+	{#if enableHoverPreview && previewItem}
+		<article class:visible={previewVisible} class="rail-preview-card" style={previewStyle} aria-hidden="true">
+			<div class="rail-preview-visual">
+				<img
+					src={previewItem.backdrop ?? previewItem.image ?? heroImage}
+					alt={previewItem.title}
+					loading="lazy"
+					decoding="async"
+				/>
+				<div class="rail-preview-overlay"></div>
+				<div class="rail-preview-brand">
+					{#if previewItem.clearlogo}
+						<img
+							class="rail-preview-clearlogo"
+							src={previewItem.clearlogo}
+							alt={previewItem.title}
+							loading="lazy"
+							decoding="async"
+						/>
+					{:else}
+						<h4>{previewItem.title}</h4>
+					{/if}
+				</div>
+			</div>
+			<div class="rail-preview-copy">
+				<div class="rail-preview-meta">
+					<span>{previewItem.duration}</span>
+					<span>{previewItem.year}</span>
+				</div>
+				<p>{previewItem.description}</p>
+			</div>
+		</article>
 	{/if}
 
 	<div class="rail-viewport" bind:this={viewport}>
@@ -92,7 +209,13 @@
 			style={`transform: translate3d(-${Math.max(0, index * (cardWidth + gap) - offset)}px, 0, 0);`}
 		>
 			{#each clonedItems as item}
-				<button class="rail-card" type="button" onclick={() => onSelect(item)}>
+				<button
+					class="rail-card"
+					type="button"
+					onclick={() => onSelect(item)}
+					onmouseenter={(event) => handleCardEnter(item, event)}
+					onmouseleave={handleCardLeave}
+				>
 					{#if layout === 'top10'}
 						<div class="ranked-poster">
 							<span class:double-rank={item.rank >= 10} class="rail-rank" aria-hidden="true">
@@ -138,6 +261,7 @@
 
 <style>
 	.poster-rail {
+		position: relative;
 		display: grid;
 		gap: 12px;
 	}
@@ -155,6 +279,101 @@
 
 	.rail-viewport {
 		overflow: hidden;
+	}
+
+	.rail-preview-card {
+		position: absolute;
+		z-index: 12;
+		display: grid;
+		grid-template-rows: 232px minmax(0, 1fr);
+		background: var(--sheet-block, var(--surface-card));
+		overflow: hidden;
+		opacity: 0;
+		transform: translateY(14px) scale(0.965);
+		pointer-events: none;
+		box-shadow: 0 24px 56px rgba(0, 0, 0, 0.34);
+		transition:
+			opacity 520ms cubic-bezier(0.22, 1, 0.36, 1),
+			transform 620ms cubic-bezier(0.22, 1, 0.36, 1),
+			background-color var(--theme-duration) var(--theme-ease),
+			color var(--theme-duration) var(--theme-ease);
+	}
+
+	.rail-preview-card.visible {
+		opacity: 1;
+		transform: translateY(0) scale(1);
+	}
+
+	.rail-preview-visual {
+		position: relative;
+		overflow: hidden;
+		background: #0d0d0f;
+	}
+
+	.rail-preview-visual > img {
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+		display: block;
+	}
+
+	.rail-preview-overlay {
+		position: absolute;
+		inset: 0;
+		background:
+			linear-gradient(180deg, rgba(8, 8, 10, 0.04) 0%, rgba(8, 8, 10, 0.16) 48%, rgba(8, 8, 10, 0.78) 100%),
+			linear-gradient(90deg, rgba(8, 8, 10, 0.18) 0%, rgba(8, 8, 10, 0.04) 100%);
+	}
+
+	.rail-preview-brand {
+		position: absolute;
+		left: 14px;
+		right: 14px;
+		bottom: 14px;
+		z-index: 1;
+	}
+
+	.rail-preview-brand h4,
+	.rail-preview-copy p,
+	.rail-preview-meta span {
+		margin: 0;
+	}
+
+	.rail-preview-brand h4 {
+		font-size: 1.2rem;
+		line-height: 0.95;
+		letter-spacing: -0.04em;
+		color: #ffffff;
+		text-shadow: 0 8px 22px rgba(0, 0, 0, 0.42);
+	}
+
+	.rail-preview-clearlogo {
+		display: block;
+		max-width: min(180px, 100%);
+		max-height: 58px;
+		object-fit: contain;
+		object-position: left bottom;
+		filter: drop-shadow(0 10px 24px rgba(0, 0, 0, 0.42));
+	}
+
+	.rail-preview-copy {
+		display: grid;
+		align-content: start;
+		gap: 0.8rem;
+		padding: 18px;
+	}
+
+	.rail-preview-meta {
+		display: flex;
+		gap: 0.8rem;
+		color: var(--muted-text-strong);
+		font-size: 0.98rem;
+	}
+
+	.rail-preview-copy p {
+		font-size: 1.04rem;
+		line-height: 1.6;
+		color: var(--muted-text-strong);
 	}
 
 	.rail-track {
