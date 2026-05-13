@@ -11,6 +11,7 @@
 		density = 'default',
 		overlayStyle = 'default',
 		layout = 'default',
+		showCardCopy = true,
 		centerActive = false,
 		onSelect = () => {}
 	} = $props();
@@ -112,12 +113,14 @@
 							decoding="async"
 						/>
 						<div class="rail-overlay"></div>
-						<div class="rail-copy">
-							{#if item.tag}
-								<span>{item.tag}</span>
-							{/if}
-							<strong>{item.title}</strong>
-						</div>
+						{#if showCardCopy}
+							<div class="rail-copy">
+								{#if item.tag}
+									<span>{item.tag}</span>
+								{/if}
+								<strong>{item.title}</strong>
+							</div>
+						{/if}
 					{/if}
 				</button>
 			{/each}
@@ -281,8 +284,8 @@
 
 	.poster-rail.homeOverlay .rail-overlay {
 		background:
-			linear-gradient(180deg, rgba(8, 8, 8, 0.02) 0%, rgba(8, 8, 8, 0.24) 38%, rgba(8, 8, 8, 0.82) 100%),
-			linear-gradient(90deg, rgba(8, 8, 8, 0.28) 0%, rgba(8, 8, 8, 0.08) 100%);
+			linear-gradient(180deg, rgba(8, 8, 8, 0.01) 0%, rgba(8, 8, 8, 0.14) 40%, rgba(8, 8, 8, 0.52) 100%),
+			linear-gradient(90deg, rgba(8, 8, 8, 0.18) 0%, rgba(8, 8, 8, 0.04) 100%);
 	}
 
 	.rail-copy {

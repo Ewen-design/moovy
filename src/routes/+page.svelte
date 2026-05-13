@@ -147,6 +147,7 @@
 				variant="small"
 				orientation="portrait"
 				overlayStyle="home"
+				showCardCopy={false}
 				dark={true}
 				onSelect={openFilm}
 			/>
@@ -174,6 +175,7 @@
 			orientation="portrait"
 			density="expanded"
 			overlayStyle="home"
+			showCardCopy={false}
 			onSelect={openFilm}
 		/>
 		<PosterRail
