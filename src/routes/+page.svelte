@@ -8,7 +8,11 @@
 	import { posterVersion } from '$lib/poster-state';
 
 	let heroVersion = $state(0);
-	const heroShowcaseMovies = [top100Movies[18], top100Movies[13], top100Movies[66]];
+	const heroShowcaseMovies = [
+		recommendationMovies.find((movie) => movie.title === 'Once Upon a Time in Hollywood'),
+		recommendationMovies.find((movie) => movie.title === 'Ocean’s Eleven'),
+		recommendationMovies.find((movie) => movie.title === 'Legend')
+	].filter(Boolean);
 	const featureShowcaseMovies = [top100Movies[2], top100Movies[17], top100Movies[63], top100Movies[54]];
 	const heroSlides = $derived.by(() => {
 		heroVersion;

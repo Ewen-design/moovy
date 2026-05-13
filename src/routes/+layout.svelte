@@ -8,6 +8,7 @@
 		genreMovieCollections,
 		getSimilarMovies,
 		recommendationMovies,
+		supplementalMovies,
 		top100Movies
 	} from '$lib/data/catalog';
 	import favicon from '$lib/assets/favicon.svg';
@@ -38,6 +39,7 @@
 	const searchableMovies = [
 		...top100Movies,
 		...recommendationMovies,
+		...supplementalMovies,
 		...Object.values(genreMovieCollections).flat()
 	].filter((movie, index, list) => index === list.findIndex((item) => item.title === movie.title));
 
@@ -637,6 +639,14 @@
 		color: var(--accent-blue);
 		border-color: var(--accent-blue);
 		box-shadow: 0 12px 28px rgba(47, 107, 255, 0.14);
+	}
+
+	:global(body.theme-dark .page-hero .hero-copy a:hover),
+	:global(body.theme-dark .film-row:hover .row-action),
+	:global(body.theme-dark .feature-block:hover .feature-copy span) {
+		background: #05070a;
+		color: var(--accent-blue);
+		border-color: var(--accent-blue);
 	}
 
 	@media (max-width: 720px) {

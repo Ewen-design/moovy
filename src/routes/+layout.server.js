@@ -1,9 +1,10 @@
 import { applyFallbackArtwork, applyMovieArtwork } from '$lib/data/catalog';
-import { genreMovieCollections, recommendationMovies, top100Movies } from '$lib/data/catalog';
+import { genreMovieCollections, recommendationMovies, supplementalMovies, top100Movies } from '$lib/data/catalog';
 
 const searchableMovies = [
 	...top100Movies,
 	...recommendationMovies,
+	...supplementalMovies,
 	...Object.values(genreMovieCollections).flat()
 ].filter((movie, index, list) => index === list.findIndex((item) => item.title === movie.title));
 

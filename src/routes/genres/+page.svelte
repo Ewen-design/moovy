@@ -15,6 +15,28 @@
 	let selectedFilm = $state(null);
 	const heroMovies = $derived.by(() => {
 		$posterVersion;
+		if (activeGenre === 'Action') {
+			const f1Movie = genreMovieCollections['Action']?.find((movie) => movie.title === 'F1');
+			const legendMovie = top100Movies.find((movie) => movie.title === 'Je suis une légende');
+			if (f1Movie && legendMovie) return [f1Movie, legendMovie];
+		}
+		if (activeGenre === 'Comedie') {
+			const kingsmanMovie = genreMovieCollections['Comedie']?.find((movie) => movie.title === 'Kingsman');
+			const trumanShowMovie = genreMovieCollections['Comedie']?.find((movie) => movie.title === 'The Truman Show');
+			if (kingsmanMovie && trumanShowMovie) return [kingsmanMovie, trumanShowMovie];
+		}
+		if (activeGenre === 'Science-fiction') {
+			const customSciFiHero = top100Movies.filter((movie) =>
+				['Interstellar'].includes(movie.title)
+			);
+			const avatarMovie = genreMovieCollections['Science-fiction']?.find((movie) => movie.title === 'Avatar');
+			if (customSciFiHero.length === 1 && avatarMovie) return [avatarMovie, customSciFiHero[0]];
+		}
+		if (activeGenre === 'Romance') {
+			const ilEtaitTempsMovie = genreMovieCollections['Romance']?.find((movie) => movie.title === 'Il était temps');
+			const titanicMovie = top100Movies.find((movie) => movie.title === 'Titanic');
+			if (ilEtaitTempsMovie && titanicMovie) return [ilEtaitTempsMovie, titanicMovie];
+		}
 		const matches = top100Movies.filter(
 			(movie) => movie.genres.includes(activeGenre) && movie.backdrop && movie.clearlogo
 		);
@@ -71,7 +93,7 @@
 
 	<section class="genre-shell" id="genres">
 		<div class="genre-head">
-			<h2>50 films par selection.</h2>
+			<h2>Par genres</h2>
 		</div>
 
 		<div class="genre-tabs">
@@ -153,6 +175,12 @@
 		color: var(--accent-blue);
 		border-color: var(--accent-blue);
 		box-shadow: 0 12px 28px rgba(47, 107, 255, 0.14);
+	}
+
+	:global(body.theme-dark) .genre-tabs button.active {
+		background: #05070a;
+		color: var(--accent-blue);
+		border-color: var(--accent-blue);
 	}
 
 	.film-list {

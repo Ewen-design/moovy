@@ -10,7 +10,9 @@
 	let heroVersion = $state(0);
 	const heroMovies = $derived.by(() => {
 		$posterVersion;
-		return recommendationMovies.filter((movie) => movie.backdrop && movie.clearlogo).slice(0, 2);
+		return recommendationMovies.filter((movie) =>
+			['Le Prestige', 'Drive'].includes(movie.title)
+		);
 	});
 	const heroSlides = $derived.by(() => {
 		heroVersion;

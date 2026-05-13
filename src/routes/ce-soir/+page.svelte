@@ -3,33 +3,19 @@
 	import FilmDetailSheet from '$lib/components/FilmDetailSheet.svelte';
 	import FilmRow from '$lib/components/FilmRow.svelte';
 	import PageHero from '$lib/components/PageHero.svelte';
-	import { getSimilarMovies, recommendationMovies, top100Movies } from '$lib/data/catalog';
+	import { getSimilarMovies, tonightMoviePool, top100Movies } from '$lib/data/catalog';
 	import { hydrateMoviePosters } from '$lib/posters';
 	import { posterVersion } from '$lib/poster-state';
 
-	const quizMovies = [...recommendationMovies, ...top100Movies].filter(
-		(movie, index, list) => index === list.findIndex((item) => item.title === movie.title)
-	);
-
 	const questions = [
 		{
-			id: 'mood',
-			label: 'Ambiance',
-			question: 'Tu veux quelle ambiance ce soir ?',
+			id: 'duration',
+			label: 'Durée',
+			question: 'Tu veux un film de quelle durée ?',
 			options: [
-				{ value: 'intense', label: 'Intense', genres: ['Thriller', 'Action'] },
-				{ value: 'emotional', label: 'Émotive', genres: ['Drame', 'Romance'] },
-				{ value: 'spectacle', label: 'Spectacle', genres: ['Science-fiction', 'Action'] }
-			]
-		},
-		{
-			id: 'pace',
-			label: 'Rythme',
-			question: 'Tu veux quel rythme ?',
-			options: [
-				{ value: 'fast', label: 'Rapide', maxDuration: 130 },
-				{ value: 'balanced', label: 'Équilibré', maxDuration: 150 },
-				{ value: 'long', label: 'Prendre le temps', minDuration: 140 }
+				{ value: 'short', label: 'Court', maxDuration: 109 },
+				{ value: 'medium', label: 'Moyen', minDuration: 110, maxDuration: 140 },
+				{ value: 'long', label: 'Long', minDuration: 141 }
 			]
 		},
 		{
@@ -37,44 +23,41 @@
 			label: 'Époque',
 			question: 'Tu préfères quelle période ?',
 			options: [
-				{ value: 'classic', label: 'Classique', maxYear: 1999 },
-				{ value: 'modern', label: 'Moderne', minYear: 2000 },
-				{ value: 'recent', label: 'Très récent', minYear: 2018 }
+				{ value: 'classic', label: 'Classique', maxYear: 1989 },
+				{ value: 'nineties-2000s', label: 'Années 90-2000', minYear: 1990, maxYear: 2009 },
+				{ value: 'recent', label: 'Récent', minYear: 2010 }
 			]
 		},
 		{
-			id: 'tone',
-			label: 'Tonalité',
-			question: 'Quelle tonalité te tente ?',
+			id: 'genre',
+			label: 'Genre',
+			question: 'Quels genres te tentent ?',
 			options: [
-				{ value: 'dark', label: 'Sombre', genres: ['Thriller', 'Crime'] },
-				{ value: 'uplift', label: 'Lumineuse', genres: ['Comedie', 'Romance'] },
-				{ value: 'epic', label: 'Épique', genres: ['Aventure', 'Science-fiction', 'Action'] }
+				{ value: 'drama', label: 'Drame', genres: ['Drame'] },
+				{ value: 'action', label: 'Action', genres: ['Action', 'Aventure', 'Thriller', 'Crime', 'Psychologique'] },
+				{ value: 'scifi', label: 'Science-fiction', genres: ['Science-fiction'] },
+				{ value: 'romance', label: 'Romance', genres: ['Romance'] },
+				{ value: 'comedy', label: 'Comédie', genres: ['Comedie'] }
 			]
 		},
 		{
-			id: 'familiarity',
-			label: 'Découverte',
-			question: 'Tu veux du très connu ou plus pointu ?',
+			id: 'mood',
+			label: 'Ambiance',
+			question: 'Quelle ambiance tu cherches ?',
 			options: [
-				{ value: 'popular', label: 'Très connu', minVotes: 1.5 },
-				{ value: 'mixed', label: 'Un mélange', minVotes: 0.8 },
-				{ value: 'curious', label: 'Plus pointu', maxVotes: 1.2 }
-			]
-		},
-		{
-			id: 'ending',
-			label: 'Effet final',
-			question: 'Tu veux finir la séance comment ?',
-			options: [
-				{ value: 'thinking', label: 'En y pensant encore', genres: ['Science-fiction', 'Drame'] },
-				{ value: 'shocked', label: 'Secoué', genres: ['Thriller', 'Psychologique'] },
-				{ value: 'satisfied', label: 'Satisfait', genres: ['Drame', 'Action', 'Comedie'] }
+				{ value: 'dark', label: 'Sombre', genres: ['Thriller', 'Crime', 'Psychologique'] },
+				{ value: 'emotional', label: 'Émotive', genres: ['Drame', 'Romance'] },
+				{ value: 'spectacular', label: 'Spectaculaire', genres: ['Action', 'Aventure', 'Science-fiction'] },
+				{ value: 'light', label: 'Légère', genres: ['Comedie', 'Romance'] },
+				{ value: 'thoughtful', label: 'Qui fait réfléchir', genres: ['Science-fiction', 'Drame', 'Mystere'] }
 			]
 		}
 	];
 
-	/** @type {Record<string, { value: string, label: string, genres?: string[], maxDuration?: number, minDuration?: number, minYear?: number, maxYear?: number, minVotes?: number, maxVotes?: number }>} */
+	const criterionPriority = ['genre', 'duration', 'era', 'mood'];
+	const fallbackPriority = ['genre', 'era', 'duration', 'mood'];
+
+	/** @type {Record<string, { value: string, label: string, genres?: string[], maxDuration?: number, minDuration?: number, minYear?: number, maxYear?: number, minVotes?: number, maxVotes?: number }[]>} */
 	let answers = $state({});
 	let heroVersion = $state(0);
 	/** @type {{ id: string, title: string, genres: string[] } | null} */
@@ -82,7 +65,9 @@
 
 	const heroMovies = $derived.by(() => {
 		$posterVersion;
-		return [top100Movies[18], top100Movies[34]];
+		return top100Movies.filter((movie) =>
+			['Whiplash', 'The Wolf of Wall Street'].includes(movie.title)
+		);
 	});
 	const heroSlides = $derived.by(() => {
 		heroVersion;
@@ -112,37 +97,136 @@
 		return Number.parseFloat(normalized) || 0;
 	}
 
-	/** @param {typeof quizMovies[number]} movie */
-	function scoreMovie(movie) {
+	/**
+	 * @param {typeof tonightMoviePool[number]} movie
+	 * @param {{ genres?: string[], maxDuration?: number, minDuration?: number, minYear?: number, maxYear?: number, minVotes?: number, maxVotes?: number }} option
+	 */
+	function scoreOption(movie, option) {
 		let score = 0;
-		for (const question of questions) {
-			const answer = answers[question.id];
-			if (!answer) continue;
-			if (answer.genres?.some((genre) => movie.genres.includes(genre))) score += 3;
-			const minutes = durationToMinutes(movie.duration);
-			if (answer.maxDuration && minutes <= answer.maxDuration) score += 2;
-			if (answer.minDuration && minutes >= answer.minDuration) score += 2;
-			if (answer.minYear && movie.year >= answer.minYear) score += 2;
-			if (answer.maxYear && movie.year <= answer.maxYear) score += 2;
-			const votes = votesToNumber(movie.votes);
-			if (answer.minVotes && votes >= answer.minVotes * 1_000_000) score += 1.5;
-			if (answer.maxVotes && votes <= answer.maxVotes * 1_000_000) score += 1.5;
-		}
-		return score + Number.parseFloat(String(movie.rating).replace(',', '.'));
+		const minutes = durationToMinutes(movie.duration);
+		const votes = votesToNumber(movie.votes);
+
+		if (option.genres?.some((genre) => movie.genres.includes(genre))) score += 3;
+		if (option.maxDuration && minutes <= option.maxDuration) score += 3;
+		if (option.minDuration && minutes >= option.minDuration) score += 3;
+		if (option.minYear && movie.year >= option.minYear) score += 3;
+		if (option.maxYear && movie.year <= option.maxYear) score += 3;
+		if (option.minVotes && votes >= option.minVotes * 1_000_000) score += 2;
+		if (option.maxVotes && votes <= option.maxVotes * 1_000_000) score += 2;
+
+		return score;
 	}
 
-	const selectedCount = $derived(Object.keys(answers).length);
+	/**
+	 * @param {typeof tonightMoviePool[number]} movie
+	 * @param {string} questionId
+	 */
+	function matchQuestion(movie, questionId) {
+		const selectedOptions = answers[questionId] ?? [];
+		if (!selectedOptions.length) return false;
+		return selectedOptions.some((option) => scoreOption(movie, option) > 0);
+	}
+
+	/** @param {typeof tonightMoviePool[number]} movie */
+	function scoreMovie(movie) {
+		const matches = Object.fromEntries(
+			criterionPriority.map((questionId) => [questionId, matchQuestion(movie, questionId)])
+		);
+
+		let score = 0;
+		let matchedQuestions = 0;
+
+		for (const questionId of criterionPriority) {
+			const selectedOptions = answers[questionId] ?? [];
+			if (!selectedOptions.length) continue;
+
+			const bestQuestionScore = Math.max(...selectedOptions.map((option) => scoreOption(movie, option)));
+			score += bestQuestionScore;
+			if (bestQuestionScore > 0) matchedQuestions += 1;
+		}
+
+		return {
+			score,
+			matchedQuestions,
+			matches,
+			rank: movie.rank ?? Number.MAX_SAFE_INTEGER
+		};
+	}
+
+	const answeredQuestions = $derived(questions.filter((question) => (answers[question.id] ?? []).length > 0).length);
 	const suggestedMovies = $derived.by(() => {
 		$posterVersion;
-		return [...quizMovies]
-			.sort((left, right) => scoreMovie(right) - scoreMovie(left))
-			.slice(0, selectedCount === questions.length ? 10 : 0);
+		if (!answeredQuestions) return [];
+
+		const activeCriteria = criterionPriority.filter((questionId) => (answers[questionId] ?? []).length > 0);
+		const rankedMovies = tonightMoviePool
+			.map((movie) => ({ movie, data: scoreMovie(movie) }))
+			.sort((left, right) => {
+				for (const questionId of criterionPriority) {
+					if (left.data.matches[questionId] !== right.data.matches[questionId]) {
+						return Number(right.data.matches[questionId]) - Number(left.data.matches[questionId]);
+					}
+				}
+				if (right.data.score !== left.data.score) {
+					return right.data.score - left.data.score;
+				}
+				if (Boolean(left.movie.rank) !== Boolean(right.movie.rank)) {
+					return Number(Boolean(right.movie.rank)) - Number(Boolean(left.movie.rank));
+				}
+				return left.data.rank - right.data.rank;
+			});
+
+		const strictMatches = rankedMovies.filter(({ data }) =>
+			activeCriteria.every((questionId) => data.matches[questionId])
+		);
+
+		if (strictMatches.length >= 3) {
+			return strictMatches.slice(0, 10).map(({ movie }) => movie);
+		}
+
+		const fallbackCriteria = fallbackPriority.filter((questionId) => (answers[questionId] ?? []).length > 0);
+		const fallbackRankedMovies = rankedMovies
+			.filter(({ data }) => fallbackCriteria.some((questionId) => data.matches[questionId]))
+			.sort((left, right) => {
+				for (const questionId of fallbackPriority) {
+					if (!fallbackCriteria.includes(questionId)) continue;
+					if (left.data.matches[questionId] !== right.data.matches[questionId]) {
+						return Number(right.data.matches[questionId]) - Number(left.data.matches[questionId]);
+					}
+				}
+				if (right.data.score !== left.data.score) {
+					return right.data.score - left.data.score;
+				}
+				if (Boolean(left.movie.rank) !== Boolean(right.movie.rank)) {
+					return Number(Boolean(right.movie.rank)) - Number(Boolean(left.movie.rank));
+				}
+				return left.data.rank - right.data.rank;
+			});
+
+		return (fallbackRankedMovies.length ? fallbackRankedMovies : rankedMovies)
+			.slice(0, 3)
+			.map(({ movie }) => movie);
 	});
 
-	/** @param {typeof quizMovies[number]} film */
+	/**
+	 * @param {string} questionId
+	 * @param {{ value: string }} option
+	 */
+	function toggleOption(questionId, option) {
+		const currentOptions = answers[questionId] ?? [];
+		const hasOption = currentOptions.some((entry) => entry.value === option.value);
+		answers = {
+			...answers,
+			[questionId]: hasOption
+				? currentOptions.filter((entry) => entry.value !== option.value)
+				: [...currentOptions, option]
+		};
+	}
+
+	/** @param {typeof tonightMoviePool[number]} film */
 	const openFilm = (film) => {
 		selectedFilm = film;
-		hydrateMoviePosters([film, ...getSimilarMovies(quizMovies, film, 6)]);
+		hydrateMoviePosters([film, ...getSimilarMovies(tonightMoviePool, film, 6)]);
 	};
 
 	const closeFilm = () => {
@@ -151,7 +235,7 @@
 
 	onMount(() => {
 		(async () => {
-			await hydrateMoviePosters([...quizMovies, ...heroMovies]);
+			await hydrateMoviePosters([...tonightMoviePool, ...heroMovies]);
 			heroVersion += 1;
 		})();
 	});
@@ -172,21 +256,20 @@
 
 	<section class="tonight-shell" id="quiz">
 		<div class="tonight-head">
-			<h2>Réponds à 6 questions pour sortir une sélection de 10 films.</h2>
-			<p>{selectedCount}/6 réponses validées</p>
+			<h2>Trouve ton film</h2>
+			<p>{answeredQuestions}/4 critères renseignés</p>
 		</div>
 
 		<div class="quiz-grid">
 			{#each questions as question}
 				<section class="question-card">
-					<span>{question.label}</span>
 					<h3>{question.question}</h3>
 					<div class="option-row">
 						{#each question.options as option}
 							<button
-								class:active={answers[question.id]?.value === option.value}
+								class:active={(answers[question.id] ?? []).some((entry) => entry.value === option.value)}
 								type="button"
-								onclick={() => (answers = { ...answers, [question.id]: option })}
+								onclick={() => toggleOption(question.id, option)}
 							>
 								{option.label}
 							</button>
@@ -200,7 +283,7 @@
 			<section class="results">
 				<div class="results-head">
 					<h2>Ta sélection pour ce soir</h2>
-					<p>10 films triés selon tes réponses.</p>
+					<p>Top 10 du top 100 selon tes critères.</p>
 				</div>
 
 				<div class="film-list">
@@ -214,7 +297,7 @@
 
 	<FilmDetailSheet
 		film={selectedFilm}
-		similarMovies={selectedFilm ? getSimilarMovies(quizMovies, selectedFilm, 6) : []}
+		similarMovies={selectedFilm ? getSimilarMovies(tonightMoviePool, selectedFilm, 6) : []}
 		onClose={closeFilm}
 		onSelect={openFilm}
 	/>
@@ -243,8 +326,7 @@
 	.tonight-head p,
 	.results-head h2,
 	.results-head p,
-	.question-card h3,
-	.question-card span {
+	.question-card h3 {
 		margin: 0;
 	}
 
@@ -255,9 +337,13 @@
 		max-width: 18ch;
 	}
 
+	.results-head h2 {
+		max-width: none;
+		white-space: nowrap;
+	}
+
 	.tonight-head p,
-	.results-head p,
-	.question-card span {
+	.results-head p {
 		color: var(--muted-text);
 	}
 
@@ -274,13 +360,6 @@
 		background: var(--surface-card);
 	}
 
-	.question-card span {
-		font-size: 0.78rem;
-		font-weight: 700;
-		letter-spacing: 0.12em;
-		text-transform: uppercase;
-	}
-
 	.question-card h3 {
 		font-size: 1.35rem;
 		letter-spacing: -0.03em;
@@ -293,6 +372,10 @@
 	}
 
 	.option-row button {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		min-height: 48px;
 		padding: 0.9rem 1.15rem;
 		border: 1px solid transparent;
 		border-radius: 999px;
@@ -305,6 +388,12 @@
 
 	.option-row button.active {
 		background: #ffffff;
+		color: var(--accent-blue);
+		border-color: var(--accent-blue);
+	}
+
+	:global(body.theme-dark) .option-row button.active {
+		background: #05070a;
 		color: var(--accent-blue);
 		border-color: var(--accent-blue);
 	}

@@ -211,11 +211,187 @@ function makeMovie(title, index) {
 
 export const top100Movies = top100Titles.slice(0, 100).map(makeMovie);
 
-export const recommendationMovies = top100Movies.slice(18, 68).map((movie, index) => ({
-	...movie,
-	id: `rec-${index + 1}`,
-	editorial: `${movie.title} fonctionne tres bien en recommandation grace a une promesse claire, une mise en scene forte et un ton qui reste facile a presenter sur une page editoriale.`
-}));
+const recommendationTitles = [
+	'Les Évadés',
+	'Le Parrain',
+	'Fight Club',
+	'Forrest Gump',
+	'Pulp Fiction',
+	'Insaisissables',
+	'La vie est belle',
+	'Sept vies',
+	'Le Prestige',
+	'Drive',
+	'Invictus',
+	'Ocean’s Eleven',
+	'Le Mans 66',
+	'Lost in Translation',
+	'À la recherche du bonheur',
+	'Vol au-dessus d’un nid de coucou',
+	'Les Infiltrés',
+	'Shutter Island',
+	'Sully',
+	'Le Come Back',
+	'Bruce tout-puissant',
+	'Rain Man',
+	'Into the Wild',
+	'Legend',
+	'Les Gamins',
+	'O’Brother',
+	'Good Morning, Vietnam',
+	'Il était temps',
+	'Little Miss Sunshine',
+	'OSS 117 : Le Caire, nid d’espions',
+	'The Blues Brothers',
+	'Papy fait de la résistance',
+	'Les Choristes',
+	'Johnny English',
+	'Evan tout-puissant',
+	'Coach Carter',
+	'Fighter',
+	'La vie rêvée de Walter Mitty',
+	'Le Murder Club du jeudi',
+	'Le Nouveau Stagiaire',
+	'Rasta Rockett',
+	'Un fauteuil pour deux',
+	'Le Prénom',
+	'Big Fish',
+	'Once Upon a Time in Hollywood',
+	'The Grand Budapest Hotel',
+	'Gran Torino',
+	'Le Cercle des poètes disparus',
+	'Moonlight',
+	'Spotlight'
+];
+
+const supplementalMovieSpecs = [
+	{ title: '2001 : l’Odyssée de l’espace', year: 1968, duration: 149, genres: ['Science-fiction', 'Drame'] },
+	{ title: 'Matrix', year: 1999, duration: 136, genres: ['Science-fiction', 'Action'] },
+	{ title: 'Orange mécanique', year: 1971, duration: 136, genres: ['Science-fiction', 'Crime'] },
+	{ title: 'Unstoppable', year: 2010, duration: 98, genres: ['Action', 'Thriller'] },
+	{ title: 'Alliés', year: 2016, duration: 124, genres: ['Drame', 'Romance'] },
+	{ title: 'Jason Bourne', year: 2016, duration: 123, genres: ['Action', 'Thriller'] },
+	{ title: 'Good Morning, Vietnam', year: 1987, duration: 121, genres: ['Comedie', 'Drame'] },
+	{ title: 'Tu ne tueras point', year: 2016, duration: 139, genres: ['Drame', 'Historique'] },
+	{ title: 'F1', year: 2025, duration: 150, genres: ['Action', 'Drame'] },
+	{ title: 'Seul sur Mars', year: 2015, duration: 144, genres: ['Science-fiction', 'Aventure'] },
+	{ title: 'The Dark Knight', year: 2008, duration: 152, genres: ['Action', 'Crime'] },
+	{ title: 'Blade Runner 2049', year: 2017, duration: 164, genres: ['Science-fiction', 'Drame'] },
+	{ title: 'No Country for Old Men', year: 2007, duration: 122, genres: ['Thriller', 'Crime'] },
+	{ title: 'Memento', year: 2000, duration: 113, genres: ['Thriller', 'Mystere'] },
+	{ title: 'Léon', year: 1994, duration: 110, genres: ['Action', 'Drame'] },
+	{ title: 'Django Unchained', year: 2012, duration: 165, genres: ['Drame', 'Action'] },
+	{ title: 'John Wick', year: 2014, duration: 101, genres: ['Action', 'Thriller'] },
+	{ title: 'Fury', year: 2014, duration: 135, genres: ['Action', 'Drame'] },
+	{ title: 'Jurassic Park', year: 1993, duration: 127, genres: ['Aventure', 'Science-fiction'] },
+	{ title: '300', year: 2006, duration: 117, genres: ['Action', 'Historique'] },
+	{ title: 'Logan', year: 2017, duration: 137, genres: ['Action', 'Drame'] },
+	{ title: 'Die Hard', year: 1988, duration: 132, genres: ['Action', 'Thriller'] },
+	{ title: 'Skyfall', year: 2012, duration: 143, genres: ['Action', 'Thriller'] },
+	{ title: 'Training Day', year: 2001, duration: 122, genres: ['Thriller', 'Crime'] },
+	{ title: 'Edge of Tomorrow', year: 2014, duration: 113, genres: ['Science-fiction', 'Action'] },
+	{ title: 'Avatar', year: 2009, duration: 162, genres: ['Science-fiction', 'Aventure'] },
+	{ title: 'Alien', year: 1979, duration: 117, genres: ['Science-fiction', 'Thriller'] },
+	{ title: 'La La Land', year: 2016, duration: 128, genres: ['Romance', 'Drame'] },
+	{ title: 'Casablanca', year: 1942, duration: 102, genres: ['Romance', 'Drame'] },
+	{ title: 'Il était temps', year: 2013, duration: 123, genres: ['Romance', 'Comedie'] },
+	{ title: 'Pretty Woman', year: 1990, duration: 119, genres: ['Romance', 'Comedie'] },
+	{ title: 'Notting Hill', year: 1999, duration: 124, genres: ['Romance', 'Comedie'] },
+	{ title: 'Love Actually', year: 2003, duration: 135, genres: ['Romance', 'Comedie'] },
+	{ title: 'The Holiday', year: 2006, duration: 136, genres: ['Romance', 'Comedie'] },
+	{ title: 'The Curious Case of Benjamin Button', year: 2008, duration: 166, genres: ['Drame', 'Romance'] },
+	{ title: 'Dumb and Dumber', year: 1994, duration: 107, genres: ['Comedie'] },
+	{ title: 'Little Miss Sunshine', year: 2006, duration: 101, genres: ['Comedie', 'Drame'] },
+	{ title: 'Les Visiteurs', year: 1993, duration: 107, genres: ['Comedie', 'Fantastique'] },
+	{ title: 'OSS 117 : Le Caire, nid d’espions', year: 2006, duration: 99, genres: ['Comedie'] },
+	{ title: 'OSS 117 : Rio ne répond plus', year: 2009, duration: 100, genres: ['Comedie'] },
+	{ title: 'Le Sens de la fête', year: 2017, duration: 117, genres: ['Comedie'] },
+	{ title: 'Bienvenue chez les Ch’tis', year: 2008, duration: 106, genres: ['Comedie'] },
+	{ title: 'Les Bronzés font du ski', year: 1979, duration: 89, genres: ['Comedie'] },
+	{ title: 'The Blues Brothers', year: 1980, duration: 133, genres: ['Comedie', 'Action'] },
+	{ title: 'Le Prénom', year: 2012, duration: 109, genres: ['Comedie'] },
+	{ title: 'Ace Ventura', year: 1994, duration: 86, genres: ['Comedie'] },
+	{ title: 'Ready Player One', year: 2018, duration: 140, genres: ['Science-fiction', 'Action'] },
+	{ title: 'Gravity', year: 2013, duration: 91, genres: ['Science-fiction', 'Thriller'] },
+	{ title: 'Pacific Rim', year: 2013, duration: 131, genres: ['Science-fiction', 'Action'] },
+	{ title: 'La Grande Vadrouille', year: 1966, duration: 132, genres: ['Comedie'] },
+	{ title: 'Fantômas', year: 1964, duration: 104, genres: ['Comedie', 'Crime'] },
+	{ title: 'Le Gendarme de Saint-Tropez', year: 1964, duration: 102, genres: ['Comedie'] },
+	{ title: 'Les Aventures de Rabbi Jacob', year: 1973, duration: 100, genres: ['Comedie'] },
+	{ title: 'L’Aile ou la Cuisse', year: 1976, duration: 104, genres: ['Comedie'] },
+	{ title: 'La Soupe aux choux', year: 1981, duration: 98, genres: ['Comedie', 'Science-fiction'] },
+	{ title: 'Les Tontons flingueurs', year: 1963, duration: 105, genres: ['Comedie', 'Crime'] },
+	{ title: 'Papy fait de la résistance', year: 1983, duration: 102, genres: ['Comedie'] },
+	{ title: 'Les Sous-doués', year: 1980, duration: 92, genres: ['Comedie'] },
+	{ title: 'Le Père Noël est une ordure', year: 1982, duration: 88, genres: ['Comedie'] },
+	{ title: 'La Vérité si je mens !', year: 1997, duration: 100, genres: ['Comedie'] },
+	{ title: 'Les Choristes', year: 2004, duration: 97, genres: ['Drame'] },
+	{ title: 'La Tour Montparnasse infernale', year: 2001, duration: 92, genres: ['Comedie'] },
+	{ title: 'Qu’est-ce qu’on a fait au Bon Dieu ?', year: 2014, duration: 97, genres: ['Comedie'] },
+	{ title: 'Johnny English', year: 2003, duration: 88, genres: ['Comedie', 'Action'] },
+	{ title: 'Bridget Jones’s Diary', year: 2001, duration: 97, genres: ['Romance', 'Comedie'] },
+	{ title: 'American Gangster', year: 2007, duration: 157, genres: ['Crime', 'Drame'] },
+	{ title: 'Bad Boys', year: 1995, duration: 119, genres: ['Action', 'Comedie'] },
+	{ title: 'Evan tout-puissant', year: 2007, duration: 96, genres: ['Comedie'] },
+	{ title: 'Casino Royale', year: 2006, duration: 144, genres: ['Action', 'Thriller'] },
+	{ title: 'Coach Carter', year: 2005, duration: 136, genres: ['Drame'] },
+	{ title: 'Fighter', year: 2010, duration: 116, genres: ['Drame'] },
+	{ title: 'Kingsman', year: 2014, duration: 129, genres: ['Action', 'Comedie'] },
+	{ title: 'La vie rêvée de Walter Mitty', year: 2013, duration: 114, genres: ['Comedie', 'Aventure'] },
+	{ title: 'L’avare', year: 1980, duration: 125, genres: ['Comedie'] },
+	{ title: 'Le Murder Club du jeudi', year: 2025, duration: 118, genres: ['Comedie', 'Crime'] },
+	{ title: 'Le Nouveau Stagiaire', year: 2015, duration: 121, genres: ['Comedie'] },
+	{ title: 'Marty Supreme', year: 2025, duration: 130, genres: ['Drame', 'Comedie'] },
+	{ title: 'Rasta Rockett', year: 1993, duration: 98, genres: ['Comedie'] },
+	{ title: 'Un fauteuil pour deux', year: 1983, duration: 116, genres: ['Comedie'] },
+	{ title: 'Moonlight', year: 2016, duration: 111, genres: ['Drame'] },
+	{ title: 'Spotlight', year: 2015, duration: 129, genres: ['Drame', 'Historique'] }
+];
+
+function makeSupplementalMovie(spec, index) {
+	const cast = ['Emma Stone', 'Ryan Gosling', 'Denzel Washington', 'Marion Cotillard', 'Matt Damon'];
+	return {
+		id: `extra-${index + 1}`,
+		title: spec.title,
+		image: /** @type {string | null} */ (null),
+		backdrop: /** @type {string | null} */ (null),
+		clearlogo: /** @type {string | null} */ (null),
+		rank: /** @type {number | undefined} */ (undefined),
+		year: spec.year,
+		duration: minutesToDuration(spec.duration),
+		rating: `${(8.6 - (index % 12) * 0.09).toFixed(1).replace('.', ',')}`,
+		votes: index < 24 ? `${(2.4 - index * 0.05).toFixed(1).replace('.', ',')} M` : `${Math.max(120, 920 - index * 9)} k`,
+		genres: spec.genres,
+		director: ['Ridley Scott', 'Christopher Nolan', 'Steven Spielberg', 'Nancy Meyers', 'Tony Scott'][index % 5],
+		cast: cast.slice(0, 3),
+		castMembers: cast.slice(0, 3).map((name, castIndex) => ({
+			name,
+			role: ['Role principal', 'Second role', 'Distribution'][castIndex],
+			image: actorPortrait(name, castIndex)
+		})),
+		maturity: ['10+', '13+', '16+'][index % 3],
+		quality: 'HD',
+		description: `${spec.title} propose une experience ${spec.genres.join(', ').toLowerCase()} immediate, avec une lecture simple et un vrai potentiel de recommandation.`,
+		editorial: `${spec.title} enrichit le catalogue avec un ton clair, identifiable et facile a activer selon un besoin de selection.`,
+		summary: `${spec.title} reste une option solide pour completer les selections editoriales avec un profil net et memorisable.`
+	};
+}
+
+export const supplementalMovies = supplementalMovieSpecs.map(makeSupplementalMovie);
+export const tonightMoviePool = [...top100Movies, ...supplementalMovies];
+
+const recommendationSourceMovies = [...top100Movies, ...supplementalMovies].filter(
+	(movie, index, list) => index === list.findIndex((item) => item.title === movie.title)
+);
+
+export const recommendationMovies = recommendationTitles
+	.map((title) => recommendationSourceMovies.find((movie) => movie.title === title))
+	.filter(Boolean)
+	.map((movie, index) => ({
+		...movie,
+		id: `rec-${index + 1}`,
+		editorial: `${movie.title} fonctionne tres bien en recommandation grace a une promesse claire, une mise en scene forte et un ton qui reste facile a presenter sur une page editoriale.`
+	}));
 
 /**
  * @param {string[]} prefixes
@@ -262,73 +438,218 @@ function makeGenreMovie(genre, title, index) {
 	};
 }
 
-const genreSourceMovies = [...top100Movies, ...recommendationMovies].filter(
+const genreSourceMovies = [...top100Movies, ...recommendationMovies, ...supplementalMovies].filter(
 	(movie, index, list) => index === list.findIndex((item) => item.title === movie.title)
 );
 
-const genreMembership = {
-	Action: new Set([
-		'Gladiator',
-		'Ocean’s Eleven',
-		'Ocean’s Twelve',
-		'Ocean’s Thirteen',
-		'Le Mans 66',
-		'Inception',
-		'Inglourious Basterds',
-		'The Expendables',
-		'Insaisissables',
-		'Top Gun',
-		'Taken'
-	]),
-	Drame: new Set([
-		'Forrest Gump',
-		'Parasite',
-		'Whiplash',
-		'La vie est belle',
-		'Sept vies',
-		'Intouchables',
-		'Invictus',
-		'À la recherche du bonheur',
-		'Will Hunting',
-		'12 Years a Slave',
-		'Rain Man'
-	]),
-	Thriller: new Set([
-		'Se7en',
-		'Le Silence des agneaux',
-		'Heat',
-		'Parasite',
-		'Shutter Island',
-		'Joker',
-		'Taxi Driver',
-		'Requiem for a Dream',
-		'The Usual Suspects',
-		'American Psycho',
-		'Taken'
-	]),
-	'Science-fiction': new Set([
-		'Inception',
-		'Interstellar',
-		'The Truman Show',
-		'Her',
-		'Retour vers le futur',
-		'Je suis une légende',
-		'V pour Vendetta',
-		'Your Name'
-	]),
-	Comedie: new Set([
-		'The Grand Budapest Hotel',
-		'The Truman Show',
-		'Lost in Translation',
-		'La Cité de la peur',
-		'Le Dîner de cons',
-		'Bruce tout-puissant',
-		'Didier',
-		'The Mask',
-		'O’Brother',
-		'Yes Man',
-		'Le Come Back'
-	])
+const genreCurations = {
+	Action: {
+		include: [
+			'The Dark Knight',
+			'John Wick',
+			'Fury',
+			'Skyfall',
+			'Casino Royale',
+			'Kingsman',
+			'Die Hard',
+			'Jason Bourne',
+			'Edge of Tomorrow',
+			'Logan',
+			'300',
+			'Bad Boys',
+			'Pacific Rim',
+			'Unstoppable',
+			'Avatar',
+			'F1'
+		],
+		exclude: ['The Wolf of Wall Street', 'Amadeus', 'Intouchables', 'La Liste de Schindler']
+	},
+	Drame: {
+		include: [
+			'No Country for Old Men',
+			'The Curious Case of Benjamin Button',
+			'American Gangster',
+			'Fighter',
+			'Casablanca',
+			'La La Land',
+			'Léon',
+			'Fury',
+			'Good Morning, Vietnam',
+			'Pretty Woman',
+			'Notting Hill',
+			'Love Actually',
+			'The Holiday',
+			'Le Nouveau Stagiaire',
+			'Will Hunting',
+			'Rain Man'
+		],
+		exclude: [
+			'Ocean’s Eleven',
+			'Le Mans 66',
+			'Lost in Translation',
+			'The Social Network',
+			'Your Name',
+			'Le Fabuleux Destin d’Amélie Poulain',
+			'The Expendables',
+			'Le Come Back',
+			'Insaisissables',
+			'Retour vers le futur',
+			'Insaisissables 2',
+			'Bruce tout-puissant',
+			'Alliés',
+			'Tu ne tueras point',
+			'Django Unchained',
+			'Les Choristes',
+			'Coach Carter',
+			'La La Land',
+			'The Holiday',
+			'Notting Hill',
+			'Love Actually',
+			'Pretty Woman',
+			'Le Nouveau Stagiaire',
+			'Top Gun',
+			'The Mask',
+			'Le Dîner de cons',
+			'La Chèvre',
+			'Blade Runner 2049',
+			'F1',
+			'2001 : l’Odyssée de l’espace'
+		]
+	},
+	Thriller: {
+		include: [
+			'No Country for Old Men',
+			'Memento',
+			'Training Day',
+			'Casino Royale',
+			'Skyfall',
+			'Jason Bourne',
+			'Unstoppable',
+			'Die Hard',
+			'Alien',
+			'Gravity',
+			'John Wick',
+			'Blade Runner 2049',
+			'Orange mécanique'
+		],
+		exclude: [
+			'Parasite',
+			'Joker',
+			'Taxi Driver',
+			'Requiem for a Dream',
+			'The Usual Suspects',
+			'Taken',
+			'American Psycho',
+			'Shutter Island',
+			'Heat',
+			'Le Silence des agneaux',
+			'Se7en',
+			'Die Hard',
+			'Skyfall',
+			'John Wick',
+			'Blade Runner 2049',
+			'Titanic',
+			'Amadeus',
+			'Le Voyage de Chihiro',
+			'Le Grand Bleu',
+			'Seul contre tous',
+			'La Môme',
+			'Le Cercle des poètes disparus',
+			'Big Fish',
+			'Didier',
+			'Les Gamins',
+			'The Mask'
+		]
+	},
+	'Science-fiction': {
+		include: [
+			'2001 : l’Odyssée de l’espace',
+			'Matrix',
+			'Orange mécanique',
+			'Seul sur Mars',
+			'Blade Runner 2049',
+			'Jurassic Park',
+			'Edge of Tomorrow',
+			'Avatar',
+			'Alien',
+			'Ready Player One',
+			'Gravity',
+			'Pacific Rim',
+			'La Soupe aux choux'
+		],
+		exclude: [
+			'Le Dîner de cons',
+			'Sept vies',
+			'La Liste de Schindler',
+			'Le Prestige',
+			'La Cité de Dieu',
+			'À la recherche du bonheur',
+			'Le Grand Bleu',
+			'Le Parrain, 3e partie',
+			'Il faut sauver le soldat Ryan',
+			'Insaisissables',
+			'Monuments Men',
+			'Seul contre tous',
+			'Didier'
+		]
+	},
+	Comedie: {
+		include: [
+			'Dumb and Dumber',
+			'Little Miss Sunshine',
+			'Les Visiteurs',
+			'OSS 117 : Le Caire, nid d’espions',
+			'OSS 117 : Rio ne répond plus',
+			'Le Sens de la fête',
+			'Bienvenue chez les Ch’tis',
+			'Les Bronzés font du ski',
+			'The Blues Brothers',
+			'Le Prénom',
+			'Ace Ventura',
+			'La Grande Vadrouille',
+			'Fantômas',
+			'Le Gendarme de Saint-Tropez',
+			'Les Aventures de Rabbi Jacob',
+			'L’Aile ou la Cuisse',
+			'Les Tontons flingueurs',
+			'Papy fait de la résistance',
+			'Les Sous-doués',
+			'Le Père Noël est une ordure',
+			'La Vérité si je mens !',
+			'La Tour Montparnasse infernale',
+			'Qu’est-ce qu’on a fait au Bon Dieu ?',
+			'Johnny English',
+			'Bridget Jones’s Diary',
+			'Evan tout-puissant',
+			'Le Nouveau Stagiaire',
+			'Rasta Rockett',
+			'Un fauteuil pour deux',
+			'The Truman Show',
+			'Kingsman'
+		],
+		exclude: ['Marty Supreme', 'L’avare']
+	},
+	Romance: {
+		include: [
+			'Il était temps',
+			'Pretty Woman',
+			'Notting Hill',
+			'Love Actually',
+			'The Holiday',
+			'La La Land',
+			'Casablanca',
+			'The Curious Case of Benjamin Button',
+			'Bridget Jones’s Diary',
+			'Alliés'
+		],
+		exclude: [
+			'Alliés',
+			'La Ligne verte',
+			'Le Silence des agneaux',
+			'Le Bon, la Brute et le Truand',
+			'Sully'
+		]
+	}
 };
 
 /**
@@ -348,12 +669,23 @@ function cloneMovieForGenre(genre, movie, index) {
 }
 
 export const genreMovieCollections = Object.fromEntries(
-	Object.entries(genreMembership).map(([genre, titles]) => {
-		const source = genreSourceMovies.filter((movie) => titles.has(movie.title));
-		const pool = source.length ? source : genreSourceMovies;
+	['Action', 'Drame', 'Thriller', 'Science-fiction', 'Comedie', 'Romance'].map((genre) => {
+		const curation = genreCurations[genre] ?? { include: [], exclude: [] };
+		const excludedTitles = new Set(curation.exclude);
+		const source = genreSourceMovies.filter(
+			(movie) => movie.genres.includes(genre) && !excludedTitles.has(movie.title)
+		);
+		const preferredTitles = new Set(curation.include);
+		const preferred = genreSourceMovies.filter(
+			(movie) => preferredTitles.has(movie.title) && !excludedTitles.has(movie.title)
+		);
+		const fallback = source.filter((movie) => !preferredTitles.has(movie.title));
+		const pool = [...preferred, ...fallback].filter(
+			(movie, index, list) => index === list.findIndex((item) => item.title === movie.title)
+		);
 		return [
 			genre,
-			Array.from({ length: 50 }, (_, index) => cloneMovieForGenre(genre, pool[index % pool.length], index))
+			pool.slice(0, 50).map((movie, index) => cloneMovieForGenre(genre, movie, index))
 		];
 	})
 );
@@ -381,7 +713,13 @@ function normalizeMovieTitle(title) {
 		.trim();
 }
 
-const allMovieCollections = [top100Movies, recommendationMovies, ...Object.values(genreMovieCollections)];
+const allMovieCollections = [
+	top100Movies,
+	recommendationMovies,
+	supplementalMovies,
+	tonightMoviePool,
+	...Object.values(genreMovieCollections)
+];
 
 /** @param {string} value */
 function hashValue(value) {
