@@ -193,6 +193,27 @@
 			gap: 72px;
 		}
 
+		.genre-shell {
+			gap: 28px;
+		}
+
+		.genre-tabs {
+			flex-wrap: nowrap;
+			overflow-x: auto;
+			padding-bottom: 6px;
+			scrollbar-width: none;
+		}
+
+		.genre-tabs::-webkit-scrollbar {
+			display: none;
+		}
+
+		.genre-tabs button {
+			flex: 0 0 auto;
+			padding: 0.78rem 1rem;
+			white-space: nowrap;
+		}
+
 		.film-list {
 			gap: 8px;
 		}

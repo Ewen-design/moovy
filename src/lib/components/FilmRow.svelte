@@ -157,6 +157,7 @@
 		.film-row.detailed {
 			grid-template-columns: 78px minmax(0, 1fr);
 			padding: 12px;
+			align-items: start;
 		}
 
 		.film-row.ranked,
@@ -179,6 +180,46 @@
 			grid-column: 2;
 			justify-self: flex-start;
 			margin-top: 0.8rem;
+		}
+	}
+
+	@media (max-width: 480px) {
+		.film-row,
+		.film-row.detailed {
+			grid-template-columns: 64px minmax(0, 1fr);
+			gap: 12px;
+			padding: 10px;
+		}
+
+		.film-row.ranked,
+		.film-row.ranked.detailed {
+			grid-template-columns: 116px minmax(0, 1fr);
+			padding-left: 88px;
+		}
+
+		.film-row.ranked .poster-wrap {
+			--rank-gap: 2.35rem;
+			--rank-overlap: 0.42rem;
+		}
+
+		.rank-backdrop {
+			font-size: clamp(4rem, 19vw, 5.4rem);
+		}
+
+		h3 {
+			font-size: 1.05rem;
+		}
+
+		.meta,
+		.credits,
+		.description {
+			font-size: 0.88rem;
+		}
+
+		.row-action {
+			min-height: 40px;
+			padding: 0.72rem 1rem;
+			font-size: 0.86rem;
 		}
 	}
 </style>

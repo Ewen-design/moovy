@@ -14,7 +14,7 @@
 	import favicon from '$lib/assets/favicon.svg';
 	import { hydrateMoviePosters, seedPosterLibrary } from '$lib/posters';
 	import { posterVersion } from '$lib/poster-state';
-	import { fade } from 'svelte/transition';
+import { fade } from 'svelte/transition';
 
 	let { children, data } = $props();
 
@@ -25,13 +25,22 @@
 		{ href: '/recommandations', label: 'Recommandations' },
 		{ href: '/genres', label: 'Par genres' }
 	];
+	const mobileBottomNavItems = [
+		{ href: '/', label: 'Accueil', icon: 'home' },
+		{ href: '/recherche', label: 'Recherche', icon: 'search' }
+	];
+	const mobileBreakpoint = '(max-width: 720px)';
 	const preloaderLetters = ['M', 'O', 'O', 'V', 'Y'];
 	let scrolled = $state(false);
 	let searchQuery = $state('');
 	let searchOpen = $state(false);
+	let mobileMenuOpen = $state(false);
+	let isMobileViewport = $state(false);
 	let theme = $state('light');
 	let showPreloader = $state(true);
 	let preloaderLeaving = $state(false);
+	/** @type {HTMLElement | null} */
+	let headerElement = $state(null);
 	/** @type {HTMLDivElement | null} */
 	let searchBox = $state(null);
 	/** @type {HTMLInputElement | null} */
@@ -71,21 +80,51 @@
 	};
 
 	/** @param {'light' | 'dark'} nextTheme */
-	const applyTheme = (nextTheme) => {
-		theme = nextTheme;
+	const applyTheme = (nextTheme, persist = true) => {
+		const resolvedTheme = isMobileViewport ? 'dark' : nextTheme;
+		theme = resolvedTheme;
 		if (!browser) return;
-		document.body.classList.toggle('theme-dark', nextTheme === 'dark');
-		localStorage.setItem('moovy-theme', nextTheme);
+		document.body.classList.toggle('theme-dark', resolvedTheme === 'dark');
+		if (persist && !isMobileViewport) {
+			localStorage.setItem('moovy-theme', resolvedTheme);
+		}
+	};
+
+	const syncViewportTheme = () => {
+		if (!browser) return;
+		const savedTheme = localStorage.getItem('moovy-theme');
+		const nextTheme =
+			savedTheme === 'dark' || savedTheme === 'light' ? savedTheme : getDefaultTheme();
+		applyTheme(nextTheme, false);
+	};
+
+	const setMobileViewport = (matches) => {
+		isMobileViewport = matches;
+		if (matches) {
+			searchOpen = false;
+			searchQuery = '';
+		}
+		syncViewportTheme();
 	};
 
 	const toggleTheme = () => {
+		if (isMobileViewport) return;
 		applyTheme(theme === 'dark' ? 'light' : 'dark');
+	};
+
+	const closeMobileMenu = () => {
+		mobileMenuOpen = false;
+	};
+
+	const toggleMobileMenu = () => {
+		mobileMenuOpen = !mobileMenuOpen;
 	};
 
 	const getDefaultTheme = () => 'dark';
 
 	const toggleSearch = async () => {
 		searchOpen = !searchOpen;
+		if (searchOpen) mobileMenuOpen = false;
 		if (!searchOpen) {
 			searchQuery = '';
 			return;
@@ -104,12 +143,6 @@
 
 	$effect(() => {
 		if (!browser) return;
-		const savedTheme = localStorage.getItem('moovy-theme');
-		applyTheme(savedTheme === 'dark' || savedTheme === 'light' ? savedTheme : getDefaultTheme());
-	});
-
-	$effect(() => {
-		if (!browser) return;
 		document.body.classList.toggle('preloader-open', showPreloader);
 
 		return () => {
@@ -117,8 +150,26 @@
 		};
 	});
 
+	$effect(() => {
+		const nextPathname = page.url.pathname;
+		mobileMenuOpen = false;
+		searchOpen = false;
+		searchQuery = '';
+	});
+
+	$effect(() => {
+		if (!browser) return;
+		document.body.classList.toggle('menu-open', mobileMenuOpen);
+
+		return () => {
+			document.body.classList.remove('menu-open');
+		};
+	});
+
 	onMount(() => {
 		seedPosterLibrary();
+		const mediaQuery = window.matchMedia(mobileBreakpoint);
+		setMobileViewport(mediaQuery.matches);
 		const leaveTimer = window.setTimeout(() => {
 			preloaderLeaving = true;
 		}, 1600);
@@ -128,18 +179,41 @@
 
 		/** @param {PointerEvent} event */
 		const handlePointerDown = (event) => {
-			if (!searchOpen || !searchBox) return;
-			if (searchBox.contains(/** @type {Node} */ (event.target))) return;
+			const target = /** @type {Node} */ (event.target);
+
+			if (searchOpen && searchBox && !searchBox.contains(target)) {
+				searchOpen = false;
+				searchQuery = '';
+			}
+
+			if (mobileMenuOpen && headerElement && !headerElement.contains(target)) {
+				mobileMenuOpen = false;
+			}
+		};
+
+		/** @param {KeyboardEvent} event */
+		const handleKeydown = (event) => {
+			if (event.key !== 'Escape') return;
 			searchOpen = false;
 			searchQuery = '';
+			mobileMenuOpen = false;
+		};
+
+		/** @param {MediaQueryListEvent} event */
+		const handleViewportChange = (event) => {
+			setMobileViewport(event.matches);
 		};
 
 		document.addEventListener('pointerdown', handlePointerDown);
+		document.addEventListener('keydown', handleKeydown);
+		mediaQuery.addEventListener('change', handleViewportChange);
 
 		return () => {
 			window.clearTimeout(leaveTimer);
 			window.clearTimeout(hideTimer);
 			document.removeEventListener('pointerdown', handlePointerDown);
+			document.removeEventListener('keydown', handleKeydown);
+			mediaQuery.removeEventListener('change', handleViewportChange);
 		};
 	});
 </script>
@@ -168,7 +242,7 @@
 {/if}
 
 <div class="app-shell">
-	<header class:scrolled class="site-header">
+	<header bind:this={headerElement} class:menu-open={mobileMenuOpen} class:scrolled class="site-header">
 		<div class="header-left">
 			<a class="brand" href="/">MOOVY</a>
 
@@ -207,18 +281,41 @@
 					</div>
 				{/if}
 			</div>
+
+			{#if !isMobileViewport}
+				<button
+					class="theme-toggle"
+					type="button"
+					aria-label={theme === 'dark' ? 'Passer en mode clair' : 'Passer en mode nuit'}
+					onclick={toggleTheme}
+				>
+					<span class:moon={theme !== 'dark'} class:sun={theme === 'dark'} class="theme-icon" aria-hidden="true">
+						{theme === 'dark' ? '☀' : '☾'}
+					</span>
+				</button>
+			{/if}
+
+			<button
+				class="menu-toggle"
+				type="button"
+				aria-expanded={mobileMenuOpen}
+				aria-controls="mobile-nav"
+				aria-label={mobileMenuOpen ? 'Fermer le menu' : 'Ouvrir le menu'}
+				onclick={toggleMobileMenu}
+			>
+				<span class:open={mobileMenuOpen} class="menu-toggle-bars" aria-hidden="true"></span>
+			</button>
 		</div>
 
-		<button
-			class="theme-toggle"
-			type="button"
-			aria-label={theme === 'dark' ? 'Passer en mode clair' : 'Passer en mode nuit'}
-			onclick={toggleTheme}
-		>
-			<span class:moon={theme !== 'dark'} class:sun={theme === 'dark'} class="theme-icon" aria-hidden="true">
-				{theme === 'dark' ? '☀' : '☾'}
-			</span>
-		</button>
+		<div class:open={mobileMenuOpen} class="mobile-nav-panel" id="mobile-nav">
+			<nav class="mobile-nav" aria-label="Navigation mobile">
+				{#each navItems as item}
+					<a class:active={page.url.pathname === item.href} href={item.href} onclick={closeMobileMenu}>
+						{item.label}
+					</a>
+				{/each}
+			</nav>
+		</div>
 	</header>
 
 	<main class="site-main">
@@ -228,6 +325,24 @@
 			</div>
 		{/key}
 	</main>
+
+	<nav class="mobile-bottom-nav" aria-label="Navigation mobile principale">
+		{#each mobileBottomNavItems as item}
+			<a class:active={page.url.pathname === item.href} href={item.href} aria-current={page.url.pathname === item.href ? 'page' : undefined}>
+				{#if item.icon === 'home'}
+					<svg viewBox="0 0 24 24" aria-hidden="true">
+						<path d="M4 11.6 12 5l8 6.6V20a1 1 0 0 1-1 1h-5.2v-6.2h-3.6V21H5a1 1 0 0 1-1-1z"></path>
+					</svg>
+				{:else}
+					<svg viewBox="0 0 24 24" aria-hidden="true">
+						<circle cx="11" cy="11" r="6.2"></circle>
+						<path d="M20 20 16.3 16.3"></path>
+					</svg>
+				{/if}
+				<span>{item.label}</span>
+			</a>
+		{/each}
+	</nav>
 
 	<footer class="site-footer">
 		<p>Moovy</p>
@@ -290,6 +405,10 @@
 	}
 
 	:global(body.preloader-open) {
+		overflow: hidden;
+	}
+
+	:global(body.menu-open) {
 		overflow: hidden;
 	}
 
@@ -426,7 +545,8 @@
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
-		padding: 14px 88px 18px 28px;
+		flex-wrap: wrap;
+		padding: 14px 28px 18px;
 		background: transparent;
 		color: #ffffff;
 		transition: padding 260ms ease;
@@ -459,7 +579,7 @@
 	}
 
 	.site-header.scrolled {
-		padding: 12px 88px 12px 28px;
+		padding: 12px 28px;
 	}
 
 	.site-header.scrolled::before {
@@ -491,7 +611,7 @@
 	}
 
 	.header-right {
-		gap: 0.85rem;
+		gap: 0.45rem;
 		margin-left: auto;
 	}
 
@@ -512,10 +632,8 @@
 	}
 
 	.theme-toggle {
-		position: fixed;
-		top: 16px;
-		right: 18px;
-		z-index: 72;
+		position: relative;
+		z-index: 1;
 		display: inline-flex;
 		align-items: center;
 		justify-content: center;
@@ -534,6 +652,66 @@
 			background-color var(--theme-duration) var(--theme-ease),
 			border-color var(--theme-duration) var(--theme-ease),
 			color var(--theme-duration) var(--theme-ease);
+	}
+
+	.menu-toggle {
+		display: none;
+		position: relative;
+		z-index: 1;
+		align-items: center;
+		justify-content: center;
+		width: 56px;
+		height: 56px;
+		padding: 0;
+		border: 0;
+		background: transparent;
+		color: #ffffff;
+		cursor: pointer;
+	}
+
+	.menu-toggle-bars,
+	.menu-toggle-bars::before,
+	.menu-toggle-bars::after {
+		display: block;
+		width: 22px;
+		height: 2px;
+		border-radius: 999px;
+		background: currentColor;
+		transition:
+			transform 240ms ease,
+			opacity 240ms ease,
+			background-color 240ms ease;
+	}
+
+	.menu-toggle-bars {
+		position: relative;
+	}
+
+	.menu-toggle-bars::before,
+	.menu-toggle-bars::after {
+		content: '';
+		position: absolute;
+		left: 0;
+	}
+
+	.menu-toggle-bars::before {
+		top: -7px;
+	}
+
+	.menu-toggle-bars::after {
+		top: 7px;
+	}
+
+	.menu-toggle-bars.open {
+		background: transparent;
+	}
+
+	.menu-toggle-bars.open::before {
+		transform: translateY(7px) rotate(45deg);
+	}
+
+	.menu-toggle-bars.open::after {
+		transform: translateY(-7px) rotate(-45deg);
 	}
 
 	.theme-icon {
@@ -685,8 +863,56 @@
 		color: var(--search-results-muted);
 	}
 
+	.mobile-nav-panel {
+		display: none;
+		width: 100%;
+		max-height: 0;
+		overflow: hidden;
+		opacity: 0;
+		pointer-events: none;
+		transition:
+			max-height 280ms cubic-bezier(0.22, 1, 0.36, 1),
+			opacity 180ms ease;
+	}
+
+	.mobile-nav-panel.open {
+		max-height: 70svh;
+		opacity: 1;
+		pointer-events: auto;
+	}
+
+	.mobile-nav {
+		display: grid;
+		gap: 0.5rem;
+		padding: 0 0 0.5rem;
+	}
+
+	.mobile-nav a {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		padding: 1rem 1.1rem;
+		border: 1px solid rgba(255, 255, 255, 0.08);
+		background: rgba(8, 8, 10, 0.82);
+		color: rgba(255, 255, 255, 0.84);
+		text-decoration: none;
+		font-size: 1rem;
+		font-weight: 600;
+		backdrop-filter: blur(16px);
+	}
+
+	.mobile-nav a.active {
+		color: #ffffff;
+		border-color: rgba(47, 107, 255, 0.52);
+		background: rgba(17, 30, 58, 0.92);
+	}
+
 	.site-main {
 		margin-top: 0;
+	}
+
+	.mobile-bottom-nav {
+		display: none;
 	}
 
 	.site-footer {
@@ -736,29 +962,213 @@
 	}
 
 	@media (max-width: 720px) {
+		:global(body) {
+			--page-bg: #0b0d11;
+			--page-text: #f2f5fb;
+			--muted-text: #97a2b7;
+			--muted-text-strong: #a5afc2;
+			--muted-text-soft: #8993a6;
+			--surface-card: #141820;
+			--surface-card-strong: #181d26;
+			--rank-number: #000000;
+			--rank-number-stroke: var(--accent-blue);
+			--surface-elevated: #181818;
+			--surface-subtle: #232323;
+			--surface-subtle-hover: #353535;
+			--surface-inverse: #181818;
+			--sheet-surface: #181818;
+			--sheet-block: #232323;
+			--sheet-block-hover: #353535;
+			--sheet-gradient-end: #181818;
+			--sheet-shadow: 0 30px 120px rgba(0, 0, 0, 0.45);
+			--border-soft: rgba(255, 255, 255, 0.08);
+			--shadow-soft: 0 26px 86px rgba(0, 0, 0, 0.42);
+			--search-border: rgba(255, 255, 255, 0.14);
+			--search-bg: rgba(255, 255, 255, 0.08);
+			--search-text: #ffffff;
+			--search-placeholder: rgba(255, 255, 255, 0.56);
+			--search-results-bg: rgba(15, 17, 22, 0.98);
+			--search-results-text: #f2f5fb;
+			--search-results-muted: #9aa4b8;
+			background: var(--page-bg);
+			color: var(--page-text);
+		}
+
 		.app-shell {
 			padding: 8px;
 		}
 
 		.site-header {
-			padding: 12px 72px 16px 16px;
+			padding: 10px 12px 14px;
+			align-items: flex-start;
 		}
 
 		.site-header.scrolled {
-			padding: 11px 72px 11px 16px;
+			padding: 10px 12px 12px;
+		}
+
+		.site-header::before {
+			background: linear-gradient(
+				180deg,
+				rgba(6, 8, 12, 0.98) 0%,
+				rgba(6, 8, 12, 0.92) 18%,
+				rgba(6, 8, 12, 0.78) 38%,
+				rgba(6, 8, 12, 0.5) 62%,
+				rgba(6, 8, 12, 0.18) 82%,
+				rgba(6, 8, 12, 0) 100%
+			);
+			opacity: 1;
+		}
+
+		.site-header::after,
+		.site-header.scrolled::after {
+			opacity: 0;
+		}
+
+		.site-header.scrolled::before {
+			opacity: 1;
+		}
+
+		.header-left {
+			width: 100%;
+			justify-content: space-between;
+			gap: 0.75rem;
 		}
 
 		.site-nav {
-			gap: 0.95rem;
-			overflow: auto;
+			display: none;
 		}
 
 		.header-right {
-			display: flex;
+			position: absolute;
+			top: 10px;
+			right: 8px;
 		}
 
 		.search-box {
 			display: none;
+		}
+
+		.brand {
+			font-size: 1.72rem;
+			transform: translateY(5px);
+		}
+
+		.menu-toggle,
+		.mobile-nav-panel {
+			display: flex;
+		}
+
+		.mobile-nav-panel {
+			padding-top: 64px;
+		}
+
+		.theme-toggle,
+		.menu-toggle {
+			width: 48px;
+			height: 48px;
+		}
+
+		.theme-icon {
+			transform: none;
+			font-size: 1.2rem;
+		}
+
+		.site-main {
+			padding-bottom: calc(62px + env(safe-area-inset-bottom));
+		}
+
+		.site-footer {
+			padding-bottom: calc(8px + env(safe-area-inset-bottom));
+		}
+
+		.mobile-bottom-nav {
+			position: fixed;
+			left: 8px;
+			right: 8px;
+			bottom: 8px;
+			z-index: 78;
+			display: grid;
+			grid-template-columns: repeat(2, minmax(0, 1fr));
+			padding: 4px 8px calc(4px + env(safe-area-inset-bottom));
+			background: var(--page-bg);
+			backdrop-filter: blur(18px);
+			box-shadow: 0 36px 104px rgba(0, 0, 0, 0.76);
+		}
+
+		.mobile-bottom-nav a {
+			display: grid;
+			justify-items: center;
+			gap: 0.18rem;
+			padding: 0.42rem 0.3rem 0.08rem;
+			color: rgba(255, 255, 255, 0.56);
+			text-decoration: none;
+			font-size: 0.8rem;
+			font-weight: 500;
+		}
+
+		.mobile-bottom-nav a.active {
+			color: #ffffff;
+		}
+
+		.mobile-bottom-nav svg {
+			width: 26px;
+			height: 26px;
+			fill: none;
+			stroke: currentColor;
+			stroke-width: 1.9;
+			stroke-linecap: round;
+			stroke-linejoin: round;
+		}
+
+		.mobile-bottom-nav a:first-child svg {
+			fill: currentColor;
+			stroke: none;
+		}
+	}
+
+	@media (max-width: 720px) and (pointer: coarse) {
+		.preloader-word {
+			font-size: clamp(3.3rem, 16vw, 7rem);
+		}
+	}
+
+	@media (max-width: 480px) {
+		.site-header,
+		.site-header.scrolled {
+			padding-inline: 10px;
+		}
+
+		.mobile-nav-panel {
+			padding-top: 58px;
+		}
+
+		.mobile-nav a {
+			padding: 0.92rem 1rem;
+		}
+
+		.brand {
+			font-size: 1.88rem;
+			transform: translateY(7px);
+		}
+
+		.mobile-bottom-nav {
+			left: 0;
+			right: 0;
+			bottom: 0;
+			padding-inline: 6px;
+		}
+
+		.site-footer {
+			padding-top: 18px;
+		}
+
+		.footer-meta {
+			gap: 0.45rem 0.9rem;
+		}
+
+		.footer-meta a:last-child {
+			margin-left: 0;
 		}
 	}
 </style>

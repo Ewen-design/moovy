@@ -233,6 +233,10 @@
 			gap: 72px;
 		}
 
+		.catalog-shell {
+			gap: 28px;
+		}
+
 		.film-list {
 			gap: 8px;
 		}
@@ -240,6 +244,23 @@
 		.catalog-head {
 			flex-direction: column;
 			align-items: flex-start;
+		}
+
+		.pager {
+			flex-wrap: nowrap;
+			overflow-x: auto;
+			padding-bottom: 6px;
+			scrollbar-width: none;
+		}
+
+		.pager::-webkit-scrollbar {
+			display: none;
+		}
+
+		.pager button {
+			flex: 0 0 auto;
+			min-width: 40px;
+			height: 40px;
 		}
 	}
 </style>

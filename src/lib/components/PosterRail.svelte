@@ -1,4 +1,5 @@
 <script>
+	import { browser } from '$app/environment';
 	import { onMount } from 'svelte';
 	import { heroImage } from '$lib/data/catalog';
 
@@ -31,6 +32,7 @@
 	let gap = $state(0);
 	let index = $state(0);
 	let instant = $state(false);
+	let isMobileViewport = $state(false);
 	let paused = $state(false);
 	let previewVisible = $state(false);
 	let previewItem = $state(null);
@@ -38,7 +40,7 @@
 	let hoverTimer = null;
 	let previewUnmountTimer = null;
 
-	const clonedItems = $derived([...items, ...items]);
+	const renderedItems = $derived(isMobileViewport ? items : [...items, ...items]);
 
 	const measure = () => {
 		if (!track) return;
@@ -53,7 +55,7 @@
 	const offset = $derived(centerActive ? Math.max(0, (viewportWidth - cardWidth) / 2) : 0);
 
 	const step = () => {
-		if (!items.length || paused) return;
+		if (!items.length || paused || isMobileViewport) return;
 		instant = false;
 		index += 1;
 	};
@@ -106,7 +108,7 @@
 
 	/** @param {{ currentTarget: EventTarget | null }} event */
 	const handleCardEnter = (item, event) => {
-		if (!enableHoverPreview) return;
+		if (!enableHoverPreview || isMobileViewport) return;
 		const target = event.currentTarget;
 		clearHoverTimer();
 		previewVisible = false;
@@ -120,6 +122,7 @@
 	};
 
 	const handleTransitionEnd = () => {
+		if (isMobileViewport) return;
 		if (index < items.length) return;
 		instant = true;
 		index = 0;
@@ -131,16 +134,37 @@
 	};
 
 	onMount(() => {
+		if (!browser) return;
+		const mediaQuery = window.matchMedia('(max-width: 720px)');
+		const syncViewport = (matches) => {
+			isMobileViewport = matches;
+			if (matches) {
+				index = 0;
+				instant = true;
+			} else {
+				requestAnimationFrame(() => {
+					instant = false;
+				});
+			}
+		};
+
+		syncViewport(mediaQuery.matches);
 		measure();
 		const resizeObserver = new ResizeObserver(() => measure());
 		if (viewport) resizeObserver.observe(viewport);
 		const interval = setInterval(step, 3600);
+		/** @param {MediaQueryListEvent} event */
+		const handleViewportChange = (event) => {
+			syncViewport(event.matches);
+		};
+		mediaQuery.addEventListener('change', handleViewportChange);
 
 		return () => {
 			resizeObserver.disconnect();
 			clearInterval(interval);
 			clearHoverTimer();
 			clearPreviewUnmountTimer();
+			mediaQuery.removeEventListener('change', handleViewportChange);
 		};
 	});
 </script>
@@ -155,10 +179,10 @@
 	class={`poster-rail ${variant}`}
 	aria-label={title || 'Selection'}
 	onmouseenter={() => {
-		if (pauseOnHover) paused = true;
+		if (pauseOnHover && !isMobileViewport) paused = true;
 	}}
 	onmouseleave={() => {
-		paused = false;
+		if (!isMobileViewport) paused = false;
 		hidePreview();
 	}}
 >
@@ -202,13 +226,16 @@
 
 	<div class="rail-viewport" bind:this={viewport}>
 		<div
-			class:instant
+			class:instant={instant || isMobileViewport}
+			class:mobile-track={isMobileViewport}
 			class="rail-track"
 			bind:this={track}
 			ontransitionend={handleTransitionEnd}
-			style={`transform: translate3d(-${Math.max(0, index * (cardWidth + gap) - offset)}px, 0, 0);`}
+			style={isMobileViewport
+				? undefined
+				: `transform: translate3d(-${Math.max(0, index * (cardWidth + gap) - offset)}px, 0, 0);`}
 		>
-			{#each clonedItems as item}
+			{#each renderedItems as item}
 				<button
 					class="rail-card"
 					type="button"
@@ -597,6 +624,32 @@
 	}
 
 	@media (max-width: 640px) {
+		.rail-viewport {
+			overflow-x: auto;
+			overflow-y: hidden;
+			scrollbar-width: none;
+			-webkit-overflow-scrolling: touch;
+			overscroll-behavior-x: contain;
+		}
+
+		.rail-viewport::-webkit-scrollbar {
+			display: none;
+		}
+
+		.rail-track.mobile-track {
+			width: max-content;
+			padding-right: 12px;
+			transition: none;
+		}
+
+		.rail-card,
+		.ranked-poster,
+		.rail-card img {
+			touch-action: auto;
+			user-select: none;
+			-webkit-user-drag: none;
+		}
+
 		.poster-rail.small .rail-card {
 			width: 42vw;
 			height: 24vw;

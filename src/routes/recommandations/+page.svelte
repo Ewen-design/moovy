@@ -115,6 +115,10 @@
 			gap: 72px;
 		}
 
+		.recommend-shell {
+			gap: 28px;
+		}
+
 		.film-list {
 			gap: 8px;
 		}

@@ -409,6 +409,10 @@
 			gap: 72px;
 		}
 
+		.tonight-shell {
+			gap: 32px;
+		}
+
 		.quiz-grid {
 			grid-template-columns: 1fr;
 		}
@@ -417,6 +421,26 @@
 		.results-head {
 			flex-direction: column;
 			align-items: flex-start;
+		}
+	}
+
+	@media (max-width: 640px) {
+		.question-card {
+			padding: 18px 16px;
+		}
+
+		.question-card h3 {
+			font-size: 1.2rem;
+		}
+
+		.option-row {
+			gap: 0.55rem;
+		}
+
+		.option-row button {
+			width: 100%;
+			justify-content: flex-start;
+			padding: 0.88rem 1rem;
 		}
 	}
 </style>

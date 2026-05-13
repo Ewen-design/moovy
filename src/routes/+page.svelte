@@ -48,25 +48,21 @@
 		return [
 			{
 				title: 'Pour ce soir',
-				button: 'Choisir',
 				href: '/ce-soir',
 				image: featureShowcaseMovies[2].backdrop ?? featureShowcaseMovies[2].image
 			},
 			{
 				title: 'Top 100',
-				button: 'Ouvrir',
 				href: '/top-100',
 				image: featureShowcaseMovies[0].backdrop ?? featureShowcaseMovies[0].image
 			},
 			{
 				title: 'Recommandations',
-				button: 'Voir',
 				href: '/recommandations',
 				image: featureShowcaseMovies[1].backdrop ?? featureShowcaseMovies[1].image
 			},
 			{
 				title: 'Par genre',
-				button: 'Parcourir',
 				href: '/genres',
 				image: featureShowcaseMovies[3].backdrop ?? featureShowcaseMovies[3].image
 			}
@@ -160,8 +156,7 @@
 				<img src={block.image ?? '/telephone2_parfum.webp'} alt={block.title} loading="lazy" decoding="async" />
 				<div class="feature-overlay"></div>
 				<div class="feature-copy">
-					<h2>{block.title}</h2>
-					<span>{block.button}</span>
+					<span>{block.title}</span>
 				</div>
 			</a>
 		{/each}
@@ -269,27 +264,18 @@
 		color: #ffffff;
 	}
 
-	.feature-copy h2 {
-		margin: 0;
-		max-width: none;
-		white-space: nowrap;
-		font-size: clamp(2.3rem, 4vw, 4.2rem);
-		line-height: 0.94;
-		letter-spacing: -0.06em;
-	}
-
 	.feature-copy span {
 		display: inline-flex;
 		align-items: center;
 		justify-content: center;
-		margin-top: 1rem;
 		padding: 0.9rem 1.3rem;
 		border: 1px solid transparent;
 		border-radius: 999px;
 		background: var(--accent-blue);
 		color: #ffffff;
-		font-size: 0.98rem;
+		font-size: 1rem;
 		font-weight: 600;
+		letter-spacing: -0.02em;
 		transition:
 			background-color 240ms ease,
 			color 240ms ease,
@@ -320,6 +306,12 @@
 			height: 360px;
 		}
 
+		.feature-copy {
+			left: 18px;
+			right: 18px;
+			bottom: 18px;
+		}
+
 		.bottom-slider {
 			gap: 72px;
 			padding: 82px 16px 68px;
@@ -328,11 +320,67 @@
 
 	@media (max-width: 640px) {
 		.home {
-			gap: 62px;
+			gap: 54px;
+		}
+
+		.hero-rail {
+			left: 12px;
+			right: 12px;
+			bottom: 12px;
+		}
+
+		.hero-rail :global(h3),
+		.bottom-slider :global(h3) {
+			color: #ffffff;
+			font-size: 1.32rem;
+			line-height: 1;
+		}
+
+		.bottom-slider :global(.poster-rail.topTen h3) {
+			font-size: 1.32rem;
+		}
+
+		.feature-grid {
+			padding-top: 82px;
+		}
+
+		.feature-block {
+			height: 300px;
+		}
+
+		.feature-copy span {
+			font-size: 0.94rem;
+			padding: 0.84rem 1.1rem;
 		}
 
 		.bottom-slider {
-			gap: 76px;
+			gap: 56px;
+			padding: 68px 12px 56px;
+		}
+
+		.bottom-slider :global(.poster-rail.portrait.large.expanded .rail-card) {
+			width: 34vw;
+			height: 52vw;
+		}
+
+		.bottom-slider :global(.poster-rail.topTen .rail-card) {
+			width: auto;
+		}
+
+		.bottom-slider :global(.poster-rail.topTen .ranked-poster img) {
+			width: 34vw;
+		}
+
+		.bottom-slider :global(.poster-rail.topTen .rail-rank) {
+			transform: translateY(-50%) translateX(-18px);
+		}
+
+		.bottom-slider :global(.poster-rail.topTen .rail-rank.double-rank) {
+			transform: translateY(-50%) translateX(-22px);
+		}
+
+		.bottom-slider :global(.poster-rail.topTen .rail-track) {
+			gap: 56px;
 		}
 	}
 </style>

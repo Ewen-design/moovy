@@ -291,12 +291,12 @@
 
 	@media (max-width: 640px) {
 		.page-hero {
-			min-height: calc(100svh - 84px);
+			min-height: calc(100svh - 72px);
 		}
 
 		.page-hero.compact {
-			height: 100svh;
-			min-height: 100svh;
+			height: min(100svh, 760px);
+			min-height: min(100svh, 760px);
 		}
 
 		.page-hero.fullBleed {
@@ -316,6 +316,29 @@
 		.hero-logo {
 			max-width: min(78vw, 360px);
 			max-height: 96px;
+		}
+	}
+
+	@media (max-width: 480px) {
+		.page-hero.compact {
+			height: min(100svh, 680px);
+			min-height: min(100svh, 680px);
+		}
+
+		.hero-copy {
+			left: 14px;
+			right: 14px;
+			bottom: 14px;
+		}
+
+		.hero-copy a {
+			width: 100%;
+			min-height: 46px;
+		}
+
+		.hero-logo {
+			max-width: min(82vw, 300px);
+			max-height: 82px;
 		}
 	}
 </style>
