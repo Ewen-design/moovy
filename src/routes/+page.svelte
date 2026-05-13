@@ -239,6 +239,7 @@
 	.feature-block {
 		position: relative;
 		height: 450px;
+		border-radius: 3px;
 		overflow: hidden;
 		text-decoration: none;
 		background: var(--surface-card);

@@ -286,6 +286,7 @@
 		z-index: 12;
 		display: grid;
 		grid-template-rows: 232px minmax(0, 1fr);
+		border-radius: 3px;
 		background: var(--sheet-block, var(--surface-card));
 		overflow: hidden;
 		opacity: 0;
@@ -392,6 +393,7 @@
 		flex: 0 0 auto;
 		padding: 0;
 		border: 0;
+		border-radius: 3px;
 		background: #151515;
 		overflow: hidden;
 		cursor: pointer;

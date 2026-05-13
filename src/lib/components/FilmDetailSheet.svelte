@@ -162,6 +162,7 @@
 	.sheet {
 		width: min(1240px, 100%);
 		margin: auto;
+		border-radius: 3px;
 		background: var(--sheet-surface);
 		color: var(--page-text);
 		box-shadow: var(--sheet-shadow);
@@ -322,6 +323,7 @@
 	}
 
 	.cast-card {
+		border-radius: 3px;
 		background: var(--sheet-block);
 		overflow: hidden;
 		transition:
@@ -379,6 +381,7 @@
 		display: grid;
 		grid-template-rows: clamp(160px, 16vw, 220px) minmax(0, 1fr);
 		border: 0;
+		border-radius: 3px;
 		background: var(--sheet-block);
 		overflow: hidden;
 		height: 100%;
