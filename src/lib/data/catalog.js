@@ -1,3 +1,5 @@
+import { movieCopyByTitle } from './movie-copy.generated.js';
+
 export const heroImage = '/telephone2_parfum.webp';
 
 const top100Titles = [
@@ -126,13 +128,157 @@ const genreCycle = [
 	['Animation', 'Fantastique']
 ];
 
-const descriptionOpeners = [
-	'Un classique tendu et elegant.',
-	'Une mise en scene directe et memorielle.',
-	'Une experience de cinema ample et precise.',
-	'Un film qui avance avec une tension constante.',
-	'Une proposition visuelle forte, pensee pour durer.'
+/** @type {Record<string, { summary: string }>} */
+const manualMovieCopyByTitle = {
+	'Le Parrain': {
+		summary:
+			"En 1945, à New York, Vito Corleone règne sur l'une des plus puissantes familles mafieuses. Lorsqu'il refuse d'entrer dans le trafic de drogue et devient la cible d'un attentat, son plus jeune fils Michael, jusque-là tenu à l'écart des affaires, se retrouve entraîné dans la violence et la succession du clan."
+	},
+	Parasite: {
+		summary:
+			"Toute la famille de Ki-taek vit de petits expédients dans un sous-sol insalubre de Séoul. Lorsqu'un des fils parvient à se faire engager comme professeur particulier chez les richissimes Park, les siens s'infiltrent peu à peu dans la maison, jusqu'à faire basculer l'équilibre entre les deux mondes."
+	},
+	'Le Come Back': {
+		summary:
+			"Alex Fletcher, ancienne star pop des années 1980, n'est plus qu'un chanteur nostalgique. Lorsqu'une idole du moment lui propose d'écrire un nouveau tube, il s'associe à Sophie, une jeune femme brillante avec les mots, et voit renaître autant son inspiration que sa vie sentimentale."
+	},
+	'Evan tout-puissant': {
+		summary:
+			"Fraîchement élu au Congrès, Evan Baxter veut réussir sa nouvelle vie politique. Mais Dieu lui confie une mission inattendue: construire une arche avant un déluge imminent. Entre ridicule public, crise familiale et foi mise à l'épreuve, Evan doit accepter l'impossible."
+	},
+	'Coach Carter': {
+		summary:
+			"Ken Carter reprend l'équipe de basket de son ancien lycée à Richmond avec une discipline de fer. En imposant des règles scolaires strictes à ses joueurs, il cherche à leur offrir un avenir au-delà du terrain, quitte à provoquer l'incompréhension générale."
+	},
+	'Le Murder Club du jeudi': {
+		summary:
+			"Quatre retraités passionnés d'affaires criminelles se retrouvent chaque semaine pour résoudre d'anciens meurtres. Leur jeu prend une tournure bien plus dangereuse lorsqu'un véritable homicide survient sous leurs yeux et les propulse au coeur d'une enquête bien réelle."
+	},
+	'Un fauteuil pour deux': {
+		summary:
+			"Deux magnats de la finance décident de parier sur la nature humaine en échangeant la vie d'un brillant courtier de Wall Street avec celle d'un petit escroc sans le sou. Leur expérience va bouleverser les deux hommes et révéler les règles cruelles de leur monde."
+	},
+	Unstoppable: {
+		summary:
+			"Un train de marchandises lancé à toute vitesse et sans conducteur traverse la Pennsylvanie avec une cargaison hautement dangereuse. Un vétéran du rail et un jeune conducteur n'ont que quelques heures pour l'arrêter avant la catastrophe."
+	},
+	Alliés: {
+		summary:
+			"En 1942, l'agent de renseignement Max Vatan retrouve à Casablanca Marianne Beausejour, résistante française avec qui il doit mener une mission périlleuse. Leur histoire d'amour se prolonge à Londres, jusqu'au jour où Max apprend que sa femme pourrait être une espionne au service de l'ennemi."
+	},
+	'L’avare': {
+		summary:
+			"Harpagon, bourgeois richissime obsédé par son argent, tyrannise ses enfants et ses domestiques pour préserver sa cassette. Alors que chacun tente de vivre ses amours malgré son autorité, l'obsession maladive du vieil homme déclenche quiproquos, manipulations et affrontements."
+	}
+};
+
+/** @param {string | null | undefined} text */
+function sanitizeSynopsis(text) {
+	return String(text ?? '')
+		.replaceAll('\r\n', ' ')
+		.replaceAll('\n', ' ')
+		.replace(/\s+/g, ' ')
+		.trim();
+}
+
+/** @param {string} value */
+function capitalizeFirst(value) {
+	return value ? `${value.charAt(0).toUpperCase()}${value.slice(1)}` : value;
+}
+
+const manualQuickCopyByTitle = {
+	'Ocean’s Eleven': 'braquage · casino · argent',
+	'Ocean’s Twelve': 'braquage · équipe · revanche',
+	'Ocean’s Thirteen': 'casino · vengeance · équipe',
+	'Le Parrain': 'mafia · famille · succession',
+	'Le Parrain, 2e partie': 'mafia · pouvoir · héritage',
+	'Le Parrain, 3e partie': 'mafia · rédemption · succession',
+	'Les Évadés': 'prison · amitié · liberté',
+	Drive: 'cavale · braquage · solitude',
+	Inception: 'rêves · subconscient · manipulation',
+	'Le Prestige': 'rivalité · illusion · obsession',
+	'Le Mans 66': 'course · vitesse · rivalité',
+	'La vie est belle': 'amour · guerre · sacrifice',
+	'Coach Carter': 'basket · discipline · lycée'
+};
+
+const quickKeywordRules = [
+	{ label: 'braquage', pattern: /braquage|cambriol|cambrioler|hold-up|casse|voler|malfrat|pickpocket/i },
+	{ label: 'casino', pattern: /casino|las vegas|bellagio|mirage|mgm/i },
+	{ label: 'argent', pattern: /dollars|argent|fortune|finance|wall street/i },
+	{ label: 'mafia', pattern: /mafia|parrain|clan|gangster|crime organis/i },
+	{ label: 'prison', pattern: /prison|p[eé]nitencier|d[eé]tenu|condamn[eé]|cellule/i },
+	{ label: 'liberté', pattern: /libert[eé]|[ée]vad|s[' ]?évader/i },
+	{ label: 'amitié', pattern: /amiti[eé]|ami |amis |compagnon/i },
+	{ label: 'famille', pattern: /famille|fils|p[eè]re|m[eè]re|fr[eè]res?|soeur/i },
+	{ label: 'succession', pattern: /succession|h[eé]ritage|reprendre|transmission/i },
+	{ label: 'vengeance', pattern: /vengeance|venger|traquer|revanche/i },
+	{ label: 'rêves', pattern: /r[eê]ve|r[eê]ves|dort|dormir/i },
+	{ label: 'subconscient', pattern: /subconscient|esprit|id[eé]e|m[eé]moire/i },
+	{ label: 'manipulation', pattern: /manipul|infiltr|pi[eè]ge|complot/i },
+	{ label: 'illusion', pattern: /magicien|illusion|tour|prestige/i },
+	{ label: 'rivalité', pattern: /rivalit[eé]|ennemis|comp[eé]tition|oppos/i },
+	{ label: 'obsession', pattern: /obsession|obs[eé]d|haine|fixation/i },
+	{ label: 'course', pattern: /course|circuit|comp[eé]tition|pilote|volant/i },
+	{ label: 'vitesse', pattern: /vitesse|bolide|train|lanc[eé] à toute vitesse|formule 1/i },
+	{ label: 'basket', pattern: /basket|joueurs|lyc[eé]e|terrain/i },
+	{ label: 'discipline', pattern: /discipline|r[eè]gles|strictes|coach/i },
+	{ label: 'guerre', pattern: /guerre|soldat|arm[eé]e|camp|d[eé]port|naz|r[eé]sistant/i },
+	{ label: 'amour', pattern: /amour|amoureux|bien-aim[eé]e|romance|femme|mari/i },
+	{ label: 'sacrifice', pattern: /sacrifice|sauver|prot[eé]ger|pour son fils|pour eux/i },
+	{ label: 'espionnage', pattern: /espion|renseignement|mission|agent secret|service de l'ennemi/i },
+	{ label: 'enquête', pattern: /enqu[eê]te|inspecteur|police|indices|affaire/i },
+	{ label: 'meurtre', pattern: /meurtre|assassin|homicide|tueur/i },
+	{ label: 'justice', pattern: /proc[eè]s|tribunal|juge|avocat|justice/i },
+	{ label: 'survie', pattern: /survie|catastrophe|danger|sauver|dernier souffle/i },
+	{ label: 'musique', pattern: /musique|chanteur|op[eé]ra|jazz|batteur/i },
+	{ label: 'école', pattern: /lyc[eé]e|professeur|institutrice|classe/i }
 ];
+
+/**
+ * @param {string} title
+ * @param {string[] | null | undefined} genres
+ * @param {string | null | undefined} summary
+ */
+function buildQuickMovieCopy(title, genres, summary) {
+	if (manualQuickCopyByTitle[title]) return capitalizeFirst(manualQuickCopyByTitle[title]);
+
+	const text = sanitizeSynopsis(summary).toLowerCase();
+	const labels = quickKeywordRules
+		.filter((rule) => rule.pattern.test(text))
+		.map((rule) => rule.label)
+		.filter((label, index, list) => list.indexOf(label) === index)
+		.slice(0, 3);
+
+	if (labels.length) return capitalizeFirst(labels.join(' · '));
+
+	const fallback = (genres ?? []).filter(Boolean).slice(0, 2);
+	return fallback.length ? capitalizeFirst(fallback.join(' · ')) : 'Film';
+}
+
+/**
+ * @param {string} title
+ * @param {string[] | null | undefined} genres
+ * @param {string | null | undefined} [fallbackSummary]
+ */
+function buildMovieCopy(title, genres, fallbackSummary) {
+	/** @type {Record<string, { summary?: string }>} */
+	const generatedMovieCopyByTitle = movieCopyByTitle;
+	const summary = sanitizeSynopsis(
+		manualMovieCopyByTitle[title]?.summary ??
+			generatedMovieCopyByTitle[title]?.summary ??
+			fallbackSummary
+	);
+	const quickCopy = buildQuickMovieCopy(title, genres, summary);
+
+	return {
+		summary:
+			summary ||
+			`${title} suit des personnages confrontés à un basculement majeur dans un récit immédiatement lisible.`,
+		description: quickCopy,
+		editorial: quickCopy
+	};
+}
 
 /**
  * @param {string} name
@@ -167,7 +313,6 @@ function makeMovie(title, index) {
 	const baseYear = 1954 + ((index * 5) % 69);
 	const duration = 96 + ((index * 7) % 72);
 	const genres = genreCycle[index % genreCycle.length];
-	const opener = descriptionOpeners[index % descriptionOpeners.length];
 	const cast = [
 		'Jake Gyllenhaal',
 		'Carey Mulligan',
@@ -203,9 +348,7 @@ function makeMovie(title, index) {
 		})),
 		maturity: ['13+', '16+', '10+', '18+'][index % 4],
 		quality: 'HD',
-		description: `${opener} ${title} garde une narration lisible, une vraie tenue dramatique et un impact immediat.`,
-		editorial: `${title} fait partie de ces films qu on recommande pour leur rythme, leur tenue visuelle et leur capacite a accrocher en quelques minutes.`,
-		summary: `${title} suit des personnages confrontes a des choix decisiifs dans un recit tendu, clair et immediatement lisible.`
+		...buildMovieCopy(title, genres)
 	};
 }
 
@@ -371,9 +514,7 @@ function makeSupplementalMovie(spec, index) {
 		})),
 		maturity: ['10+', '13+', '16+'][index % 3],
 		quality: 'HD',
-		description: `${spec.title} propose une experience ${spec.genres.join(', ').toLowerCase()} immediate, avec une lecture simple et un vrai potentiel de recommandation.`,
-		editorial: `${spec.title} enrichit le catalogue avec un ton clair, identifiable et facile a activer selon un besoin de selection.`,
-		summary: `${spec.title} reste une option solide pour completer les selections editoriales avec un profil net et memorisable.`
+		...buildMovieCopy(spec.title, spec.genres)
 	};
 }
 
@@ -390,7 +531,7 @@ export const recommendationMovies = recommendationTitles
 	.map((movie, index) => ({
 		...movie,
 		id: `rec-${index + 1}`,
-		editorial: `${movie.title} fonctionne tres bien en recommandation grace a une promesse claire, une mise en scene forte et un ton qui reste facile a presenter sur une page editoriale.`
+		...buildMovieCopy(movie.title, movie.genres, movie.summary)
 	}));
 
 /**
@@ -423,9 +564,6 @@ function makeGenreMovie(genre, title, index) {
 				? `${(1.8 - index * 0.05).toFixed(1).replace('.', ',')} M`
 				: `${980 - index * 11} k`,
 		genres: [genre],
-		description: `${title} condense les codes du ${genre.toLowerCase()} avec une approche nette et rapide a scanner.`,
-		editorial: `${title} pousse une ambiance ${genre.toLowerCase()} tres directe, avec un vrai sens du rythme et une entree facile sur la page.`,
-		summary: `${title} suit un parcours tendu et lisible, ideal pour une selection rapide par genre.`,
 		director: ['Julia Ducournau', 'Celine Sciamma', 'Cedric Klapisch'][index % 3],
 		cast,
 		castMembers: cast.map((name, castIndex) => ({
@@ -434,7 +572,8 @@ function makeGenreMovie(genre, title, index) {
 			image: actorPortrait(name, castIndex)
 		})),
 		maturity: ['13+', '16+', '10+'][index % 3],
-		quality: 'HD'
+		quality: 'HD',
+		...buildMovieCopy(title, [genre])
 	};
 }
 
@@ -732,22 +871,11 @@ function hashValue(value) {
 
 /**
  * @param {string} title
- * @param {number | null | undefined} year
  * @param {string[] | null | undefined} genres
- * @param {string | null | undefined} director
- * @param {string | null | undefined} duration
+ * @param {string | null | undefined} overview
  */
-function buildFrenchMovieCopy(title, year, genres, director, duration) {
-	const genreLabel = genres?.filter(Boolean).slice(0, 2).join(', ') || 'drame';
-	const yearLabel = year ? `sorti en ${year}` : 'du cinema';
-	const directorLabel = director ? ` mis en scene par ${director}` : '';
-	const durationLabel = duration ? ` sur ${duration}` : '';
-
-	return {
-		summary: `${title} est un film ${genreLabel.toLowerCase()} ${yearLabel}${directorLabel}, construit autour d une narration forte et d un vrai souffle de mise en scene.`,
-		description: `${title} propose une experience ${genreLabel.toLowerCase()} marquante${durationLabel}, avec des personnages memorables et une ambiance immediatement lisible.`,
-		editorial: `${title} s impose comme une recommandation solide pour son ton, son rythme et la precision de son univers cinematographique.`
-	};
+function buildFrenchMovieCopy(title, genres, overview) {
+	return buildMovieCopy(title, genres, overview);
 }
 
 /**
@@ -793,10 +921,8 @@ export function applyMovieArtwork(entries) {
 			movie.castMembers = match.castMembers?.length ? match.castMembers : movie.castMembers;
 			const frenchCopy = buildFrenchMovieCopy(
 				movie.title,
-				match.year ?? movie.year,
 				match.genres?.length ? match.genres : movie.genres,
-				match.director ?? movie.director,
-				match.duration ?? movie.duration
+				match.overview ?? movie.summary
 			);
 			movie.summary = frenchCopy.summary;
 			movie.description = frenchCopy.description;

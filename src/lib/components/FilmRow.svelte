@@ -17,7 +17,6 @@
 	<div class="film-copy">
 		<h3>{film.title}</h3>
 		<p class="meta">{film.year} · {film.duration} · {film.genres.join(', ')}</p>
-		<p class="rating">★ {film.rating} · {film.votes}</p>
 		{#if detailed}
 			<p class="description">{film.editorial}</p>
 			<p class="credits">De {film.director} · Avec {film.cast.join(', ')}</p>
@@ -118,7 +117,6 @@
 	}
 
 	.meta,
-	.rating,
 	.credits {
 		margin-top: 0.35rem;
 		font-size: 0.96rem;
