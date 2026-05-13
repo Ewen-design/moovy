@@ -25,10 +25,13 @@
 		{ href: '/recommandations', label: 'Recommandations' },
 		{ href: '/genres', label: 'Par genres' }
 	];
+	const preloaderLetters = ['M', 'O', 'O', 'V', 'Y'];
 	let scrolled = $state(false);
 	let searchQuery = $state('');
 	let searchOpen = $state(false);
 	let theme = $state('light');
+	let showPreloader = $state(true);
+	let preloaderLeaving = $state(false);
 	/** @type {HTMLDivElement | null} */
 	let searchBox = $state(null);
 	/** @type {HTMLInputElement | null} */
@@ -110,6 +113,12 @@
 
 	onMount(() => {
 		seedPosterLibrary();
+		const leaveTimer = window.setTimeout(() => {
+			preloaderLeaving = true;
+		}, 1600);
+		const hideTimer = window.setTimeout(() => {
+			showPreloader = false;
+		}, 2120);
 
 		/** @param {PointerEvent} event */
 		const handlePointerDown = (event) => {
@@ -122,6 +131,8 @@
 		document.addEventListener('pointerdown', handlePointerDown);
 
 		return () => {
+			window.clearTimeout(leaveTimer);
+			window.clearTimeout(hideTimer);
 			document.removeEventListener('pointerdown', handlePointerDown);
 		};
 	});
@@ -137,6 +148,18 @@
 </svelte:head>
 
 <svelte:window onscroll={() => (scrolled = window.scrollY > 28)} />
+
+{#if showPreloader}
+	<div class:leaving={preloaderLeaving} class="preloader" aria-hidden="true">
+		<div class="preloader-word">
+			{#each preloaderLetters as letter, index}
+				<span class="preloader-letter" style={`--letter-delay:${index * 90}ms;`}>
+					<span>{letter}</span>
+				</span>
+			{/each}
+		</div>
+	</div>
+{/if}
 
 <div class="app-shell">
 	<header class:scrolled class="site-header">
@@ -329,6 +352,61 @@
 
 	.app-shell {
 		padding: 10px;
+	}
+
+	.preloader {
+		position: fixed;
+		inset: 0;
+		z-index: 140;
+		display: grid;
+		place-items: center;
+		background: var(--page-bg);
+		opacity: 1;
+		transition:
+			opacity 520ms cubic-bezier(0.22, 1, 0.36, 1),
+			visibility 520ms cubic-bezier(0.22, 1, 0.36, 1);
+	}
+
+	.preloader.leaving {
+		opacity: 0;
+		visibility: hidden;
+	}
+
+	.preloader-word {
+		display: inline-flex;
+		align-items: center;
+		gap: 0;
+		color: var(--accent-blue);
+		font-size: clamp(2.6rem, 8vw, 5.8rem);
+		font-weight: 800;
+		letter-spacing: -0.12em;
+	}
+
+	.preloader-letter {
+		display: inline-block;
+		overflow: hidden;
+		perspective: 800px;
+	}
+
+	.preloader-letter span {
+		display: inline-block;
+		transform-origin: center bottom;
+		transform: translateY(115%) rotateX(-88deg);
+		animation: preloader-wipe-flip 920ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+		animation-delay: var(--letter-delay);
+		will-change: transform, opacity;
+	}
+
+	@keyframes preloader-wipe-flip {
+		0% {
+			opacity: 0;
+			transform: translateY(115%) rotateX(-88deg);
+		}
+
+		100% {
+			opacity: 1;
+			transform: translateY(0) rotateX(0deg);
+		}
 	}
 
 	.site-header {
