@@ -179,7 +179,7 @@
 			onSelect={openFilm}
 		/>
 		<PosterRail
-			title="Top 10"
+			title="TOP 10 : Notre sélection"
 			items={bottomMiniRailItems}
 			variant="medium"
 			orientation="portrait"
@@ -214,8 +214,17 @@
 	}
 
 	.hero-rail :global(h3) {
-		color: #ffffff;
-		font-size: 1rem;
+		color: rgba(255, 255, 255, 0.68);
+		font-size: 1.8rem;
+		font-weight: 800;
+		letter-spacing: -0.04em;
+	}
+
+	.bottom-slider :global(h3) {
+		font-size: 1.95rem;
+		font-weight: 800;
+		letter-spacing: -0.04em;
+		color: rgba(255, 255, 255, 0.68);
 	}
 
 	.feature-grid {

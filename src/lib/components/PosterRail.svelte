@@ -371,7 +371,8 @@
 	}
 
 	.poster-rail.topTen h3 {
-		font-size: 1.18rem;
+		font-size: 1.95rem;
+		letter-spacing: -0.04em;
 	}
 
 	@media (max-width: 640px) {
