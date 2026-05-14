@@ -45,6 +45,12 @@
 				onkeydown={(event) => event.stopPropagation()}
 				transition:fly={{ y: 80, duration: 260 }}
 			>
+				<div class="sheet-close-rail">
+					<button class="close-button" type="button" aria-label="Fermer" onclick={handleCloseClick}>
+						<span class="close-icon" aria-hidden="true"></span>
+					</button>
+				</div>
+
 				<div class="sheet-hero">
 					<img
 						src={film.backdrop ?? film.image ?? heroImage}
@@ -53,9 +59,6 @@
 						decoding="async"
 					/>
 					<div class="sheet-overlay"></div>
-					<button class="close-button" type="button" aria-label="Fermer" onclick={handleCloseClick}>
-						<span class="close-icon" aria-hidden="true"></span>
-					</button>
 
 					<div class="sheet-hero-copy">
 						{#if film.clearlogo}
@@ -170,6 +173,7 @@
 	}
 
 	.sheet {
+		position: relative;
 		width: min(1240px, 100%);
 		margin: auto;
 		border-radius: 3px;
@@ -212,10 +216,19 @@
 		transition: background var(--theme-duration) var(--theme-ease);
 	}
 
-	.close-button {
-		position: absolute;
+	.sheet-close-rail {
+		position: sticky;
 		top: 18px;
-		right: 18px;
+		z-index: 12;
+		display: flex;
+		justify-content: flex-end;
+		height: 0;
+		padding-right: 18px;
+		pointer-events: none;
+	}
+
+	.close-button {
+		position: relative;
 		z-index: 1;
 		width: 56px;
 		height: 56px;
@@ -225,6 +238,7 @@
 		display: inline-flex;
 		align-items: center;
 		justify-content: center;
+		pointer-events: auto;
 		cursor: pointer;
 		transition:
 			background-color 220ms ease,
@@ -524,6 +538,16 @@
 	}
 
 	@media (max-width: 720px) {
+		.sheet-close-rail {
+			top: 18px;
+			padding-right: 18px;
+		}
+
+		.close-button {
+			width: 50px;
+			height: 50px;
+		}
+
 		.trailer-button {
 			margin-top: 0.9rem;
 			padding: 0.74rem 0.98rem;
