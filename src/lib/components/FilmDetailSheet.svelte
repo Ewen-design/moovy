@@ -345,22 +345,31 @@
 		justify-content: center;
 		margin-top: 1rem;
 		padding: 0.82rem 1.1rem;
+		border: 1px solid transparent;
 		border-radius: 999px;
 		background: var(--accent-blue);
 		color: #ffffff;
 		font-size: 0.92rem;
 		font-weight: 700;
 		text-decoration: none;
-		box-shadow: 0 12px 28px rgba(47, 107, 255, 0.24);
 		transition:
-			background-color 220ms ease,
-			box-shadow 220ms ease,
-			transform 220ms ease;
+			background-color 240ms ease,
+			color 240ms ease,
+			border-color 240ms ease,
+			box-shadow 240ms ease;
 	}
 
 	.trailer-button:hover {
-		transform: translateY(-1px);
-		box-shadow: 0 16px 34px rgba(47, 107, 255, 0.3);
+		background: #ffffff;
+		color: var(--accent-blue);
+		border-color: var(--accent-blue);
+		box-shadow: 0 12px 28px rgba(47, 107, 255, 0.14);
+	}
+
+	:global(body.theme-dark) .trailer-button:hover {
+		background: #05070a;
+		color: var(--accent-blue);
+		border-color: var(--accent-blue);
 	}
 
 	.cast-grid {
