@@ -76,6 +76,16 @@
 					<div class="sheet-main">
 						<p class="meta">{film.year} · {film.duration} · {film.maturity ?? '13+'}</p>
 						<p class="summary">{film.summary ?? film.description}</p>
+						{#if film.trailerUrl}
+							<a
+								class="trailer-button"
+								href={film.trailerUrl}
+								target="_blank"
+								rel="noreferrer"
+							>
+								Bande-annonce
+							</a>
+						{/if}
 
 						<div class="cast-grid">
 							{#each film.castMembers ?? [] as member}
@@ -315,6 +325,30 @@
 		color: var(--page-text);
 	}
 
+	.trailer-button {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		margin-top: 1rem;
+		padding: 0.82rem 1.1rem;
+		border-radius: 999px;
+		background: var(--accent-blue);
+		color: #ffffff;
+		font-size: 0.92rem;
+		font-weight: 700;
+		text-decoration: none;
+		box-shadow: 0 12px 28px rgba(47, 107, 255, 0.24);
+		transition:
+			background-color 220ms ease,
+			box-shadow 220ms ease,
+			transform 220ms ease;
+	}
+
+	.trailer-button:hover {
+		transform: translateY(-1px);
+		box-shadow: 0 16px 34px rgba(47, 107, 255, 0.3);
+	}
+
 	.cast-grid {
 		display: grid;
 		grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -490,6 +524,12 @@
 	}
 
 	@media (max-width: 720px) {
+		.trailer-button {
+			margin-top: 0.9rem;
+			padding: 0.74rem 0.98rem;
+			font-size: 0.86rem;
+		}
+
 		.cast-grid {
 			grid-template-columns: repeat(3, minmax(0, 1fr));
 			gap: 8px;

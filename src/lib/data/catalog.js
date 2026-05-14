@@ -891,7 +891,8 @@ function buildFrenchMovieCopy(title, genres, overview) {
  *   genres?: string[] | null,
  *   director?: string | null,
  *   cast?: string[] | null,
- *   castMembers?: { name: string, role: string, image: string }[] | null
+ *   castMembers?: { name: string, role: string, image: string }[] | null,
+ *   trailerUrl?: string | null
  * }} PosterEntry
  */
 
@@ -919,6 +920,7 @@ export function applyMovieArtwork(entries) {
 			movie.director = match.director ?? movie.director;
 			movie.cast = match.cast?.length ? match.cast : movie.cast;
 			movie.castMembers = match.castMembers?.length ? match.castMembers : movie.castMembers;
+			movie.trailerUrl = match.trailerUrl ?? movie.trailerUrl ?? null;
 			const frenchCopy = buildFrenchMovieCopy(
 				movie.title,
 				match.genres?.length ? match.genres : movie.genres,

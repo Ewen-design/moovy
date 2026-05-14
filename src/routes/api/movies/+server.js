@@ -109,7 +109,8 @@ const movieCache = new Map();
  *   genres: string[],
  *   director: string | null,
  *   cast: string[],
- *   castMembers: { name: string, role: string, image: string }[]
+ *   castMembers: { name: string, role: string, image: string }[],
+ *   trailerUrl: string | null
  * } | null} MovieRecord
  */
 
@@ -202,6 +203,22 @@ function pickPeople(characters, type, peopleType) {
 	return (characters ?? [])
 		.filter((character) => character?.type === type || character?.peopleType === peopleType)
 		.sort((left, right) => (left?.sort ?? 999) - (right?.sort ?? 999));
+}
+
+/** @param {{ url?: string | null, language?: string | null }[]} trailers */
+function pickTrailer(trailers) {
+	const validTrailers = (trailers ?? []).filter(
+		(trailer) => typeof trailer?.url === 'string' && trailer.url.startsWith('http')
+	);
+
+	if (!validTrailers.length) return null;
+
+	return (
+		validTrailers.find((trailer) => trailer.language === 'fra')?.url ??
+		validTrailers.find((trailer) => trailer.language === 'eng')?.url ??
+		validTrailers[0]?.url ??
+		null
+	);
 }
 
 /** @param {string} title */
@@ -348,6 +365,7 @@ async function fetchMovieByTitle(fetch, title) {
 		const moviePayload = await tvdbFetch(fetch, `/movies/${movieId}/extended`);
 		const movie = moviePayload?.data;
 		const artworks = movie?.artworks ?? [];
+		const trailers = movie?.trailers ?? [];
 		const characters = movie?.characters ?? [];
 		const castMembers = pickPeople(characters, 3, 'Actor')
 			.slice(0, 6)
@@ -374,7 +392,8 @@ async function fetchMovieByTitle(fetch, title) {
 						.filter(Boolean),
 					director: directors.at(-1)?.personName ?? null,
 					cast: castMembers.slice(0, 3).map((member) => member.name),
-					castMembers
+					castMembers,
+					trailerUrl: pickTrailer(trailers)
 				}
 			: null;
 
