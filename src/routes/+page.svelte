@@ -71,7 +71,7 @@
 
 	const heroRailItems = $derived.by(() => {
 		$posterVersion;
-		return recommendationMovies.slice(0, 10);
+		return recommendationMovies.slice(0, 20);
 	});
 
 	const bottomRailItems = $derived.by(() => {
@@ -145,6 +145,8 @@
 				overlayStyle="home"
 				showCardCopy={false}
 				dark={true}
+				autoAdvance={false}
+				desktopScrollable={true}
 				onSelect={openFilm}
 			/>
 		</div>
@@ -173,6 +175,8 @@
 			showCardCopy={false}
 			enableHoverPreview={false}
 			pauseOnHover={false}
+			autoAdvance={false}
+			desktopScrollable={true}
 			onSelect={openFilm}
 		/>
 		<PosterRail
@@ -182,6 +186,8 @@
 			orientation="portrait"
 			overlayStyle="home"
 			layout="top10"
+			autoAdvance={false}
+			desktopScrollable={true}
 			onSelect={openFilm}
 		/>
 	</section>

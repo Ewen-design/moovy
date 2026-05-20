@@ -15,6 +15,8 @@
 		showCardCopy = true,
 		enableHoverPreview = true,
 		pauseOnHover = true,
+		autoAdvance = true,
+		desktopScrollable = false,
 		centerActive = false,
 		onSelect = () => {}
 	} = $props();
@@ -40,7 +42,9 @@
 	let hoverTimer = null;
 	let previewUnmountTimer = null;
 
-	const renderedItems = $derived(isMobileViewport ? items : [...items, ...items]);
+	const isScrollable = $derived(isMobileViewport || desktopScrollable);
+	const useInfiniteTrack = $derived(!isScrollable && autoAdvance);
+	const renderedItems = $derived(useInfiniteTrack ? [...items, ...items] : items);
 
 	const measure = () => {
 		if (!track) return;
@@ -55,7 +59,7 @@
 	const offset = $derived(centerActive ? Math.max(0, (viewportWidth - cardWidth) / 2) : 0);
 
 	const step = () => {
-		if (!items.length || paused || isMobileViewport) return;
+		if (!items.length || paused || !useInfiniteTrack) return;
 		instant = false;
 		index += 1;
 	};
@@ -90,14 +94,19 @@
 		if (!railRoot || !(target instanceof HTMLElement)) return;
 		clearPreviewUnmountTimer();
 		const rootRect = railRoot.getBoundingClientRect();
-		const cardRect = target.getBoundingClientRect();
+		const previewAnchor =
+			layout === 'top10'
+				? /** @type {HTMLElement | null} */ (target.querySelector('.ranked-poster img'))
+				: target;
+		const anchorRect = (previewAnchor ?? target).getBoundingClientRect();
 		const previewWidth = layout === 'top10' ? 430 : 396;
 		const previewHeight = 372;
-		const rawLeft = cardRect.left - rootRect.left + cardRect.width / 2 - previewWidth / 2;
+		const rawLeft = anchorRect.left - rootRect.left + anchorRect.width / 2 - previewWidth / 2;
 		const maxLeft = Math.max(0, rootRect.width - previewWidth);
 		const left = Math.min(Math.max(0, rawLeft), maxLeft);
-		const rawTop = cardRect.top - rootRect.top + cardRect.height / 2 - previewHeight / 2 + 12;
-		const top = Math.max(0, rawTop);
+		const rawTop = anchorRect.top - rootRect.top + anchorRect.height / 2 - previewHeight / 2 + 12;
+		const maxTop = Math.max(0, rootRect.height - previewHeight);
+		const top = Math.min(Math.max(0, rawTop), maxTop);
 
 		previewItem = item;
 		previewStyle = `left:${left}px;top:${top}px;width:${previewWidth}px;`;
@@ -122,7 +131,7 @@
 	};
 
 	const handleTransitionEnd = () => {
-		if (isMobileViewport) return;
+		if (!useInfiniteTrack) return;
 		if (index < items.length) return;
 		instant = true;
 		index = 0;
@@ -138,7 +147,7 @@
 		const mediaQuery = window.matchMedia('(max-width: 720px)');
 		const syncViewport = (matches) => {
 			isMobileViewport = matches;
-			if (matches) {
+			if (matches || !useInfiniteTrack) {
 				index = 0;
 				instant = true;
 			} else {
@@ -176,6 +185,7 @@
 	class:expanded={density === 'expanded'}
 	class:homeOverlay={overlayStyle === 'home'}
 	class:topTen={layout === 'top10'}
+	class:desktopScrollable
 	class={`poster-rail ${variant}`}
 	aria-label={title || 'Selection'}
 	onmouseenter={() => {
@@ -226,12 +236,12 @@
 
 	<div class="rail-viewport" bind:this={viewport}>
 		<div
-			class:instant={instant || isMobileViewport}
-			class:mobile-track={isMobileViewport}
+			class:instant={instant || isScrollable}
+			class:mobile-track={isScrollable}
 			class="rail-track"
 			bind:this={track}
 			ontransitionend={handleTransitionEnd}
-			style={isMobileViewport
+			style={isScrollable
 				? undefined
 				: `transform: translate3d(-${Math.max(0, index * (cardWidth + gap) - offset)}px, 0, 0);`}
 		>
@@ -306,6 +316,18 @@
 
 	.rail-viewport {
 		overflow: hidden;
+	}
+
+	.poster-rail.desktopScrollable .rail-viewport {
+		overflow-x: auto;
+		overflow-y: hidden;
+		scrollbar-width: none;
+		overscroll-behavior-x: contain;
+		-webkit-overflow-scrolling: touch;
+	}
+
+	.poster-rail.desktopScrollable .rail-viewport::-webkit-scrollbar {
+		display: none;
 	}
 
 	.rail-preview-card {
