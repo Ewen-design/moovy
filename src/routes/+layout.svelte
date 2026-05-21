@@ -3,6 +3,7 @@
 	import { page } from '$app/state';
 	import { onMount, tick } from 'svelte';
 	import FilmDetailSheet from '$lib/components/FilmDetailSheet.svelte';
+	import PosterRail from '$lib/components/PosterRail.svelte';
 	import { applyFallbackArtwork, applyMovieArtwork } from '$lib/data/catalog';
 	import {
 		genreMovieCollections,
@@ -70,6 +71,17 @@ const shareImage = `${siteUrl}/moovy-showcase.svg`;
 					movie.genres.some((genre) => genre.toLowerCase().includes(query))
 			)
 			.slice(0, 8);
+	});
+
+	const mobileMenuRailItems = $derived.by(() => {
+		$posterVersion;
+		return recommendationMovies
+			.filter((movie) => movie.clearlogo && (movie.backdrop || movie.image))
+			.slice(0, 8)
+			.map((movie) => ({
+				...movie,
+				image: movie.backdrop ?? movie.image
+			}));
 	});
 
 	/** @param {{ id: string, title: string, genres: string[] }} film */
@@ -390,6 +402,21 @@ const shareImage = `${siteUrl}/moovy-showcase.svg`;
 						</a>
 					{/each}
 				</nav>
+				<div class="mobile-menu-rail">
+					<PosterRail
+						title=""
+						items={mobileMenuRailItems}
+						variant="small"
+						orientation="landscape"
+						overlayStyle="home"
+						showCardCopy={false}
+						showClearlogoOverlay={true}
+						dark={true}
+						enableHoverPreview={false}
+						pauseOnHover={false}
+						onSelect={openFilm}
+					/>
+				</div>
 			</div>
 		</div>
 	</header>
@@ -992,7 +1019,7 @@ const shareImage = `${siteUrl}/moovy-showcase.svg`;
 		width: min(100%, 420px);
 		padding: 0;
 		margin: 0 auto;
-		transform: translateY(-20px);
+		transform: translateY(-112px);
 	}
 
 	.mobile-nav a {
@@ -1044,7 +1071,7 @@ const shareImage = `${siteUrl}/moovy-showcase.svg`;
 	}
 
 	.mobile-nav-copy strong {
-		font-size: clamp(2rem, 7vw, 3rem);
+		font-size: clamp(1.8rem, 6.3vw, 2.6rem);
 		font-weight: 700;
 		line-height: 0.98;
 		letter-spacing: -0.06em;
@@ -1054,6 +1081,32 @@ const shareImage = `${siteUrl}/moovy-showcase.svg`;
 		color: rgba(255, 255, 255, 0.42);
 		font-size: 0.84rem;
 		line-height: 1.35;
+	}
+
+	.mobile-menu-rail {
+		position: absolute;
+		left: 0;
+		right: 0;
+		bottom: calc(82px + env(safe-area-inset-bottom));
+		padding: 0 16px;
+	}
+
+	.mobile-menu-rail :global(.poster-rail) {
+		gap: 0;
+	}
+
+	.mobile-menu-rail :global(.rail-viewport) {
+		overflow-x: auto;
+		overflow-y: hidden;
+		scrollbar-width: none;
+	}
+
+	.mobile-menu-rail :global(.rail-viewport::-webkit-scrollbar) {
+		display: none;
+	}
+
+	.mobile-menu-rail :global(.rail-track) {
+		padding-right: 12px;
 	}
 
 	.site-main {
@@ -1294,6 +1347,11 @@ const shareImage = `${siteUrl}/moovy-showcase.svg`;
 
 		.mobile-nav-inner {
 			top: 58px;
+		}
+
+		.mobile-menu-rail {
+			bottom: calc(74px + env(safe-area-inset-bottom));
+			padding: 0 10px;
 		}
 
 		.brand {

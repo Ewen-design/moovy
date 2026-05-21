@@ -13,6 +13,7 @@
 		overlayStyle = 'default',
 		layout = 'default',
 		showCardCopy = true,
+		showClearlogoOverlay = false,
 		enableHoverPreview = true,
 		pauseOnHover = true,
 		autoAdvance = true,
@@ -332,7 +333,17 @@
 							decoding="async"
 						/>
 						<div class="rail-overlay"></div>
-						{#if showCardCopy}
+						{#if showClearlogoOverlay && item.clearlogo}
+							<div class="rail-clearlogo-wrap">
+								<img
+									class="rail-clearlogo"
+									src={item.clearlogo}
+									alt={item.title}
+									loading="lazy"
+									decoding="async"
+								/>
+							</div>
+						{:else if showCardCopy}
 							<div class="rail-copy">
 								{#if item.tag}
 									<span>{item.tag}</span>
@@ -731,6 +742,27 @@
 		gap: 0.2rem;
 		color: #ffffff;
 		text-align: left;
+	}
+
+	.rail-clearlogo-wrap {
+		position: absolute;
+		inset: 0;
+		z-index: 1;
+		display: grid;
+		place-items: center;
+		padding: 12px;
+		pointer-events: none;
+	}
+
+	.rail-clearlogo {
+		display: block;
+		max-width: min(82%, 250px);
+		max-height: 52%;
+		object-fit: contain;
+		object-position: center;
+		filter:
+			drop-shadow(0 10px 24px rgba(0, 0, 0, 0.42))
+			drop-shadow(0 2px 10px rgba(0, 0, 0, 0.24));
 	}
 
 	.rail-copy span {
