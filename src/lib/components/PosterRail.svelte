@@ -685,11 +685,15 @@
 	}
 
 	:global(body:not(.theme-dark)) .poster-rail.topTen .rail-rank {
-		text-shadow:
-			1px 0 0 var(--accent-blue),
-			-1px 0 0 var(--accent-blue),
-			0 1px 0 var(--accent-blue),
-			0 -1px 0 var(--accent-blue);
+		text-shadow: none;
+		filter:
+			drop-shadow(12px 0 12px rgba(0, 0, 0, 0.34))
+			drop-shadow(24px 0 30px rgba(0, 0, 0, 0.26))
+			drop-shadow(40px 0 68px rgba(0, 0, 0, 0.2));
+	}
+
+	:global(body:not(.theme-dark)) .poster-rail.topTen .rail-rank-shadow {
+		opacity: 0;
 	}
 
 	.rail-rank-digits {

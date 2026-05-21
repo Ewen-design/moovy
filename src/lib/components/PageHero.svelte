@@ -78,6 +78,7 @@
 		min-height: calc(100svh - 96px);
 		overflow: hidden;
 		background: var(--page-bg);
+		transition: background-color var(--theme-duration) var(--theme-ease);
 	}
 
 	.page-hero.compact {
@@ -100,6 +101,9 @@
 		height: 42%;
 		background: linear-gradient(180deg, rgba(10, 10, 10, 0) 0%, rgba(10, 10, 10, 0.22) 38%, rgba(10, 10, 10, 0.94) 100%);
 		pointer-events: none;
+		transition:
+			background var(--theme-duration) var(--theme-ease),
+			height var(--theme-duration) var(--theme-ease);
 	}
 
 	.page-hero.simpleBottom .hero-bottom-overlay {
