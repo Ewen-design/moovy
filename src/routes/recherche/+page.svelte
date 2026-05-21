@@ -18,11 +18,33 @@
 		...Object.values(genreMovieCollections).flat()
 	].filter((movie, index, list) => index === list.findIndex((item) => item.title === movie.title));
 
+	/**
+	 * @param {{ title: string }[]} source
+	 * @param {Set<string>} usedTitles
+	 * @param {number} count
+	 */
+	const takeUniqueMovies = (source, usedTitles, count = 10) => {
+		const items = [];
+
+		for (const movie of source) {
+			if (usedTitles.has(movie.title)) continue;
+			items.push(movie);
+			usedTitles.add(movie.title);
+			if (items.length === count) break;
+		}
+
+		return items;
+	};
+
+	const usedDiscoveryTitles = new Set();
 	const searchSections = [
-		{ title: 'À redécouvrir', items: recommendationMovies.slice(0, 10) },
-		{ title: 'Pour ce soir', items: tonightMoviePool.slice(0, 10) },
-		{ title: 'Top 100', items: top100Movies.slice(0, 10) },
-		{ title: 'Films à grand spectacle', items: genreMovieCollections['Action']?.slice(0, 10) ?? [] }
+		{ title: 'À redécouvrir', items: takeUniqueMovies(recommendationMovies, usedDiscoveryTitles) },
+		{ title: 'Pour ce soir', items: takeUniqueMovies(tonightMoviePool, usedDiscoveryTitles) },
+		{ title: 'Top 100', items: takeUniqueMovies(top100Movies, usedDiscoveryTitles) },
+		{
+			title: 'Films à grand spectacle',
+			items: takeUniqueMovies(genreMovieCollections['Action'] ?? [], usedDiscoveryTitles)
+		}
 	];
 
 	let query = $state('');
