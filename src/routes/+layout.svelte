@@ -27,6 +27,7 @@ const shareImage = `${siteUrl}/moovy-showcase.svg`;
 		{ href: '/recommandations', label: 'Recommandations' },
 		{ href: '/genres', label: 'Par genres' }
 	];
+	const mobileMenuItems = navItems.filter((item) => item.href !== '/');
 	const mobileBottomNavItems = [
 		{ href: '/', label: 'Accueil', icon: 'home' },
 		{ href: '/recherche', label: 'Recherche', icon: 'search' }
@@ -37,6 +38,7 @@ const shareImage = `${siteUrl}/moovy-showcase.svg`;
 	let searchQuery = $state('');
 	let searchOpen = $state(false);
 	let mobileMenuOpen = $state(false);
+	let mobileMenuClosing = $state(false);
 	let isMobileViewport = $state(false);
 	let theme = $state('light');
 	let showPreloader = $state(true);
@@ -49,6 +51,7 @@ const shareImage = `${siteUrl}/moovy-showcase.svg`;
 	let searchInput = $state(null);
 	/** @type {{ id: string, title: string, genres: string[] } | null} */
 	let selectedFilm = $state(null);
+	let mobileMenuCloseTimer;
 
 	const searchableMovies = [
 		...top100Movies,
@@ -114,12 +117,41 @@ const shareImage = `${siteUrl}/moovy-showcase.svg`;
 		applyTheme(theme === 'dark' ? 'light' : 'dark');
 	};
 
-	const closeMobileMenu = () => {
+	const finalizeMobileMenuClose = () => {
 		mobileMenuOpen = false;
+		mobileMenuClosing = false;
+		if (!browser || !mobileMenuCloseTimer) return;
+		window.clearTimeout(mobileMenuCloseTimer);
+		mobileMenuCloseTimer = null;
+	};
+
+	const requestCloseMobileMenu = () => {
+		if (!mobileMenuOpen || mobileMenuClosing) return;
+		mobileMenuClosing = true;
+		if (browser) {
+			if (mobileMenuCloseTimer) window.clearTimeout(mobileMenuCloseTimer);
+			mobileMenuCloseTimer = window.setTimeout(() => {
+				finalizeMobileMenuClose();
+			}, 1040);
+		}
+	};
+
+	const closeMobileMenu = () => {
+		requestCloseMobileMenu();
 	};
 
 	const toggleMobileMenu = () => {
-		mobileMenuOpen = !mobileMenuOpen;
+		if (mobileMenuOpen) {
+			requestCloseMobileMenu();
+			return;
+		}
+
+		if (browser && mobileMenuCloseTimer) {
+			window.clearTimeout(mobileMenuCloseTimer);
+			mobileMenuCloseTimer = null;
+		}
+		mobileMenuClosing = false;
+		mobileMenuOpen = true;
 	};
 
 	const getDefaultTheme = () => 'dark';
@@ -154,14 +186,14 @@ const shareImage = `${siteUrl}/moovy-showcase.svg`;
 
 	$effect(() => {
 		const nextPathname = page.url.pathname;
-		mobileMenuOpen = false;
+		finalizeMobileMenuClose();
 		searchOpen = false;
 		searchQuery = '';
 	});
 
 	$effect(() => {
 		if (!browser) return;
-		document.body.classList.toggle('menu-open', mobileMenuOpen);
+		document.body.classList.toggle('menu-open', mobileMenuOpen || mobileMenuClosing);
 
 		return () => {
 			document.body.classList.remove('menu-open');
@@ -189,7 +221,7 @@ const shareImage = `${siteUrl}/moovy-showcase.svg`;
 			}
 
 			if (mobileMenuOpen && headerElement && !headerElement.contains(target)) {
-				mobileMenuOpen = false;
+				requestCloseMobileMenu();
 			}
 		};
 
@@ -198,7 +230,7 @@ const shareImage = `${siteUrl}/moovy-showcase.svg`;
 			if (event.key !== 'Escape') return;
 			searchOpen = false;
 			searchQuery = '';
-			mobileMenuOpen = false;
+			requestCloseMobileMenu();
 		};
 
 		/** @param {MediaQueryListEvent} event */
@@ -213,6 +245,7 @@ const shareImage = `${siteUrl}/moovy-showcase.svg`;
 		return () => {
 			window.clearTimeout(leaveTimer);
 			window.clearTimeout(hideTimer);
+			if (mobileMenuCloseTimer) window.clearTimeout(mobileMenuCloseTimer);
 			document.removeEventListener('pointerdown', handlePointerDown);
 			document.removeEventListener('keydown', handleKeydown);
 			mediaQuery.removeEventListener('change', handleViewportChange);
@@ -326,39 +359,34 @@ const shareImage = `${siteUrl}/moovy-showcase.svg`;
 			</button>
 		</div>
 
-		<div class:open={mobileMenuOpen} class="mobile-nav-panel" id="mobile-nav">
-			<div class="mobile-nav-atmosphere" aria-hidden="true">
-				<span class="mobile-nav-glow mobile-nav-glow-a"></span>
-				<span class="mobile-nav-glow mobile-nav-glow-b"></span>
-			</div>
-			<div class="mobile-nav-surface">
-				<div class="mobile-nav-head">
-					<p>Menu</p>
-					<span>Explore rapidement Moovy</span>
-				</div>
+		<div
+			class:active={mobileMenuOpen || mobileMenuClosing}
+			class:open={mobileMenuOpen && !mobileMenuClosing}
+			class:closing={mobileMenuClosing}
+			class="mobile-nav-panel"
+			id="mobile-nav"
+		>
+			<div class="mobile-nav-inner">
 				<nav class="mobile-nav" aria-label="Navigation mobile">
-					{#each navItems as item, index}
+					{#each mobileMenuItems as item, index}
 						<a
 							class:active={page.url.pathname === item.href}
 							href={item.href}
 							onclick={closeMobileMenu}
-							style={`--nav-index:${index};`}
+							style={`--nav-index:${index};--nav-out-index:${mobileMenuItems.length - index - 1};`}
 						>
 							<span class="mobile-nav-copy">
 								<strong>{item.label}</strong>
 								<small>
-									{item.href === '/'
-										? 'Accueil principal'
-										: item.href === '/ce-soir'
-											? 'Selection par humeur'
-											: item.href === '/top-100'
-												? 'Classement complet'
-												: item.href === '/recommandations'
-													? 'Nos suggestions'
-													: 'Explorer par genres'}
+									{item.href === '/ce-soir'
+										? 'Selection par humeur'
+										: item.href === '/top-100'
+											? 'Classement complet'
+											: item.href === '/recommandations'
+												? 'Nos suggestions'
+												: 'Explorer par genres'}
 								</small>
 							</span>
-							<span class="mobile-nav-arrow" aria-hidden="true"></span>
 						</a>
 					{/each}
 				</nav>
@@ -532,7 +560,7 @@ const shareImage = `${siteUrl}/moovy-showcase.svg`;
 	.preloader {
 		position: fixed;
 		inset: 0;
-		z-index: 140;
+		z-index: 500;
 		display: grid;
 		place-items: center;
 		background: #0b0d11;
@@ -589,7 +617,8 @@ const shareImage = `${siteUrl}/moovy-showcase.svg`;
 		top: 0;
 		left: 0;
 		right: 0;
-		z-index: 70;
+		z-index: 220;
+		isolation: isolate;
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
@@ -640,7 +669,7 @@ const shareImage = `${siteUrl}/moovy-showcase.svg`;
 
 	.brand {
 		position: relative;
-		z-index: 1;
+		z-index: 3;
 		color: var(--accent-blue);
 		font-size: 1.7rem;
 		font-weight: 800;
@@ -652,7 +681,7 @@ const shareImage = `${siteUrl}/moovy-showcase.svg`;
 	.header-right,
 	.site-nav {
 		position: relative;
-		z-index: 1;
+		z-index: 3;
 		display: flex;
 		align-items: center;
 		gap: 1.5rem;
@@ -681,7 +710,7 @@ const shareImage = `${siteUrl}/moovy-showcase.svg`;
 
 	.theme-toggle {
 		position: relative;
-		z-index: 1;
+		z-index: 3;
 		display: inline-flex;
 		align-items: center;
 		justify-content: center;
@@ -705,7 +734,7 @@ const shareImage = `${siteUrl}/moovy-showcase.svg`;
 	.menu-toggle {
 		display: none;
 		position: relative;
-		z-index: 1;
+		z-index: 3;
 		align-items: center;
 		justify-content: center;
 		width: 56px;
@@ -912,173 +941,101 @@ const shareImage = `${siteUrl}/moovy-showcase.svg`;
 	}
 
 	.mobile-nav-panel {
-		display: none;
-		position: relative;
-		width: 100%;
-		max-height: 0;
-		overflow: hidden;
+		position: fixed;
+		inset: 0;
+		z-index: 1;
+		display: block;
+		padding: 0;
+		background: rgba(0, 0, 0, 0.985);
 		opacity: 0;
 		pointer-events: none;
+		clip-path: inset(0 0 100% 0);
 		transition:
-			max-height 560ms cubic-bezier(0.22, 1, 0.36, 1),
+			clip-path 700ms cubic-bezier(0.22, 1, 0.36, 1),
 			opacity 260ms ease;
 	}
 
-	.mobile-nav-panel.open {
-		max-height: 78svh;
+	.mobile-nav-panel.active {
 		opacity: 1;
 		pointer-events: auto;
 	}
 
-	.mobile-nav-atmosphere {
-		position: absolute;
-		inset: 0;
+	.mobile-nav-panel.open {
+		clip-path: inset(0 0 0 0);
+	}
+
+	.mobile-nav-panel.closing {
+		clip-path: inset(0 0 100% 0);
 		pointer-events: none;
+		transition:
+			clip-path 620ms cubic-bezier(0.22, 1, 0.36, 1) 380ms,
+			opacity 260ms ease;
 	}
 
-	.mobile-nav-glow {
+	.mobile-nav-inner {
 		position: absolute;
-		border-radius: 999px;
-		filter: blur(48px);
-		opacity: 0;
-		transform: scale(0.82);
-		transition:
-			opacity 520ms ease,
-			transform 620ms cubic-bezier(0.22, 1, 0.36, 1);
-	}
-
-	.mobile-nav-panel.open .mobile-nav-glow {
-		opacity: 1;
-		transform: scale(1);
-	}
-
-	.mobile-nav-glow-a {
-		top: -10px;
-		right: -18px;
-		width: 150px;
-		height: 150px;
-		background: rgba(47, 107, 255, 0.22);
-	}
-
-	.mobile-nav-glow-b {
-		left: -28px;
-		bottom: 12px;
-		width: 110px;
-		height: 110px;
-		background: rgba(255, 255, 255, 0.05);
-	}
-
-	.mobile-nav-surface {
-		position: relative;
+		top: 72px;
+		left: 0;
+		right: 0;
+		bottom: 0;
 		display: grid;
-		gap: 0.9rem;
-		padding: 0.35rem 0 0.55rem;
-		transform: translateY(-14px) scale(0.988);
-		transform-origin: top center;
-		opacity: 0;
-		background: linear-gradient(180deg, rgba(14, 17, 24, 0.98) 0%, rgba(11, 13, 17, 0.94) 100%);
-		box-shadow: 0 24px 72px rgba(0, 0, 0, 0.34);
-		transition:
-			transform 520ms cubic-bezier(0.22, 1, 0.36, 1),
-			opacity 240ms ease;
-	}
-
-	.mobile-nav-panel.open .mobile-nav-surface {
-		transform: translateY(0) scale(1);
-		opacity: 1;
-	}
-
-	.mobile-nav-head {
-		display: grid;
-		gap: 0.14rem;
-		padding: 0 0.3rem;
-	}
-
-	.mobile-nav-head p,
-	.mobile-nav-head span {
-		margin: 0;
-	}
-
-	.mobile-nav-head p {
-		color: rgba(255, 255, 255, 0.96);
-		font-size: 1.45rem;
-		font-weight: 700;
-		letter-spacing: -0.05em;
-	}
-
-	.mobile-nav-head span {
-		color: rgba(255, 255, 255, 0.46);
-		font-size: 0.82rem;
-		line-height: 1.35;
+		place-items: center;
+		padding: 24px;
 	}
 
 	.mobile-nav {
 		display: grid;
-		gap: 0.18rem;
+		align-self: center;
+		align-content: center;
+		justify-items: center;
+		gap: 1.7rem;
+		width: min(100%, 420px);
 		padding: 0;
+		margin: 0 auto;
+		transform: translateY(-20px);
 	}
 
 	.mobile-nav a {
-		position: relative;
 		display: grid;
-		grid-template-columns: minmax(0, 1fr) auto;
-		align-items: center;
-		gap: 0.9rem;
-		padding: 1rem 0.3rem 1rem 0.3rem;
-		background: transparent;
-		color: rgba(255, 255, 255, 0.9);
+		justify-items: center;
+		gap: 0.32rem;
+		width: 100%;
+		padding: 0;
+		color: #ffffff;
 		text-decoration: none;
-		transform: translateX(-18px);
+		text-align: center;
+		transform: translateY(72%) rotateX(-72deg);
+		transform-origin: center bottom;
 		opacity: 0;
 		transition:
-			transform 480ms cubic-bezier(0.22, 1, 0.36, 1),
-			opacity 260ms ease,
-			background-color 240ms ease,
-			color 240ms ease;
-		transition-delay: calc(var(--nav-index, 0) * 42ms);
+			transform 540ms cubic-bezier(0.22, 1, 0.36, 1),
+			opacity 320ms ease,
+			color 220ms ease;
+		transition-delay: calc(760ms + (var(--nav-index, 0) * 92ms));
+		will-change: transform, opacity;
 	}
 
 	.mobile-nav-panel.open .mobile-nav a {
-		transform: translateX(0);
+		transform: translateY(0) rotateX(0deg);
 		opacity: 1;
 	}
 
-	.mobile-nav a::before {
-		content: '';
-		position: absolute;
-		left: 0.3rem;
-		right: 0.3rem;
-		bottom: 0;
-		height: 1px;
-		background: linear-gradient(
-			90deg,
-			rgba(255, 255, 255, 0) 0%,
-			rgba(255, 255, 255, 0.08) 18%,
-			rgba(255, 255, 255, 0.08) 82%,
-			rgba(255, 255, 255, 0) 100%
-		);
-		transform: scaleX(0.94);
-		transition:
-			transform 240ms ease,
-			opacity 240ms ease;
-	}
-
-	.mobile-nav a:hover::before,
-	.mobile-nav a.active::before {
-		transform: scaleX(1);
-		opacity: 1;
+	.mobile-nav-panel.closing .mobile-nav a {
+		transform: translateY(72%) rotateX(-72deg);
+		opacity: 0;
+		transition-delay: calc(var(--nav-out-index, 0) * 58ms);
 	}
 
 	.mobile-nav a:hover,
 	.mobile-nav a.active {
 		color: #ffffff;
-		background: rgba(255, 255, 255, 0.025);
 	}
 
 	.mobile-nav-copy {
 		display: grid;
-		gap: 0.08rem;
+		gap: 0.22rem;
 		min-width: 0;
+		justify-items: center;
 	}
 
 	.mobile-nav-copy strong,
@@ -1087,65 +1044,16 @@ const shareImage = `${siteUrl}/moovy-showcase.svg`;
 	}
 
 	.mobile-nav-copy strong {
-		font-size: 1.12rem;
-		font-weight: 680;
-		line-height: 1.12;
-		letter-spacing: -0.03em;
+		font-size: clamp(2rem, 7vw, 3rem);
+		font-weight: 700;
+		line-height: 0.98;
+		letter-spacing: -0.06em;
 	}
 
 	.mobile-nav-copy small {
 		color: rgba(255, 255, 255, 0.42);
-		font-size: 0.76rem;
+		font-size: 0.84rem;
 		line-height: 1.35;
-	}
-
-	.mobile-nav-arrow {
-		width: 22px;
-		height: 22px;
-		border-radius: 999px;
-		background:
-			linear-gradient(135deg, rgba(47, 107, 255, 0.24), rgba(47, 107, 255, 0.06));
-		transform: translateX(-4px) scale(0.92);
-		opacity: 0.72;
-		transition:
-			transform 240ms ease,
-			opacity 240ms ease,
-			background 240ms ease;
-	}
-
-	.mobile-nav-arrow::before,
-	.mobile-nav-arrow::after {
-		content: '';
-		position: absolute;
-		display: block;
-		background: var(--accent-blue);
-		border-radius: 999px;
-	}
-
-	.mobile-nav-arrow::before {
-		width: 8px;
-		height: 1.5px;
-		top: 10px;
-		left: 7px;
-	}
-
-	.mobile-nav-arrow::after {
-		width: 6px;
-		height: 6px;
-		top: 7px;
-		right: 6px;
-		background: transparent;
-		border-top: 1.5px solid var(--accent-blue);
-		border-right: 1.5px solid var(--accent-blue);
-		transform: rotate(45deg);
-	}
-
-	.mobile-nav a:hover .mobile-nav-arrow,
-	.mobile-nav a.active .mobile-nav-arrow {
-		transform: translateX(0) scale(1);
-		opacity: 1;
-		background:
-			linear-gradient(135deg, rgba(47, 107, 255, 0.34), rgba(47, 107, 255, 0.1));
 	}
 
 	.site-main {
@@ -1301,7 +1209,7 @@ const shareImage = `${siteUrl}/moovy-showcase.svg`;
 		}
 
 		.mobile-nav-panel {
-			padding-top: 76px;
+			padding-top: 0;
 		}
 
 		.theme-toggle,
@@ -1328,7 +1236,7 @@ const shareImage = `${siteUrl}/moovy-showcase.svg`;
 			left: 8px;
 			right: 8px;
 			bottom: 8px;
-			z-index: 78;
+			z-index: 230;
 			display: grid;
 			grid-template-columns: repeat(2, minmax(0, 1fr));
 			padding: 4px 8px calc(4px + env(safe-area-inset-bottom));
@@ -1373,12 +1281,8 @@ const shareImage = `${siteUrl}/moovy-showcase.svg`;
 			font-size: clamp(3.3rem, 16vw, 7rem);
 		}
 
-		.mobile-nav-panel {
-			padding-top: 76px;
-		}
-
-		.mobile-nav a {
-			padding-right: 0;
+		.mobile-nav-inner {
+			top: 76px;
 		}
 	}
 
@@ -1388,12 +1292,8 @@ const shareImage = `${siteUrl}/moovy-showcase.svg`;
 			padding-inline: 10px;
 		}
 
-		.mobile-nav-panel {
-			padding-top: 58px;
-		}
-
-		.mobile-nav a {
-			padding: 0.92rem 1rem;
+		.mobile-nav-inner {
+			top: 58px;
 		}
 
 		.brand {
