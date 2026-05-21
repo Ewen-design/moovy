@@ -345,6 +345,7 @@
 	.tonight-head p,
 	.results-head p {
 		color: var(--muted-text);
+		font-weight: 380;
 	}
 
 	.quiz-grid {
@@ -363,6 +364,7 @@
 	.question-card h3 {
 		font-size: 1.35rem;
 		letter-spacing: -0.03em;
+		font-weight: 520;
 	}
 
 	.option-row {
@@ -382,8 +384,22 @@
 		background: var(--accent-blue);
 		color: #ffffff;
 		font: inherit;
-		font-weight: 600;
+		font-weight: 500;
 		cursor: pointer;
+	}
+
+	.tonight-shell :global(.film-row h3) {
+		font-weight: 560;
+	}
+
+	.tonight-shell :global(.film-row .meta),
+	.tonight-shell :global(.film-row .description),
+	.tonight-shell :global(.film-row .credits) {
+		font-weight: 380;
+	}
+
+	.tonight-shell :global(.film-row .row-action) {
+		font-weight: 500;
 	}
 
 	.option-row button.active {
@@ -438,8 +454,6 @@
 		}
 
 		.option-row button {
-			width: 100%;
-			justify-content: flex-start;
 			padding: 0.88rem 1rem;
 		}
 	}

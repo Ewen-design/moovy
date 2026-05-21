@@ -173,6 +173,7 @@
 	.catalog-head span {
 		font-size: 0.95rem;
 		color: var(--muted-text);
+		font-weight: 380;
 	}
 
 	.pager {
@@ -189,7 +190,7 @@
 		background: var(--accent-blue);
 		color: #ffffff;
 		font-size: 0.94rem;
-		font-weight: 600;
+		font-weight: 500;
 		cursor: pointer;
 		box-shadow: 0 10px 24px rgba(47, 107, 255, 0.18);
 		transition:
@@ -226,6 +227,20 @@
 	.bottom {
 		justify-content: flex-start;
 		padding-bottom: 4px;
+	}
+
+	.catalog-shell :global(.film-row h3) {
+		font-weight: 560;
+	}
+
+	.catalog-shell :global(.film-row .meta),
+	.catalog-shell :global(.film-row .description),
+	.catalog-shell :global(.film-row .credits) {
+		font-weight: 380;
+	}
+
+	.catalog-shell :global(.film-row .row-action) {
+		font-weight: 500;
 	}
 
 	@media (max-width: 640px) {

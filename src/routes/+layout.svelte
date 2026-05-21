@@ -467,9 +467,18 @@ const shareImage = `${siteUrl}/moovy-showcase.svg`;
 </div>
 
 <style>
+	@font-face {
+		font-family: 'Panchang';
+		src: url('/fonts/Panchang-Variable.woff2') format('woff2');
+		font-weight: 200 800;
+		font-style: normal;
+		font-display: swap;
+	}
+
 	:global(body) {
 		margin: 0;
-		font-family: Inter, 'Helvetica Neue', Arial, sans-serif;
+		font-family: 'Panchang', 'Helvetica Neue', Arial, sans-serif;
+		font-weight: 450;
 		--accent-blue: #2f6bff;
 		--page-bg: #f5f5f7;
 		--page-text: #111111;
@@ -505,6 +514,42 @@ const shareImage = `${siteUrl}/moovy-showcase.svg`;
 		transition:
 			background-color var(--theme-duration) var(--theme-ease),
 			color var(--theme-duration) var(--theme-ease);
+	}
+
+	:global(
+		html,
+		body,
+		button,
+		input,
+		textarea,
+		select,
+		option,
+		a,
+		p,
+		span,
+		small,
+		strong,
+		em,
+		li,
+		label,
+		h1,
+		h2,
+		h3,
+		h4,
+		h5,
+		h6
+	) {
+		font-family: 'Panchang', 'Helvetica Neue', Arial, sans-serif;
+	}
+
+	:global(p),
+	:global(small),
+	:global(label),
+	:global(input),
+	:global(textarea),
+	:global(select),
+	:global(li) {
+		font-weight: 380;
 	}
 
 	:global(body.preloader-open) {
@@ -724,8 +769,10 @@ const shareImage = `${siteUrl}/moovy-showcase.svg`;
 		align-items: center;
 		justify-content: center;
 		padding: 0.5rem 0.9rem;
-		font-size: 0.96rem;
+		font-size: 0.76rem;
 		font-weight: 600;
+		letter-spacing: 0.08em;
+		text-transform: uppercase;
 		text-decoration: none;
 		color: rgba(255, 255, 255, 0.54);
 		transition: color 220ms ease;
@@ -914,6 +961,7 @@ const shareImage = `${siteUrl}/moovy-showcase.svg`;
 		box-shadow: none;
 		color: var(--search-text);
 		font: inherit;
+		font-size: 0.84rem;
 		outline: none;
 		opacity: 0;
 		pointer-events: none;
@@ -1071,16 +1119,19 @@ const shareImage = `${siteUrl}/moovy-showcase.svg`;
 	}
 
 	.mobile-nav-copy strong {
-		font-size: clamp(1.8rem, 6.3vw, 2.6rem);
+		font-size: clamp(1.16rem, 4.2vw, 1.68rem);
 		font-weight: 700;
 		line-height: 0.98;
-		letter-spacing: -0.06em;
+		letter-spacing: 0.02em;
+		text-transform: uppercase;
 	}
 
 	.mobile-nav-copy small {
 		color: rgba(255, 255, 255, 0.42);
-		font-size: 0.84rem;
+		font-size: 0.76rem;
 		line-height: 1.35;
+		letter-spacing: 0.08em;
+		text-transform: uppercase;
 	}
 
 	.mobile-menu-rail {

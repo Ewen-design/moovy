@@ -116,6 +116,20 @@
 		gap: 10px;
 	}
 
+	.recommend-shell :global(.film-row h3) {
+		font-weight: 560;
+	}
+
+	.recommend-shell :global(.film-row .meta),
+	.recommend-shell :global(.film-row .description),
+	.recommend-shell :global(.film-row .credits) {
+		font-weight: 380;
+	}
+
+	.recommend-shell :global(.film-row .row-action) {
+		font-weight: 500;
+	}
+
 	@media (max-width: 640px) {
 		.recommend-page {
 			gap: 72px;
@@ -127,6 +141,54 @@
 
 		.film-list {
 			gap: 8px;
+		}
+
+		.recommend-shell :global(.film-row.mobile-card.mobile-expanded),
+		.recommend-shell :global(.film-row.mobile-card.mobile-expanded.detailed) {
+			grid-template-columns: 176px minmax(0, 1fr);
+			gap: 22px;
+			padding: 18px 16px;
+		}
+
+		.recommend-shell :global(.film-row.mobile-card.mobile-expanded .poster-wrap img) {
+			width: 176px;
+		}
+
+		.recommend-shell :global(.film-row.mobile-card.mobile-expanded .content-stack) {
+			gap: 0.9rem;
+		}
+
+		.recommend-shell :global(.film-row.mobile-card.mobile-expanded .film-copy) {
+			gap: 0.8rem;
+		}
+
+		.recommend-shell :global(.film-row.mobile-card.mobile-expanded h3) {
+			line-height: 1.08;
+		}
+
+		.recommend-shell :global(.film-row.mobile-card.mobile-expanded .meta),
+		.recommend-shell :global(.film-row.mobile-card.mobile-expanded .credits),
+		.recommend-shell :global(.film-row.mobile-card.mobile-expanded .description) {
+			line-height: 1.52;
+		}
+	}
+
+	@media (max-width: 480px) {
+		.recommend-shell :global(.film-row.mobile-card.mobile-expanded),
+		.recommend-shell :global(.film-row.mobile-card.mobile-expanded.detailed) {
+			grid-template-columns: 160px minmax(0, 1fr);
+			gap: 18px;
+			padding: 16px 12px;
+		}
+
+		.recommend-shell :global(.film-row.mobile-card.mobile-expanded .poster-wrap img) {
+			width: 160px;
+		}
+
+		.recommend-shell :global(.film-row.mobile-card.mobile-expanded .meta),
+		.recommend-shell :global(.film-row.mobile-card.mobile-expanded .credits),
+		.recommend-shell :global(.film-row.mobile-card.mobile-expanded .description) {
+			line-height: 1.48;
 		}
 	}
 </style>

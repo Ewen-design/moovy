@@ -596,6 +596,7 @@
 		top: 50%;
 		z-index: 1;
 		transform: translateY(-50%);
+		font-family: system-ui, sans-serif;
 		font-size: clamp(13.4rem, 18vw, 21rem);
 		line-height: 0.82;
 		font-weight: 900;
@@ -620,6 +621,7 @@
 		top: 50%;
 		z-index: 2;
 		transform: translateY(-50%);
+		font-family: system-ui, sans-serif;
 		font-size: clamp(13.4rem, 18vw, 21rem);
 		line-height: 0.82;
 		font-weight: 900;
@@ -693,6 +695,11 @@
 	.rail-rank-digits {
 		display: inline-flex;
 		gap: 0;
+		font-family: system-ui, sans-serif;
+	}
+
+	.rail-rank-digits span {
+		font-family: system-ui, sans-serif;
 	}
 
 	.rail-rank-shadow .rail-rank-digits {

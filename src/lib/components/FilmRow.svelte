@@ -118,6 +118,7 @@
 		top: 50%;
 		z-index: 0;
 		transform: translateY(-50%);
+		font-family: system-ui, sans-serif;
 		font-size: clamp(6.7rem, 10vw, 10rem);
 		line-height: 0.82;
 		font-weight: 900;
@@ -174,7 +175,7 @@
 		background: var(--accent-blue);
 		color: #ffffff;
 		font-size: 0.92rem;
-		font-weight: 600;
+		font-weight: 200;
 		text-decoration: none;
 		transition:
 			background-color 240ms ease,

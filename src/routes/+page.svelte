@@ -218,16 +218,22 @@
 
 	.hero-rail :global(h3) {
 		color: rgba(255, 255, 255, 0.68);
-		font-size: 1.8rem;
+		font-size: 1.4rem;
 		font-weight: 800;
-		letter-spacing: -0.04em;
+		letter-spacing: 0.08em;
+		text-transform: uppercase;
 	}
 
 	.bottom-slider :global(h3) {
-		font-size: 1.95rem;
+		font-size: 1.4rem;
 		font-weight: 800;
-		letter-spacing: -0.04em;
+		letter-spacing: 0.08em;
 		color: rgba(255, 255, 255, 0.68);
+		text-transform: uppercase;
+	}
+
+	.bottom-slider :global(.poster-rail.topTen h3) {
+		font-size: 1.4rem;
 	}
 
 	.feature-grid {
@@ -338,12 +344,12 @@
 		.hero-rail :global(h3),
 		.bottom-slider :global(h3) {
 			color: #ffffff;
-			font-size: 1.32rem;
+			font-size: 1.18rem;
 			line-height: 1;
 		}
 
 		.bottom-slider :global(.poster-rail.topTen h3) {
-			font-size: 1.32rem;
+			font-size: 1.18rem;
 		}
 
 		.feature-grid {

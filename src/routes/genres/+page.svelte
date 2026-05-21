@@ -160,7 +160,7 @@
 		background: var(--accent-blue);
 		color: #ffffff;
 		font-size: 0.95rem;
-		font-weight: 600;
+		font-weight: 500;
 		cursor: pointer;
 		box-shadow: 0 10px 24px rgba(47, 107, 255, 0.18);
 		transition:
@@ -186,6 +186,20 @@
 	.film-list {
 		display: grid;
 		gap: 10px;
+	}
+
+	.genre-shell :global(.film-row h3) {
+		font-weight: 560;
+	}
+
+	.genre-shell :global(.film-row .meta),
+	.genre-shell :global(.film-row .description),
+	.genre-shell :global(.film-row .credits) {
+		font-weight: 380;
+	}
+
+	.genre-shell :global(.film-row .row-action) {
+		font-weight: 500;
 	}
 
 	@media (max-width: 640px) {

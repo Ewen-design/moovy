@@ -166,7 +166,7 @@
 	.sheet-backdrop {
 		position: fixed;
 		inset: 0;
-		z-index: 80;
+		z-index: 320;
 		padding: 24px;
 		background: rgba(0, 0, 0, 0.72);
 		overflow: auto;
