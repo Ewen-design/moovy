@@ -22,6 +22,7 @@
 	} = $props();
 
 	const previewDelayMs = 1000;
+	const scrollSettleDelayMs = 180;
 
 	/** @type {HTMLDivElement | undefined} */
 	let railRoot;
@@ -41,6 +42,10 @@
 	let previewStyle = $state('');
 	let hoverTimer = null;
 	let previewUnmountTimer = null;
+	let scrollSettleTimer = null;
+	let suppressHoverUntil = 0;
+	let hoveredCard = null;
+	let hoveredItem = null;
 
 	const isScrollable = $derived(isMobileViewport || desktopScrollable);
 	const useInfiniteTrack = $derived(!isScrollable && autoAdvance);
@@ -76,6 +81,16 @@
 		previewUnmountTimer = null;
 	};
 
+	const clearScrollSettleTimer = () => {
+		if (!scrollSettleTimer) return;
+		clearTimeout(scrollSettleTimer);
+		scrollSettleTimer = null;
+	};
+
+	const suppressHover = (delay = scrollSettleDelayMs) => {
+		suppressHoverUntil = Date.now() + delay;
+	};
+
 	const hidePreview = () => {
 		clearHoverTimer();
 		clearPreviewUnmountTimer();
@@ -104,9 +119,7 @@
 		const rawLeft = anchorRect.left - rootRect.left + anchorRect.width / 2 - previewWidth / 2;
 		const maxLeft = Math.max(0, rootRect.width - previewWidth);
 		const left = Math.min(Math.max(0, rawLeft), maxLeft);
-		const rawTop = anchorRect.top - rootRect.top + anchorRect.height / 2 - previewHeight / 2 + 12;
-		const maxTop = Math.max(0, rootRect.height - previewHeight);
-		const top = Math.min(Math.max(0, rawTop), maxTop);
+		const top = anchorRect.top - rootRect.top + anchorRect.height / 2 - previewHeight / 2;
 
 		previewItem = item;
 		previewStyle = `left:${left}px;top:${top}px;width:${previewWidth}px;`;
@@ -115,18 +128,40 @@
 		});
 	};
 
+	const handleViewportScrollActivity = () => {
+		suppressHover();
+		hidePreview();
+		clearScrollSettleTimer();
+		scrollSettleTimer = setTimeout(() => {
+			scrollSettleTimer = null;
+			if (hoveredCard && hoveredItem && Date.now() >= suppressHoverUntil) {
+				clearHoverTimer();
+				hoverTimer = setTimeout(() => {
+					if (!hoveredCard || !hoveredItem || Date.now() < suppressHoverUntil) return;
+					showPreview(hoveredItem, hoveredCard);
+				}, 120);
+			}
+		}, scrollSettleDelayMs);
+	};
+
 	/** @param {{ currentTarget: EventTarget | null }} event */
 	const handleCardEnter = (item, event) => {
-		if (!enableHoverPreview || isMobileViewport) return;
 		const target = event.currentTarget;
+		if (!(target instanceof HTMLElement)) return;
+		hoveredCard = target;
+		hoveredItem = item;
+		if (!enableHoverPreview || isMobileViewport || Date.now() < suppressHoverUntil) return;
 		clearHoverTimer();
 		previewVisible = false;
 		hoverTimer = setTimeout(() => {
+			if (Date.now() < suppressHoverUntil) return;
 			showPreview(item, target);
 		}, previewDelayMs);
 	};
 
 	const handleCardLeave = () => {
+		hoveredCard = null;
+		hoveredItem = null;
 		hidePreview();
 	};
 
@@ -158,7 +193,7 @@
 		};
 
 		syncViewport(mediaQuery.matches);
-		measure();
+		requestAnimationFrame(() => measure());
 		const resizeObserver = new ResizeObserver(() => measure());
 		if (viewport) resizeObserver.observe(viewport);
 		const interval = setInterval(step, 3600);
@@ -173,6 +208,7 @@
 			clearInterval(interval);
 			clearHoverTimer();
 			clearPreviewUnmountTimer();
+			clearScrollSettleTimer();
 			mediaQuery.removeEventListener('change', handleViewportChange);
 		};
 	});
@@ -234,7 +270,11 @@
 		</article>
 	{/if}
 
-	<div class="rail-viewport" bind:this={viewport}>
+	<div
+		class="rail-viewport"
+		bind:this={viewport}
+		onscroll={handleViewportScrollActivity}
+	>
 		<div
 			class:instant={instant || isScrollable}
 			class:mobile-track={isScrollable}
@@ -322,7 +362,6 @@
 		overflow-x: auto;
 		overflow-y: hidden;
 		scrollbar-width: none;
-		overscroll-behavior-x: contain;
 		-webkit-overflow-scrolling: touch;
 	}
 
