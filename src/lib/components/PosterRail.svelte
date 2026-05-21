@@ -295,6 +295,17 @@
 				>
 					{#if layout === 'top10'}
 						<div class="ranked-poster">
+							<span class:double-rank={item.rank >= 10} class="rail-rank-shadow" aria-hidden="true">
+								{#if item.rank >= 10}
+									<span class="rail-rank-digits">
+										{#each String(item.rank).split('') as digit}
+											<span>{digit}</span>
+										{/each}
+									</span>
+								{:else}
+									{item.rank}
+								{/if}
+							</span>
 							<span class:double-rank={item.rank >= 10} class="rail-rank" aria-hidden="true">
 								{#if item.rank >= 10}
 									<span class="rail-rank-digits">
@@ -561,17 +572,18 @@
 
 	.poster-rail.topTen .ranked-poster img {
 		position: relative;
-		z-index: 1;
+		z-index: 3;
 		width: clamp(188px, 14vw, 258px);
 		height: auto;
 		object-fit: contain;
+		filter: none;
 	}
 
 	.rail-rank {
 		position: absolute;
 		right: calc(100% - (var(--rail-rank-gap) + var(--rail-rank-overlap)));
 		top: 50%;
-		z-index: 0;
+		z-index: 1;
 		transform: translateY(-50%);
 		font-size: clamp(13.4rem, 18vw, 21rem);
 		line-height: 0.82;
@@ -591,7 +603,52 @@
 		pointer-events: none;
 	}
 
+	.rail-rank-shadow {
+		position: absolute;
+		right: calc(100% - (var(--rail-rank-gap) + var(--rail-rank-overlap)));
+		top: 50%;
+		z-index: 2;
+		transform: translateY(-50%);
+		font-size: clamp(13.4rem, 18vw, 21rem);
+		line-height: 0.82;
+		font-weight: 900;
+		letter-spacing: -0.24em;
+		color: transparent;
+		white-space: nowrap;
+		pointer-events: none;
+		background:
+			linear-gradient(
+				90deg,
+				rgba(5, 8, 12, 0) 0%,
+				rgba(5, 8, 12, 0.07) 18%,
+				rgba(5, 8, 12, 0.2) 40%,
+				rgba(5, 8, 12, 0.46) 64%,
+				rgba(5, 8, 12, 0.72) 100%
+			);
+		-webkit-background-clip: text;
+		background-clip: text;
+		-webkit-text-fill-color: transparent;
+		filter:
+			blur(0.5px)
+			drop-shadow(7px 0 7px rgba(0, 0, 0, 0.16))
+			drop-shadow(12px 0 10px rgba(0, 0, 0, 0.1));
+		opacity: 0.9;
+	}
+
+	.rail-rank-shadow .rail-rank-digits,
+	.rail-rank-shadow .rail-rank-digits span {
+		background: inherit;
+		-webkit-background-clip: text;
+		background-clip: text;
+		-webkit-text-fill-color: transparent;
+	}
+
 	.rail-rank.double-rank {
+		--rail-rank-overlap: 2.25rem;
+		font-size: clamp(10.7rem, 14.3vw, 15.8rem);
+	}
+
+	.rail-rank-shadow.double-rank {
 		--rail-rank-overlap: 2.25rem;
 		font-size: clamp(10.7rem, 14.3vw, 15.8rem);
 	}
@@ -599,7 +656,19 @@
 	.poster-rail.topTen .rail-rank {
 		right: calc(100% - (var(--rail-rank-gap) + 2.75rem));
 		color: var(--surface-card);
-		text-shadow: none;
+		text-shadow:
+			12px 0 10px rgba(0, 0, 0, 0.52),
+			22px 0 22px rgba(0, 0, 0, 0.42),
+			34px 0 44px rgba(0, 0, 0, 0.34),
+			52px 0 92px rgba(0, 0, 0, 0.28);
+		filter:
+			drop-shadow(12px 0 12px rgba(0, 0, 0, 0.34))
+			drop-shadow(24px 0 30px rgba(0, 0, 0, 0.26))
+			drop-shadow(40px 0 68px rgba(0, 0, 0, 0.2));
+	}
+
+	.poster-rail.topTen .rail-rank-shadow {
+		right: calc(100% - (var(--rail-rank-gap) + 2.75rem));
 	}
 
 	:global(body:not(.theme-dark)) .poster-rail.topTen .rail-rank {
@@ -615,12 +684,26 @@
 		gap: 0;
 	}
 
+	.rail-rank-shadow .rail-rank-digits {
+		display: inline-flex;
+		gap: 0;
+	}
+
 	.poster-rail.topTen .rail-rank.double-rank .rail-rank-digits {
 		gap: 0;
 		transform: translateX(0.55rem);
 	}
 
+	.poster-rail.topTen .rail-rank-shadow.double-rank .rail-rank-digits {
+		gap: 0;
+		transform: translateX(0.55rem);
+	}
+
 	.poster-rail.topTen .rail-rank.double-rank .rail-rank-digits span + span {
+		margin-left: -1.35rem;
+	}
+
+	.poster-rail.topTen .rail-rank-shadow.double-rank .rail-rank-digits span + span {
 		margin-left: -1.35rem;
 	}
 
@@ -779,7 +862,15 @@
 			transform: translateX(0.34rem);
 		}
 
+		.poster-rail.topTen .rail-rank-shadow.double-rank .rail-rank-digits {
+			transform: translateX(0.34rem);
+		}
+
 		.poster-rail.topTen .rail-rank.double-rank .rail-rank-digits span + span {
+			margin-left: -0.9rem;
+		}
+
+		.poster-rail.topTen .rail-rank-shadow.double-rank .rail-rank-digits span + span {
 			margin-left: -0.9rem;
 		}
 	}
