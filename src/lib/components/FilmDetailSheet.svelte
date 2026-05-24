@@ -353,10 +353,10 @@
 		font-weight: 700;
 		text-decoration: none;
 		transition:
-			background-color 240ms ease,
-			color 240ms ease,
-			border-color 240ms ease,
-			box-shadow 240ms ease;
+			background-color 320ms cubic-bezier(0.22, 1, 0.36, 1),
+			color 320ms cubic-bezier(0.22, 1, 0.36, 1),
+			border-color 320ms cubic-bezier(0.22, 1, 0.36, 1),
+			box-shadow 320ms cubic-bezier(0.22, 1, 0.36, 1);
 	}
 
 	.trailer-button:hover {

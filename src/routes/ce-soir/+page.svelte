@@ -533,10 +533,7 @@
 		--stage-height: 100svh;
 		margin: -10px;
 		height: var(--stage-height);
-		background:
-			radial-gradient(circle at top left, rgba(47, 107, 255, 0.22), transparent 34%),
-			radial-gradient(circle at bottom right, rgba(132, 167, 255, 0.12), transparent 26%),
-			#05070b;
+		background: #05070b;
 		color: #f4f7ff;
 		overflow: hidden;
 	}
@@ -552,6 +549,7 @@
 		display: grid;
 		grid-template-rows: auto minmax(0, 1fr);
 		padding: clamp(5rem, 8vw, 6.6rem) clamp(1rem, 3vw, 2.8rem) 4.4rem;
+		background: #05070b;
 	}
 
 	.results-stage {
@@ -685,7 +683,7 @@
 	.validate-button {
 		border: 1px solid transparent;
 		border-radius: 999px;
-		background: linear-gradient(135deg, #5a7dff 0%, #2f6bff 100%);
+		background-color: #2f6bff;
 		color: #ffffff;
 		font: inherit;
 		cursor: pointer;
@@ -697,15 +695,16 @@
 		padding: 0.58rem 0.95rem;
 		font-size: 0.86rem;
 		transition:
-			background 180ms ease,
-			color 180ms ease,
-			box-shadow 180ms ease;
+			background-color 320ms cubic-bezier(0.22, 1, 0.36, 1),
+			border-color 320ms cubic-bezier(0.22, 1, 0.36, 1),
+			color 320ms cubic-bezier(0.22, 1, 0.36, 1),
+			box-shadow 320ms cubic-bezier(0.22, 1, 0.36, 1);
 	}
 
 	.primary-button:hover,
 	.criteria-toggle:hover,
 	.validate-button:hover {
-		background: transparent;
+		background-color: transparent;
 		color: #2f6bff;
 		border-color: #2f6bff;
 		box-shadow: 0 12px 28px rgba(47, 107, 255, 0.14);
@@ -713,7 +712,7 @@
 
 	.question-options button.active,
 	.criteria-options button.active {
-		background: transparent;
+		background-color: transparent;
 		color: #2f6bff;
 		border-color: #2f6bff;
 		box-shadow: none;
@@ -754,7 +753,7 @@
 		transition:
 			transform 180ms ease,
 			background-color 180ms ease,
-		opacity 180ms ease;
+			opacity 180ms ease;
 	}
 
 	.chevron {
@@ -815,8 +814,10 @@
 		font-weight: 560;
 		box-shadow: 0 20px 50px rgba(15, 39, 96, 0.35);
 		transition:
-			transform 180ms ease,
-			box-shadow 180ms ease;
+			background-color 340ms cubic-bezier(0.22, 1, 0.36, 1),
+			border-color 340ms cubic-bezier(0.22, 1, 0.36, 1),
+			color 340ms cubic-bezier(0.22, 1, 0.36, 1),
+			box-shadow 340ms cubic-bezier(0.22, 1, 0.36, 1);
 	}
 
 	.validate-button {
@@ -830,11 +831,11 @@
 		font-weight: 560;
 		transform: translateX(-50%);
 		transition:
-			background-color 180ms ease,
-			border-color 180ms ease,
-			color 180ms ease,
-			opacity 180ms ease,
-			box-shadow 180ms ease;
+			background-color 320ms cubic-bezier(0.22, 1, 0.36, 1),
+			border-color 320ms cubic-bezier(0.22, 1, 0.36, 1),
+			color 320ms cubic-bezier(0.22, 1, 0.36, 1),
+			opacity 320ms cubic-bezier(0.22, 1, 0.36, 1),
+			box-shadow 320ms cubic-bezier(0.22, 1, 0.36, 1);
 	}
 
 	.validate-button:disabled {
@@ -842,8 +843,11 @@
 		cursor: default;
 	}
 
-	.results-mode .criteria-toggle {
-		background: linear-gradient(135deg, #6d8bff 0%, #2f6bff 100%);
+	.validate-button:disabled:hover {
+		background-color: #2f6bff;
+		color: #ffffff;
+		border-color: transparent;
+		box-shadow: none;
 	}
 
 	.film-slide {
@@ -974,8 +978,10 @@
 		font-weight: 560;
 		box-shadow: 0 18px 46px rgba(25, 57, 146, 0.3);
 		transition:
-			transform 180ms ease,
-			box-shadow 180ms ease;
+			background-color 320ms cubic-bezier(0.22, 1, 0.36, 1),
+			border-color 320ms cubic-bezier(0.22, 1, 0.36, 1),
+			color 320ms cubic-bezier(0.22, 1, 0.36, 1),
+			box-shadow 320ms cubic-bezier(0.22, 1, 0.36, 1);
 	}
 
 	.film-poster-wrap {

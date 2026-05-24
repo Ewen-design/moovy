@@ -164,10 +164,10 @@
 		cursor: pointer;
 		box-shadow: 0 10px 24px rgba(47, 107, 255, 0.18);
 		transition:
-			background-color 240ms ease,
-			color 240ms ease,
-			border-color 240ms ease,
-			box-shadow 240ms ease;
+			background-color 320ms cubic-bezier(0.22, 1, 0.36, 1),
+			color 320ms cubic-bezier(0.22, 1, 0.36, 1),
+			border-color 320ms cubic-bezier(0.22, 1, 0.36, 1),
+			box-shadow 320ms cubic-bezier(0.22, 1, 0.36, 1);
 	}
 
 	.genre-tabs button.active {
