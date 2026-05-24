@@ -1,9 +1,8 @@
 <script>
 	import { onMount } from 'svelte';
+	import { fade, fly } from 'svelte/transition';
 	import FilmDetailSheet from '$lib/components/FilmDetailSheet.svelte';
-	import FilmRow from '$lib/components/FilmRow.svelte';
-	import PageHero from '$lib/components/PageHero.svelte';
-	import { getSimilarMovies, tonightMoviePool, top100Movies } from '$lib/data/catalog';
+	import { getSimilarMovies, heroImage, tonightMoviePool } from '$lib/data/catalog';
 	import { hydrateMoviePosters } from '$lib/posters';
 	import { posterVersion } from '$lib/poster-state';
 
@@ -20,7 +19,7 @@
 		},
 		{
 			id: 'era',
-			label: 'Époque',
+			label: 'Période',
 			question: 'Tu préfères quelle période ?',
 			options: [
 				{ value: 'classic', label: 'Classique', maxYear: 1989 },
@@ -34,7 +33,11 @@
 			question: 'Quels genres te tentent ?',
 			options: [
 				{ value: 'drama', label: 'Drame', genres: ['Drame'] },
-				{ value: 'action', label: 'Action', genres: ['Action', 'Aventure', 'Thriller', 'Crime', 'Psychologique'] },
+				{
+					value: 'action',
+					label: 'Action',
+					genres: ['Action', 'Aventure', 'Thriller', 'Crime', 'Psychologique']
+				},
 				{ value: 'scifi', label: 'Science-fiction', genres: ['Science-fiction'] },
 				{ value: 'romance', label: 'Romance', genres: ['Romance'] },
 				{ value: 'comedy', label: 'Comédie', genres: ['Comedie'] }
@@ -56,31 +59,21 @@
 
 	const criterionPriority = ['genre', 'duration', 'era', 'mood'];
 	const fallbackPriority = ['genre', 'era', 'duration', 'mood'];
+	const scrollThreshold = 30;
+	const scrollCooldownMs = 520;
 
 	/** @type {Record<string, { value: string, label: string, genres?: string[], maxDuration?: number, minDuration?: number, minYear?: number, maxYear?: number, minVotes?: number, maxVotes?: number }[]>} */
 	let answers = $state({});
-	let heroVersion = $state(0);
-	/** @type {{ id: string, title: string, genres: string[] } | null} */
+	/** @type {'quiz' | 'results'} */
+	let stage = $state('quiz');
+	let activeQuestionIndex = $state(0);
+	let activeResultIndex = $state(0);
+	let criteriaOpen = $state(false);
+	let lastScrollAt = $state(0);
+	/** @type {typeof tonightMoviePool[number] | null} */
 	let selectedFilm = $state(null);
-
-	const heroMovies = $derived.by(() => {
-		$posterVersion;
-		return top100Movies.filter((movie) =>
-			['Whiplash', 'The Wolf of Wall Street'].includes(movie.title)
-		);
-	});
-	const heroSlides = $derived.by(() => {
-		heroVersion;
-		$posterVersion;
-		return heroMovies.map((movie, index) => ({
-			title: movie.title,
-			logo: movie.clearlogo,
-			image: movie.backdrop ?? movie.image,
-			button: 'Découvrir',
-			href: '#quiz',
-			tint: index === 0 ? 'tint-blue' : 'tint-silver'
-		}));
-	});
+	let touchStartX = $state(0);
+	let touchStartY = $state(0);
 
 	/** @param {string} duration */
 	function durationToMinutes(duration) {
@@ -153,7 +146,11 @@
 		};
 	}
 
-	const answeredQuestions = $derived(questions.filter((question) => (answers[question.id] ?? []).length > 0).length);
+	const answeredQuestions = $derived(
+		questions.filter((question) => (answers[question.id] ?? []).length > 0).length
+	);
+	const canValidateCriteria = $derived(answeredQuestions > 0);
+
 	const suggestedMovies = $derived.by(() => {
 		$posterVersion;
 		if (!answeredQuestions) return [];
@@ -167,9 +164,7 @@
 						return Number(right.data.matches[questionId]) - Number(left.data.matches[questionId]);
 					}
 				}
-				if (right.data.score !== left.data.score) {
-					return right.data.score - left.data.score;
-				}
+				if (right.data.score !== left.data.score) return right.data.score - left.data.score;
 				if (Boolean(left.movie.rank) !== Boolean(right.movie.rank)) {
 					return Number(Boolean(right.movie.rank)) - Number(Boolean(left.movie.rank));
 				}
@@ -194,9 +189,7 @@
 						return Number(right.data.matches[questionId]) - Number(left.data.matches[questionId]);
 					}
 				}
-				if (right.data.score !== left.data.score) {
-					return right.data.score - left.data.score;
-				}
+				if (right.data.score !== left.data.score) return right.data.score - left.data.score;
 				if (Boolean(left.movie.rank) !== Boolean(right.movie.rank)) {
 					return Number(Boolean(right.movie.rank)) - Number(Boolean(left.movie.rank));
 				}
@@ -204,39 +197,116 @@
 			});
 
 		return (fallbackRankedMovies.length ? fallbackRankedMovies : rankedMovies)
-			.slice(0, 3)
+			.slice(0, 10)
 			.map(({ movie }) => movie);
 	});
 
 	/**
 	 * @param {string} questionId
-	 * @param {{ value: string }} option
+	 * @param {{ value: string, label: string, genres?: string[], maxDuration?: number, minDuration?: number, minYear?: number, maxYear?: number, minVotes?: number, maxVotes?: number }} option
 	 */
 	function toggleOption(questionId, option) {
 		const currentOptions = answers[questionId] ?? [];
 		const hasOption = currentOptions.some((entry) => entry.value === option.value);
+		const nextOptions = hasOption
+			? currentOptions.filter((entry) => entry.value !== option.value)
+			: [...currentOptions, option];
+
 		answers = {
 			...answers,
-			[questionId]: hasOption
-				? currentOptions.filter((entry) => entry.value !== option.value)
-				: [...currentOptions, option]
+			[questionId]: nextOptions
 		};
 	}
 
+	function goToResults() {
+		if (!canValidateCriteria || !suggestedMovies.length) return;
+		stage = 'results';
+		activeResultIndex = Math.min(activeResultIndex, suggestedMovies.length - 1);
+	}
+
+	/** @param {1 | -1} direction */
+	function move(direction) {
+		if (criteriaOpen || selectedFilm) return;
+
+		if (stage === 'quiz') {
+			activeQuestionIndex = Math.max(0, Math.min(questions.length - 1, activeQuestionIndex + direction));
+			return;
+		}
+
+		if (!suggestedMovies.length) return;
+
+		activeResultIndex = Math.max(0, Math.min(suggestedMovies.length - 1, activeResultIndex + direction));
+	}
+
+	/** @param {WheelEvent} event */
+	function handleWheel(event) {
+		if (criteriaOpen || selectedFilm) return;
+		const dominantDelta =
+			Math.abs(event.deltaY) >= Math.abs(event.deltaX) ? event.deltaY : event.deltaX;
+		if (Math.abs(dominantDelta) < scrollThreshold) return;
+
+		const now = Date.now();
+		if (now - lastScrollAt < scrollCooldownMs) return;
+		lastScrollAt = now;
+		move(dominantDelta > 0 ? 1 : -1);
+	}
+
+	/** @param {KeyboardEvent} event */
+	function handleKeydown(event) {
+		if (criteriaOpen && event.key === 'Escape') {
+			criteriaOpen = false;
+			return;
+		}
+		if (selectedFilm) return;
+
+		if (['ArrowRight', 'ArrowDown', 'PageDown', ' '].includes(event.key)) {
+			event.preventDefault();
+			move(1);
+		}
+
+		if (['ArrowLeft', 'ArrowUp', 'PageUp'].includes(event.key)) {
+			event.preventDefault();
+			move(-1);
+		}
+	}
+
+	/** @param {TouchEvent} event */
+	function handleTouchStart(event) {
+		const touch = event.touches[0];
+		touchStartX = touch.clientX;
+		touchStartY = touch.clientY;
+	}
+
+	/** @param {TouchEvent} event */
+	function handleTouchEnd(event) {
+		if (selectedFilm) return;
+		const touch = event.changedTouches[0];
+		const deltaX = touch.clientX - touchStartX;
+		const deltaY = touch.clientY - touchStartY;
+		const dominantDelta = Math.abs(deltaX) > Math.abs(deltaY) ? deltaX : deltaY;
+		if (Math.abs(dominantDelta) < 46) return;
+		move(dominantDelta < 0 ? 1 : -1);
+	}
+
 	/** @param {typeof tonightMoviePool[number]} film */
-	const openFilm = (film) => {
+	function openFilm(film) {
 		selectedFilm = film;
 		hydrateMoviePosters([film, ...getSimilarMovies(tonightMoviePool, film, 6)]);
-	};
+	}
 
-	const closeFilm = () => {
+	function closeFilm() {
 		selectedFilm = null;
-	};
+	}
+
+	$effect(() => {
+		if (activeResultIndex > suggestedMovies.length - 1) {
+			activeResultIndex = Math.max(0, suggestedMovies.length - 1);
+		}
+	});
 
 	onMount(() => {
 		(async () => {
-			await hydrateMoviePosters([...tonightMoviePool, ...heroMovies]);
-			heroVersion += 1;
+			await hydrateMoviePosters(tonightMoviePool);
 		})();
 	});
 </script>
@@ -245,55 +315,209 @@
 	<title>Moovy | Pour ce soir</title>
 </svelte:head>
 
-<div class="tonight-page">
-	<PageHero
-		compact={true}
-		fullBleed={true}
-		overlayBottom={true}
-		imageOverlay="vertical"
-		slides={heroSlides}
-	/>
+<svelte:window onkeydown={handleKeydown} />
 
-	<section class="tonight-shell" id="quiz">
-		<div class="tonight-head">
-			<h2>Trouve ton film</h2>
-			<p>{answeredQuestions}/4 critères renseignés</p>
-		</div>
+<div
+	class:results-mode={stage === 'results'}
+	class="tonight-experience"
+	role="application"
+	aria-label="Parcours de selection de film"
+	onwheel={handleWheel}
+	ontouchstart={handleTouchStart}
+	ontouchend={handleTouchEnd}
+>
+	{#if stage === 'quiz'}
+		<section class="quiz-stage" transition:fade={{ duration: 420 }}>
+			<div class="quiz-header">
+				<h1>Trouve ton film</h1>
+			</div>
 
-		<div class="quiz-grid">
-			{#each questions as question}
-				<section class="question-card">
-					<h3>{question.question}</h3>
-					<div class="option-row">
-						{#each question.options as option}
-							<button
-								class:active={(answers[question.id] ?? []).some((entry) => entry.value === option.value)}
-								type="button"
-								onclick={() => toggleOption(question.id, option)}
-							>
-								{option.label}
-							</button>
-						{/each}
-					</div>
-				</section>
-			{/each}
-		</div>
+			<nav class="question-stepper" aria-label="Questions">
+				{#each questions as _, index}
+					<button
+						class:active={index === activeQuestionIndex}
+						type="button"
+						aria-label={`Aller à la question ${index + 1}`}
+						onclick={() => (activeQuestionIndex = index)}
+					>
+						{index + 1}
+					</button>
+				{/each}
+			</nav>
 
-		{#if suggestedMovies.length}
-			<section class="results">
-				<div class="results-head">
-					<h2>Ta sélection pour ce soir</h2>
-					<p>Top 10 du top 100 selon tes critères.</p>
+			<div class="question-rail">
+				{#each questions as question, index}
+					<section
+						class:active={activeQuestionIndex === index}
+						class="question-slide"
+						aria-hidden={activeQuestionIndex !== index}
+					>
+						<div class="question-card">
+							<h2>{question.question}</h2>
+							<div class="question-options">
+								{#each question.options as option}
+									<button
+										class:active={(answers[question.id] ?? []).some((entry) => entry.value === option.value)}
+										type="button"
+										onclick={() => toggleOption(question.id, option)}
+									>
+										{option.label}
+									</button>
+								{/each}
+							</div>
+						</div>
+					</section>
+				{/each}
+			</div>
+
+			<div class="stage-nav quiz-nav">
+				<button
+					class="nav-arrow up"
+					type="button"
+					aria-label="Question précédente"
+					disabled={activeQuestionIndex === 0}
+					onclick={() => move(-1)}
+				>
+					<span class="chevron" aria-hidden="true"></span>
+				</button>
+				<button
+					class="nav-arrow down"
+					type="button"
+					aria-label="Question suivante"
+					disabled={activeQuestionIndex === questions.length - 1}
+					onclick={() => move(1)}
+				>
+					<span class="chevron" aria-hidden="true"></span>
+				</button>
+			</div>
+
+			<button
+				class="validate-button"
+				type="button"
+				disabled={!canValidateCriteria}
+				onclick={goToResults}
+			>
+				Valider mes critères
+			</button>
+
+		</section>
+	{:else}
+		<section class="results-stage" transition:fade={{ duration: 420 }}>
+			<button class="criteria-toggle" type="button" onclick={() => (criteriaOpen = true)}>
+				Changer les critères
+			</button>
+			<div
+				class="result-rail"
+				style={`transform: translate3d(-${activeResultIndex * 100}%, 0, 0);`}
+			>
+				{#each suggestedMovies as film, index}
+					<article class="film-slide" aria-hidden={activeResultIndex !== index}>
+						<div class="film-background">
+							<img src={film.backdrop ?? film.image ?? heroImage} alt={film.title} loading="lazy" />
+						</div>
+						<div class="film-overlay"></div>
+						<div class="film-grid">
+							<div class="film-copy">
+								{#if film.clearlogo}
+									<img class="film-logo" src={film.clearlogo} alt={film.title} loading="lazy" />
+								{:else}
+									<h2>{film.title}</h2>
+								{/if}
+								<div class="film-meta">
+									<span>{film.year}</span>
+									<span>{film.duration}</span>
+									<span>{film.genres.slice(0, 3).join(' · ')}</span>
+								</div>
+								<p class="film-summary">{film.summary ?? film.editorial ?? film.description}</p>
+								<div class="film-credits">
+									<p><span>Réalisé par</span> {film.director}</p>
+									<p><span>Avec</span> {film.cast.slice(0, 3).join(', ')}</p>
+								</div>
+								<div class="film-actions">
+									<button class="primary-button" type="button" onclick={() => openFilm(film)}>Voir</button>
+								</div>
+							</div>
+
+							<div class="film-poster-wrap">
+								<img class="film-poster" src={film.image ?? heroImage} alt={film.title} loading="lazy" />
+							</div>
+						</div>
+					</article>
+				{/each}
+			</div>
+			<div class="stage-nav results-nav">
+				<button
+					class="nav-arrow left"
+					type="button"
+					aria-label="Film précédent"
+					disabled={activeResultIndex === 0}
+					onclick={() => move(-1)}
+				>
+					<span class="chevron" aria-hidden="true"></span>
+				</button>
+				<button
+					class="nav-arrow right"
+					type="button"
+					aria-label="Film suivant"
+					disabled={activeResultIndex === suggestedMovies.length - 1}
+					onclick={() => move(1)}
+				>
+					<span class="chevron" aria-hidden="true"></span>
+				</button>
+			</div>
+
+			<div class="stage-dots" aria-hidden="true">
+				{#each suggestedMovies as _, index}
+					<span class:active={index === activeResultIndex}></span>
+				{/each}
+			</div>
+		</section>
+	{/if}
+
+	{#if criteriaOpen}
+		<div
+			class="criteria-layer"
+			role="presentation"
+			onclick={() => (criteriaOpen = false)}
+			transition:fade={{ duration: 180 }}
+		>
+			<div
+				class="criteria-panel"
+				role="dialog"
+				aria-modal="true"
+				aria-label="Modifier les critères"
+				tabindex="-1"
+				onclick={(event) => event.stopPropagation()}
+				onkeydown={(event) => event.stopPropagation()}
+				transition:fly={{ y: -34, duration: 240 }}
+			>
+				<div class="criteria-panel-head">
+					<button class="panel-close" type="button" aria-label="Fermer" onclick={() => (criteriaOpen = false)}>
+						<span aria-hidden="true">×</span>
+					</button>
 				</div>
 
-				<div class="film-list">
-					{#each suggestedMovies as film}
-						<FilmRow {film} mobileCard={true} onSelect={openFilm} />
+				<div class="criteria-grid">
+					{#each questions as question}
+						<section class="criteria-card">
+							<h3>{question.question}</h3>
+							<div class="criteria-options">
+								{#each question.options as option}
+									<button
+										class:active={(answers[question.id] ?? []).some((entry) => entry.value === option.value)}
+										type="button"
+										onclick={() => toggleOption(question.id, option)}
+									>
+										{option.label}
+									</button>
+								{/each}
+							</div>
+						</section>
 					{/each}
 				</div>
-			</section>
-		{/if}
-	</section>
+			</div>
+		</div>
+	{/if}
 
 	<FilmDetailSheet
 		film={selectedFilm}
@@ -304,157 +528,691 @@
 </div>
 
 <style>
-	.tonight-page {
+	.tonight-experience {
+		position: relative;
+		--stage-height: 100svh;
+		margin: -10px;
+		height: var(--stage-height);
+		background:
+			radial-gradient(circle at top left, rgba(47, 107, 255, 0.22), transparent 34%),
+			radial-gradient(circle at bottom right, rgba(132, 167, 255, 0.12), transparent 26%),
+			#05070b;
+		color: #f4f7ff;
+		overflow: hidden;
+	}
+
+	.quiz-stage,
+	.results-stage {
+		position: relative;
+		height: var(--stage-height);
+		overflow: hidden;
+	}
+
+	.quiz-stage {
 		display: grid;
-		gap: 144px;
+		grid-template-rows: auto minmax(0, 1fr);
+		padding: clamp(5rem, 8vw, 6.6rem) clamp(1rem, 3vw, 2.8rem) 4.4rem;
 	}
 
-	.tonight-shell {
-		display: grid;
-		gap: 48px;
+	.results-stage {
+		padding: 0;
 	}
 
-	.tonight-head,
-	.results-head {
-		display: flex;
-		align-items: end;
-		justify-content: space-between;
-		gap: 1rem;
+	.quiz-header {
+		position: relative;
+		z-index: 4;
+		max-width: min(38rem, 100%);
+		margin-inline: auto;
+		text-align: center;
 	}
 
-	.tonight-head h2,
-	.tonight-head p,
-	.results-head h2,
-	.results-head p,
-	.question-card h3 {
+	.quiz-header h1,
+	.question-card h2,
+	.film-copy h2,
+	.criteria-card h3 {
 		margin: 0;
 	}
 
-	.tonight-head h2,
-	.results-head h2 {
-		font-size: clamp(2rem, 4vw, 3.4rem);
-		letter-spacing: -0.05em;
-		max-width: 18ch;
-	}
-
-	.results-head h2 {
-		max-width: none;
+	.quiz-header h1 {
+		font-size: 2rem;
+		line-height: 1;
+		letter-spacing: 0 !important;
 		white-space: nowrap;
 	}
 
-	.tonight-head p,
-	.results-head p {
-		color: var(--muted-text);
-		font-weight: 380;
+	.result-rail {
+		display: flex;
+		transition: transform 700ms cubic-bezier(0.22, 1, 0.36, 1);
+		will-change: transform;
 	}
 
-	.quiz-grid {
+	.question-rail {
+		position: relative;
+		min-height: 0;
+	}
+
+	.result-rail {
+		height: var(--stage-height);
+	}
+
+	.film-slide {
+		flex: 0 0 100%;
+		width: 100%;
+	}
+
+	.question-slide {
+		position: absolute;
+		inset: 0;
 		display: grid;
-		grid-template-columns: repeat(2, minmax(0, 1fr));
-		gap: 12px;
+		place-items: center;
+		min-height: 0;
+		padding: 1rem 0;
+		opacity: 0;
+		pointer-events: none;
+		transition:
+			opacity 260ms ease,
+			visibility 260ms ease;
+		visibility: hidden;
+	}
+
+	.question-slide.active {
+		opacity: 1;
+		pointer-events: auto;
+		visibility: visible;
+	}
+
+	.question-stepper {
+		position: absolute;
+		top: 50%;
+		left: clamp(1rem, 3vw, 2.6rem);
+		z-index: 8;
+		display: grid;
+		gap: 0.85rem;
+		transform: translateY(-50%);
+	}
+
+	.question-stepper button {
+		width: 28px;
+		height: 28px;
+		padding: 0;
+		border: 0;
+		background: transparent;
+		color: rgba(255, 255, 255, 0.32);
+		font: inherit;
+		font-size: 1rem;
+		font-weight: 560;
+		cursor: pointer;
+		transition: color 180ms ease;
+	}
+
+	.question-stepper button.active {
+		color: #ffffff;
 	}
 
 	.question-card {
 		display: grid;
-		gap: 1rem;
-		padding: 22px;
-		background: var(--surface-card);
+		gap: 1.9rem;
+		width: min(100%, 1100px);
+		margin-inline: auto;
+		padding: 0;
+		text-align: center;
+		background: transparent;
+		border: 0;
+		box-shadow: none;
+		backdrop-filter: none;
 	}
 
-	.question-card h3 {
-		font-size: 1.35rem;
-		letter-spacing: -0.03em;
-		font-weight: 520;
+	.question-card h2 {
+		font-size: 1.75rem;
+		line-height: 1.02;
+		letter-spacing: 0 !important;
+		max-width: 18ch;
+		margin-inline: auto;
 	}
 
-	.option-row {
+	.question-options,
+	.criteria-options {
 		display: flex;
 		flex-wrap: wrap;
+		justify-content: center;
 		gap: 0.65rem;
 	}
 
-	.option-row button {
-		display: inline-flex;
-		align-items: center;
-		justify-content: center;
-		min-height: 48px;
-		padding: 0.9rem 1.15rem;
+	.question-options button,
+	.criteria-options button,
+	.primary-button,
+	.criteria-toggle,
+	.validate-button {
 		border: 1px solid transparent;
 		border-radius: 999px;
-		background: var(--accent-blue);
+		background: linear-gradient(135deg, #5a7dff 0%, #2f6bff 100%);
 		color: #ffffff;
 		font: inherit;
-		font-weight: 500;
 		cursor: pointer;
 	}
 
-	.tonight-shell :global(.film-row h3) {
+	.question-options button,
+	.criteria-options button {
+		min-height: 40px;
+		padding: 0.58rem 0.95rem;
+		font-size: 0.86rem;
+		transition:
+			background 180ms ease,
+			color 180ms ease,
+			box-shadow 180ms ease;
+	}
+
+	.primary-button:hover,
+	.criteria-toggle:hover,
+	.validate-button:hover {
+		background: transparent;
+		color: #2f6bff;
+		border-color: #2f6bff;
+		box-shadow: 0 12px 28px rgba(47, 107, 255, 0.14);
+	}
+
+	.question-options button.active,
+	.criteria-options button.active {
+		background: transparent;
+		color: #2f6bff;
+		border-color: #2f6bff;
+		box-shadow: none;
+	}
+
+	.stage-nav {
+		position: absolute;
+		z-index: 5;
+		display: flex;
+		gap: 0.6rem;
+	}
+
+	.quiz-nav {
+		top: 50%;
+		right: clamp(1rem, 3vw, 2.6rem);
+		bottom: auto;
+		flex-direction: column;
+		transform: translateY(-50%);
+	}
+
+	.results-nav {
+		right: 50%;
+		bottom: 0.8rem;
+		transform: translateX(50%);
+	}
+
+	.nav-arrow {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 46px;
+		height: 46px;
+		border: 0;
+		border-radius: 0;
+		background: transparent;
+		color: #ffffff;
+		cursor: pointer;
+		transition:
+			transform 180ms ease,
+			background-color 180ms ease,
+		opacity 180ms ease;
+	}
+
+	.chevron {
+		display: block;
+		width: 24px;
+		height: 24px;
+		border-top: 3px solid currentColor;
+		border-right: 3px solid currentColor;
+	}
+
+	.nav-arrow.right .chevron {
+		transform: rotate(45deg) translate(-2px, 2px);
+	}
+
+	.nav-arrow.left .chevron {
+		transform: rotate(225deg) translate(-2px, 2px);
+	}
+
+	.nav-arrow.down .chevron {
+		transform: rotate(135deg) translate(-2px, 2px);
+	}
+
+	.nav-arrow.up .chevron {
+		transform: rotate(-45deg) translate(-2px, 2px);
+	}
+
+	.nav-arrow:disabled {
+		color: rgba(255, 255, 255, 0.28);
+		cursor: default;
+	}
+
+	.stage-dots {
+		position: absolute;
+		left: clamp(1.2rem, 3vw, 2.8rem);
+		bottom: 1.1rem;
+		z-index: 5;
+		display: flex;
+		gap: 0.65rem;
+	}
+
+	.stage-dots span {
+		width: 38px;
+		height: 3px;
+		background: rgba(255, 255, 255, 0.18);
+	}
+
+	.stage-dots span.active {
+		background: #2f6bff;
+	}
+
+	.criteria-toggle {
+		position: absolute;
+		right: 28px;
+		bottom: 1rem;
+		z-index: 50;
+		padding: 0.82rem 1.1rem;
+		font-size: 0.88rem;
 		font-weight: 560;
+		box-shadow: 0 20px 50px rgba(15, 39, 96, 0.35);
+		transition:
+			transform 180ms ease,
+			box-shadow 180ms ease;
 	}
 
-	.tonight-shell :global(.film-row .meta),
-	.tonight-shell :global(.film-row .description),
-	.tonight-shell :global(.film-row .credits) {
-		font-weight: 380;
+	.validate-button {
+		position: absolute;
+		left: 50%;
+		bottom: 0.8rem;
+		z-index: 6;
+		min-height: 40px;
+		padding: 0.62rem 1.05rem;
+		font-size: 0.82rem;
+		font-weight: 560;
+		transform: translateX(-50%);
+		transition:
+			background-color 180ms ease,
+			border-color 180ms ease,
+			color 180ms ease,
+			opacity 180ms ease,
+			box-shadow 180ms ease;
 	}
 
-	.tonight-shell :global(.film-row .row-action) {
-		font-weight: 500;
+	.validate-button:disabled {
+		opacity: 0.38;
+		cursor: default;
 	}
 
-	.option-row button.active {
-		background: #ffffff;
-		color: var(--accent-blue);
-		border-color: var(--accent-blue);
+	.results-mode .criteria-toggle {
+		background: linear-gradient(135deg, #6d8bff 0%, #2f6bff 100%);
 	}
 
-	:global(body.theme-dark) .option-row button.active {
-		background: #05070a;
-		color: var(--accent-blue);
-		border-color: var(--accent-blue);
-	}
-
-	.results,
-	.film-list {
+	.film-slide {
+		position: relative;
 		display: grid;
-		gap: 12px;
+		align-items: stretch;
+		height: var(--stage-height);
+		padding: 0;
+	}
+
+	.film-background,
+	.film-overlay {
+		position: absolute;
+		inset: 0;
+	}
+
+	.film-background img {
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+		filter: saturate(0.95);
+	}
+
+	.film-overlay {
+		background:
+			linear-gradient(90deg, rgba(5, 7, 11, 0.96) 0%, rgba(5, 7, 11, 0.86) 35%, rgba(5, 7, 11, 0.42) 62%, rgba(5, 7, 11, 0.7) 100%),
+			linear-gradient(180deg, rgba(5, 7, 11, 0.34) 0%, rgba(5, 7, 11, 0.74) 100%);
+	}
+
+	.film-grid {
+		position: relative;
+		z-index: 3;
+		display: grid;
+		grid-template-columns: minmax(0, 1.05fr) minmax(280px, 0.72fr);
+		align-items: center;
+		gap: clamp(2rem, 5vw, 4.4rem);
+		height: var(--stage-height);
+		padding: clamp(5.2rem, 7vw, 6.2rem) clamp(1rem, 3vw, 2.8rem) 3.7rem;
+		overflow: visible;
+	}
+
+	.film-copy {
+		display: grid;
+		gap: 0;
+		max-width: 40rem;
+	}
+
+	.film-logo {
+		display: block;
+		max-width: min(26rem, 90%);
+		max-height: 92px;
+		margin-top: 0;
+		object-fit: contain;
+		object-position: left center;
+	}
+
+	.film-copy h2 {
+		margin-top: 0.65rem;
+		font-size: clamp(2rem, 4.2vw, 3.6rem);
+		line-height: 0.92;
+		letter-spacing: 0 !important;
+	}
+
+	.film-meta,
+	.film-summary,
+	.film-credits {
+		margin: 0;
+	}
+
+	.film-meta {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.45rem;
+		margin-top: 1.25rem;
+		font-size: 0.78rem;
+		color: rgba(244, 247, 255, 0.7);
+	}
+
+	.film-meta span {
+		display: inline-flex;
+		align-items: center;
+		min-height: 28px;
+		padding: 0.35rem 0.58rem;
+		background: rgba(255, 255, 255, 0.08);
+		color: rgba(244, 247, 255, 0.82);
+	}
+
+	.film-summary {
+		display: -webkit-box;
+		margin-top: 1.35rem;
+		max-width: 32rem;
+		overflow: hidden;
+		font-size: 0.9rem;
+		line-height: 1.42;
+		color: rgba(244, 247, 255, 0.9);
+		-webkit-box-orient: vertical;
+		-webkit-line-clamp: 4;
+		line-clamp: 4;
+	}
+
+	.film-credits {
+		display: grid;
+		gap: 0.38rem;
+		margin-top: 1.25rem;
+		font-size: 0.78rem;
+		line-height: 1.35;
+		color: rgba(244, 247, 255, 0.66);
+	}
+
+	.film-credits p {
+		margin: 0;
+	}
+
+	.film-credits span {
+		display: inline-block;
+		min-width: 7rem;
+		color: rgba(244, 247, 255, 0.42);
+	}
+
+	.film-actions {
+		margin-top: 1.45rem;
+	}
+
+	.primary-button {
+		min-height: 42px;
+		padding: 0.62rem 1.05rem;
+		font-size: 0.82rem;
+		font-weight: 560;
+		box-shadow: 0 18px 46px rgba(25, 57, 146, 0.3);
+		transition:
+			transform 180ms ease,
+			box-shadow 180ms ease;
+	}
+
+	.film-poster-wrap {
+		display: flex;
+		justify-content: flex-end;
+		align-items: center;
+	}
+
+	.film-poster {
+		width: min(23vw, 310px);
+		max-width: 100%;
+		aspect-ratio: 2 / 3;
+		object-fit: cover;
+		border-radius: 3px;
+		box-shadow: 0 42px 100px rgba(0, 0, 0, 0.38);
+	}
+
+	.criteria-layer {
+		position: fixed;
+		inset: 0;
+		z-index: 120;
+		display: grid;
+		align-items: start;
+		justify-items: center;
+		padding: 88px 18px 18px;
+		background: rgba(3, 5, 8, 0.74);
+		backdrop-filter: blur(12px);
+	}
+
+	.criteria-panel {
+		position: relative;
+		width: min(1080px, 100%);
+		max-height: calc(100svh - 116px);
+		overflow: auto;
+		padding: 0;
+		background: transparent;
+		border: 0;
+		box-shadow: none;
+	}
+
+	.criteria-panel-head {
+		display: flex;
+		justify-content: flex-end;
+		margin-bottom: 0.4rem;
+		min-height: 24px;
+	}
+
+	.criteria-grid {
+		display: grid;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: 1rem;
+	}
+
+	.criteria-card {
+		display: grid;
+		gap: 1.15rem;
+		min-height: 150px;
+		padding: 1.45rem;
+		background: rgba(10, 12, 16, 0.95);
+	}
+
+	.criteria-card h3 {
+		font-size: 1rem;
+		line-height: 1;
+		letter-spacing: 0 !important;
+	}
+
+	.panel-close {
+		position: relative;
+		width: 30px;
+		height: 30px;
+		border: 0;
+		border-radius: 0;
+		background: transparent;
+		backdrop-filter: none;
+		color: rgba(255, 255, 255, 0.72);
+		cursor: pointer;
+	}
+
+	.panel-close span {
+		display: none;
+	}
+
+	.panel-close::before,
+	.panel-close::after {
+		content: '';
+		position: absolute;
+		top: 50%;
+		left: 50%;
+		width: 20px;
+		height: 2px;
+		border-radius: 999px;
+		background: currentColor;
+		transform: translate(-50%, -50%) rotate(45deg);
+	}
+
+	.panel-close::after {
+		transform: translate(-50%, -50%) rotate(-45deg);
+	}
+
+	@media (max-width: 1080px) {
+		.film-grid {
+			grid-template-columns: 1fr;
+			align-items: end;
+			gap: 1.2rem;
+			padding-top: 5.6rem;
+		}
+
+		.film-copy {
+			order: 2;
+			max-width: none;
+		}
+
+		.film-poster-wrap {
+			order: 1;
+			justify-content: flex-start;
+		}
+
+		.film-poster {
+			width: min(34vw, 240px);
+		}
 	}
 
 	@media (max-width: 800px) {
-		.tonight-page {
-			gap: 72px;
+		.tonight-experience,
+		.quiz-stage,
+		.results-stage,
+		.film-slide,
+		.film-grid {
+			height: var(--stage-height);
 		}
 
-		.tonight-shell {
-			gap: 32px;
+		.criteria-toggle {
+			right: 14px;
+			bottom: 0.9rem;
+			padding-inline: 1rem;
 		}
 
-		.quiz-grid {
+		.question-slide {
+			padding-block: 0.75rem;
+		}
+
+		.question-card h2 {
+			max-width: 15ch;
+		}
+
+		.criteria-grid {
 			grid-template-columns: 1fr;
-		}
-
-		.tonight-head,
-		.results-head {
-			flex-direction: column;
-			align-items: flex-start;
 		}
 	}
 
 	@media (max-width: 640px) {
+		.quiz-stage {
+			padding: 4.4rem 0.95rem 3.75rem;
+		}
+
 		.question-card {
-			padding: 18px 16px;
+			padding: 0;
 		}
 
-		.question-card h3 {
-			font-size: 1.2rem;
+		.question-options button,
+		.criteria-options button {
+			min-height: 38px;
+			padding: 0.52rem 0.82rem;
+			font-size: 0.76rem;
 		}
 
-		.option-row {
-			gap: 0.55rem;
+		.quiz-header h1 {
+			font-size: 1.35rem;
 		}
 
-		.option-row button {
-			padding: 0.88rem 1rem;
+		.question-card h2 {
+			font-size: 1.28rem;
+		}
+
+		.film-grid {
+			gap: 0.75rem;
+			padding: 4.9rem 0.95rem 3.7rem;
+		}
+
+		.film-logo {
+			max-width: min(15rem, 84vw);
+			max-height: 52px;
+		}
+
+		.film-copy h2 {
+			font-size: 1.65rem;
+		}
+
+		.film-summary {
+			font-size: 0.76rem;
+			line-height: 1.32;
+			margin-top: 0.9rem;
+			-webkit-line-clamp: 3;
+			line-clamp: 3;
+		}
+
+		.film-meta {
+			margin-top: 0.85rem;
+		}
+
+		.film-credits {
+			margin-top: 0.9rem;
+		}
+
+		.film-actions {
+			margin-top: 1rem;
+		}
+
+		.film-poster {
+			width: min(34vw, 128px);
+			border-radius: 3px;
+		}
+
+		.results-nav {
+			right: 50%;
+			bottom: 0.7rem;
+		}
+
+		.quiz-nav {
+			top: 50%;
+			right: 0.6rem;
+			bottom: auto;
+		}
+
+		.stage-dots {
+			left: 0.95rem;
+			bottom: 1.2rem;
+		}
+
+		.nav-arrow {
+			width: 42px;
+			height: 42px;
+		}
+
+		.criteria-layer {
+			padding: 10px;
 		}
 	}
 </style>

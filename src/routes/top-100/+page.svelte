@@ -202,14 +202,14 @@
 	}
 
 	.pager button.active {
-		background: #ffffff;
+		background: transparent;
 		color: var(--accent-blue);
 		border-color: var(--accent-blue);
 		box-shadow: 0 12px 28px rgba(47, 107, 255, 0.14);
 	}
 
 	:global(body.theme-dark) .pager button.active {
-		background: #05070a;
+		background: transparent;
 		color: var(--accent-blue);
 		border-color: var(--accent-blue);
 	}

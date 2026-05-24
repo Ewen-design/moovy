@@ -1200,7 +1200,7 @@ const shareImage = `${siteUrl}/moovy-showcase.svg`;
 	:global(.page-hero .hero-copy a:hover),
 	:global(.film-row:hover .row-action),
 	:global(.feature-block:hover .feature-copy span) {
-		background: #ffffff;
+		background: transparent;
 		color: var(--accent-blue);
 		border-color: var(--accent-blue);
 		box-shadow: 0 12px 28px rgba(47, 107, 255, 0.14);
@@ -1209,7 +1209,7 @@ const shareImage = `${siteUrl}/moovy-showcase.svg`;
 	:global(body.theme-dark .page-hero .hero-copy a:hover),
 	:global(body.theme-dark .film-row:hover .row-action),
 	:global(body.theme-dark .feature-block:hover .feature-copy span) {
-		background: #05070a;
+		background: transparent;
 		color: var(--accent-blue);
 		border-color: var(--accent-blue);
 	}
