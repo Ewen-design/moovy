@@ -213,15 +213,23 @@
 		let leaveTimer;
 		/** @type {ReturnType<typeof window.setTimeout> | undefined} */
 		let hideTimer;
+		/** @type {ReturnType<typeof window.requestAnimationFrame> | undefined} */
+		let preloaderFrame;
+		let preloaderStarted = false;
+		let disposed = false;
 
 		const startPreloader = () => {
-			preloaderReady = true;
-			leaveTimer = window.setTimeout(() => {
-				preloaderLeaving = true;
-			}, 960);
-			hideTimer = window.setTimeout(() => {
-				showPreloader = false;
-			}, 1320);
+			if (disposed || preloaderStarted) return;
+			preloaderStarted = true;
+			preloaderFrame = window.requestAnimationFrame(() => {
+				preloaderReady = true;
+				leaveTimer = window.setTimeout(() => {
+					preloaderLeaving = true;
+				}, 1120);
+				hideTimer = window.setTimeout(() => {
+					showPreloader = false;
+				}, 1460);
+			});
 		};
 
 		Promise.race([
@@ -263,6 +271,8 @@
 		mediaQuery.addEventListener('change', handleViewportChange);
 
 		return () => {
+			disposed = true;
+			if (preloaderFrame) window.cancelAnimationFrame(preloaderFrame);
 			if (leaveTimer) window.clearTimeout(leaveTimer);
 			if (hideTimer) window.clearTimeout(hideTimer);
 			if (mobileMenuCloseTimer) window.clearTimeout(mobileMenuCloseTimer);
@@ -308,12 +318,14 @@
 		class="preloader"
 		aria-hidden="true"
 	>
-		<div class="preloader-word">
-			{#each preloaderLetters as letter, index}
-				<span class="preloader-letter" style={`--letter-delay:${index * 70}ms;`}>
-					<span>{letter}</span>
-				</span>
-			{/each}
+		<div class="preloader-mark">
+			<div class="preloader-word">
+				{#each preloaderLetters as letter, index}
+					<span class="preloader-letter" style={`--letter-delay:${index * 70}ms;`}>
+						<span>{letter}</span>
+					</span>
+				{/each}
+			</div>
 		</div>
 	</div>
 {/if}
@@ -665,6 +677,7 @@
 		z-index: 500;
 		display: grid;
 		place-items: center;
+		min-height: 100svh;
 		background: #0b0d11;
 		opacity: 1;
 		contain: layout paint style;
@@ -682,36 +695,49 @@
 		pointer-events: none;
 	}
 
+	.preloader-mark {
+		display: grid;
+		place-items: center;
+		width: min(82vw, 31rem);
+		height: clamp(3.25rem, 12vw, 6.4rem);
+		overflow: visible;
+		transform: translateZ(0);
+	}
+
 	.preloader-word {
 		display: inline-flex;
 		align-items: center;
 		justify-content: center;
 		color: var(--accent-blue);
 		font-family: 'Panchang Preloader', 'Panchang', 'Helvetica Neue', Arial, sans-serif;
-		font-size: clamp(2.8rem, 10vw, 5.8rem);
+		font-size: clamp(2.65rem, 10vw, 5.65rem);
 		font-weight: 800;
-		line-height: 0.9;
+		line-height: 1;
 		letter-spacing: 0 !important;
 		font-synthesis: none;
 		text-rendering: geometricPrecision;
-		transform: translate3d(0, 8px, 0);
+		white-space: nowrap;
+		backface-visibility: hidden;
 		opacity: 0;
-		will-change: transform, opacity;
+		will-change: opacity;
 	}
 
 	.preloader.ready .preloader-word {
-		animation: preloader-word-in 440ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+		animation: preloader-word-in 180ms ease forwards;
 	}
 
 	.preloader-letter {
 		display: inline-block;
 		overflow: hidden;
-		padding-bottom: 0.08em;
+		padding-block: 0.08em;
+		line-height: 1;
 	}
 
 	.preloader-letter span {
 		display: inline-block;
+		line-height: 1;
 		transform: translate3d(0, 112%, 0);
+		backface-visibility: hidden;
 		will-change: transform;
 	}
 
@@ -723,12 +749,10 @@
 	@keyframes preloader-word-in {
 		0% {
 			opacity: 0;
-			transform: translate3d(0, 8px, 0);
 		}
 
 		100% {
 			opacity: 1;
-			transform: translate3d(0, 0, 0);
 		}
 	}
 
@@ -1462,8 +1486,13 @@
 	}
 
 	@media (max-width: 720px) and (pointer: coarse) {
+		.preloader-mark {
+			width: min(84vw, 22rem);
+			height: clamp(3rem, 15vw, 5.4rem);
+		}
+
 		.preloader-word {
-			font-size: clamp(2.8rem, 14vw, 5.2rem);
+			font-size: clamp(2.65rem, 13vw, 4.85rem);
 		}
 
 		.mobile-nav-inner {

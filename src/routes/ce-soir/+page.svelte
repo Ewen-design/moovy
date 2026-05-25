@@ -1181,7 +1181,7 @@
 
 	@media (max-width: 640px) {
 		.quiz-stage {
-			padding: 4.15rem 0.95rem calc(3.8rem + env(safe-area-inset-bottom));
+			padding: 5.45rem 0.95rem calc(3.8rem + env(safe-area-inset-bottom));
 		}
 
 		.question-stepper {
