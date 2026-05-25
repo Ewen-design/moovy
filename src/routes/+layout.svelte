@@ -1127,7 +1127,7 @@
 		pointer-events: none;
 		clip-path: inset(0 0 100% 0);
 		transition:
-			clip-path 700ms cubic-bezier(0.22, 1, 0.36, 1),
+			clip-path 520ms cubic-bezier(0.22, 1, 0.36, 1),
 			opacity 260ms ease;
 	}
 
@@ -1184,10 +1184,10 @@
 		transform-origin: center bottom;
 		opacity: 0;
 		transition:
-			transform 540ms cubic-bezier(0.22, 1, 0.36, 1),
-			opacity 320ms ease,
+			transform 460ms cubic-bezier(0.22, 1, 0.36, 1),
+			opacity 240ms ease,
 			color 220ms ease;
-		transition-delay: calc(760ms + (var(--nav-index, 0) * 92ms));
+		transition-delay: calc(170ms + (var(--nav-index, 0) * 70ms));
 		will-change: transform, opacity;
 	}
 
