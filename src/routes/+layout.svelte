@@ -15,11 +15,11 @@
 	import favicon from '$lib/assets/favicon.svg';
 	import { hydrateMoviePosters, seedPosterLibrary } from '$lib/posters';
 	import { posterVersion } from '$lib/poster-state';
-import { fade } from 'svelte/transition';
+	import { fade } from 'svelte/transition';
 
-let { children, data } = $props();
-const siteUrl = 'https://moovy.agence3terres.fr';
-const shareImage = `${siteUrl}/moovy-showcase.svg`;
+	let { children, data } = $props();
+	const siteUrl = 'https://moovy.agence3terres.fr';
+	const shareImage = `${siteUrl}/moovy-showcase.svg`;
 
 	const navItems = [
 		{ href: '/', label: 'Accueil' },
@@ -33,6 +33,7 @@ const shareImage = `${siteUrl}/moovy-showcase.svg`;
 		{ href: '/', label: 'Accueil', icon: 'home' },
 		{ href: '/recherche', label: 'Recherche', icon: 'search' }
 	];
+	const isTonightPage = $derived(page.url.pathname === '/ce-soir');
 	const mobileBreakpoint = '(max-width: 720px)';
 	const preloaderLetters = ['M', 'O', 'O', 'V', 'Y'];
 	let scrolled = $state(false);
@@ -43,6 +44,7 @@ const shareImage = `${siteUrl}/moovy-showcase.svg`;
 	let isMobileViewport = $state(false);
 	let theme = $state('light');
 	let showPreloader = $state(true);
+	let preloaderReady = $state(false);
 	let preloaderLeaving = $state(false);
 	/** @type {HTMLElement | null} */
 	let headerElement = $state(null);
@@ -188,15 +190,6 @@ const shareImage = `${siteUrl}/moovy-showcase.svg`;
 	});
 
 	$effect(() => {
-		if (!browser) return;
-		document.body.classList.toggle('preloader-open', showPreloader);
-
-		return () => {
-			document.body.classList.remove('preloader-open');
-		};
-	});
-
-	$effect(() => {
 		const nextPathname = page.url.pathname;
 		finalizeMobileMenuClose();
 		searchOpen = false;
@@ -216,12 +209,27 @@ const shareImage = `${siteUrl}/moovy-showcase.svg`;
 		seedPosterLibrary();
 		const mediaQuery = window.matchMedia(mobileBreakpoint);
 		setMobileViewport(mediaQuery.matches);
-		const leaveTimer = window.setTimeout(() => {
-			preloaderLeaving = true;
-		}, 1600);
-		const hideTimer = window.setTimeout(() => {
-			showPreloader = false;
-		}, 2120);
+		/** @type {ReturnType<typeof window.setTimeout> | undefined} */
+		let leaveTimer;
+		/** @type {ReturnType<typeof window.setTimeout> | undefined} */
+		let hideTimer;
+
+		const startPreloader = () => {
+			preloaderReady = true;
+			leaveTimer = window.setTimeout(() => {
+				preloaderLeaving = true;
+			}, 960);
+			hideTimer = window.setTimeout(() => {
+				showPreloader = false;
+			}, 1320);
+		};
+
+		Promise.race([
+			document.fonts?.load('800 72px "Panchang Preloader"') ?? Promise.resolve(),
+			new Promise((resolve) => window.setTimeout(resolve, 420))
+		])
+			.catch(() => undefined)
+			.then(startPreloader);
 
 		/** @param {PointerEvent} event */
 		const handlePointerDown = (event) => {
@@ -255,8 +263,8 @@ const shareImage = `${siteUrl}/moovy-showcase.svg`;
 		mediaQuery.addEventListener('change', handleViewportChange);
 
 		return () => {
-			window.clearTimeout(leaveTimer);
-			window.clearTimeout(hideTimer);
+			if (leaveTimer) window.clearTimeout(leaveTimer);
+			if (hideTimer) window.clearTimeout(hideTimer);
 			if (mobileMenuCloseTimer) window.clearTimeout(mobileMenuCloseTimer);
 			document.removeEventListener('pointerdown', handlePointerDown);
 			document.removeEventListener('keydown', handleKeydown);
@@ -294,10 +302,15 @@ const shareImage = `${siteUrl}/moovy-showcase.svg`;
 <svelte:window onscroll={() => (scrolled = window.scrollY > 28)} />
 
 {#if showPreloader}
-	<div class:leaving={preloaderLeaving} class="preloader" aria-hidden="true">
+	<div
+		class:leaving={preloaderLeaving}
+		class:ready={preloaderReady}
+		class="preloader"
+		aria-hidden="true"
+	>
 		<div class="preloader-word">
 			{#each preloaderLetters as letter, index}
-				<span class="preloader-letter" style={`--letter-delay:${index * 90}ms;`}>
+				<span class="preloader-letter" style={`--letter-delay:${index * 70}ms;`}>
 					<span>{letter}</span>
 				</span>
 			{/each}
@@ -305,8 +318,13 @@ const shareImage = `${siteUrl}/moovy-showcase.svg`;
 	</div>
 {/if}
 
-<div class="app-shell">
-	<header bind:this={headerElement} class:menu-open={mobileMenuOpen} class:scrolled class="site-header">
+<div class:tonight-page={isTonightPage} class="app-shell">
+	<header
+		bind:this={headerElement}
+		class:menu-open={mobileMenuOpen}
+		class:scrolled
+		class="site-header"
+	>
 		<div class="header-left">
 			<a class="brand" href="/">MOOVY</a>
 
@@ -353,7 +371,12 @@ const shareImage = `${siteUrl}/moovy-showcase.svg`;
 					aria-label={theme === 'dark' ? 'Passer en mode clair' : 'Passer en mode nuit'}
 					onclick={toggleTheme}
 				>
-					<span class:moon={theme !== 'dark'} class:sun={theme === 'dark'} class="theme-icon" aria-hidden="true">
+					<span
+						class:moon={theme !== 'dark'}
+						class:sun={theme === 'dark'}
+						class="theme-icon"
+						aria-hidden="true"
+					>
 						{theme === 'dark' ? '☀' : '☾'}
 					</span>
 				</button>
@@ -421,7 +444,7 @@ const shareImage = `${siteUrl}/moovy-showcase.svg`;
 		</div>
 	</header>
 
-	<main class="site-main">
+	<main class:tonight-page={isTonightPage} class="site-main">
 		{#key page.url.pathname}
 			<div transition:fade={{ duration: 220 }}>
 				{@render children()}
@@ -429,34 +452,41 @@ const shareImage = `${siteUrl}/moovy-showcase.svg`;
 		{/key}
 	</main>
 
-	<nav class="mobile-bottom-nav" aria-label="Navigation mobile principale">
-		{#each mobileBottomNavItems as item}
-			<a class:active={page.url.pathname === item.href} href={item.href} aria-current={page.url.pathname === item.href ? 'page' : undefined}>
-				{#if item.icon === 'home'}
-					<svg viewBox="0 0 24 24" aria-hidden="true">
-						<path d="M4 11.6 12 5l8 6.6V20a1 1 0 0 1-1 1h-5.2v-6.2h-3.6V21H5a1 1 0 0 1-1-1z"></path>
-					</svg>
-				{:else}
-					<svg viewBox="0 0 24 24" aria-hidden="true">
-						<circle cx="11" cy="11" r="6.2"></circle>
-						<path d="M20 20 16.3 16.3"></path>
-					</svg>
-				{/if}
-				<span>{item.label}</span>
-			</a>
-		{/each}
-	</nav>
+	{#if !isTonightPage}
+		<nav class="mobile-bottom-nav" aria-label="Navigation mobile principale">
+			{#each mobileBottomNavItems as item}
+				<a
+					class:active={page.url.pathname === item.href}
+					href={item.href}
+					aria-current={page.url.pathname === item.href ? 'page' : undefined}
+				>
+					{#if item.icon === 'home'}
+						<svg viewBox="0 0 24 24" aria-hidden="true">
+							<path d="M4 11.6 12 5l8 6.6V20a1 1 0 0 1-1 1h-5.2v-6.2h-3.6V21H5a1 1 0 0 1-1-1z"
+							></path>
+						</svg>
+					{:else}
+						<svg viewBox="0 0 24 24" aria-hidden="true">
+							<circle cx="11" cy="11" r="6.2"></circle>
+							<path d="M20 20 16.3 16.3"></path>
+						</svg>
+					{/if}
+					<span>{item.label}</span>
+				</a>
+			{/each}
+		</nav>
 
-	<footer class="site-footer">
-		<p>Moovy</p>
-		<div class="footer-meta">
-			<a href="/mentions-legales">Mentions legales</a>
-			<span>2026</span>
-			<a href="https://agence3terres.fr" target="_blank" rel="noreferrer">
-				Developpe par Agence 3 Terres
-			</a>
-		</div>
-	</footer>
+		<footer class="site-footer">
+			<p>Moovy</p>
+			<div class="footer-meta">
+				<a href="/mentions-legales">Mentions legales</a>
+				<span>2026</span>
+				<a href="https://agence3terres.fr" target="_blank" rel="noreferrer">
+					Developpe par Agence 3 Terres
+				</a>
+			</div>
+		</footer>
+	{/if}
 
 	<FilmDetailSheet
 		film={selectedFilm}
@@ -552,10 +582,6 @@ const shareImage = `${siteUrl}/moovy-showcase.svg`;
 		font-weight: 380;
 	}
 
-	:global(body.preloader-open) {
-		overflow: hidden;
-	}
-
 	:global(body.menu-open) {
 		overflow: hidden;
 	}
@@ -629,6 +655,10 @@ const shareImage = `${siteUrl}/moovy-showcase.svg`;
 		padding: 10px;
 	}
 
+	.app-shell.tonight-page {
+		padding: 0;
+	}
+
 	.preloader {
 		position: fixed;
 		inset: 0;
@@ -637,50 +667,97 @@ const shareImage = `${siteUrl}/moovy-showcase.svg`;
 		place-items: center;
 		background: #0b0d11;
 		opacity: 1;
+		contain: layout paint style;
+		pointer-events: auto;
+		transform: translateZ(0);
+		animation: preloader-fallback-out 260ms ease 2.1s forwards;
 		transition:
-			opacity 520ms cubic-bezier(0.22, 1, 0.36, 1),
-			visibility 520ms cubic-bezier(0.22, 1, 0.36, 1);
+			opacity 300ms cubic-bezier(0.22, 1, 0.36, 1),
+			visibility 300ms cubic-bezier(0.22, 1, 0.36, 1);
 	}
 
 	.preloader.leaving {
 		opacity: 0;
 		visibility: hidden;
+		pointer-events: none;
 	}
 
 	.preloader-word {
 		display: inline-flex;
 		align-items: center;
-		gap: 0;
+		justify-content: center;
 		color: var(--accent-blue);
-		font-size: clamp(2.6rem, 8vw, 5.8rem);
+		font-family: 'Panchang Preloader', 'Panchang', 'Helvetica Neue', Arial, sans-serif;
+		font-size: clamp(2.8rem, 10vw, 5.8rem);
 		font-weight: 800;
-		letter-spacing: -0.12em;
+		line-height: 0.9;
+		letter-spacing: 0 !important;
+		font-synthesis: none;
+		text-rendering: geometricPrecision;
+		transform: translate3d(0, 8px, 0);
+		opacity: 0;
+		will-change: transform, opacity;
+	}
+
+	.preloader.ready .preloader-word {
+		animation: preloader-word-in 440ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
 	}
 
 	.preloader-letter {
 		display: inline-block;
 		overflow: hidden;
-		perspective: 800px;
+		padding-bottom: 0.08em;
 	}
 
 	.preloader-letter span {
 		display: inline-block;
-		transform-origin: center bottom;
-		transform: translateY(115%) rotateX(-88deg);
-		animation: preloader-wipe-flip 920ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
-		animation-delay: var(--letter-delay);
-		will-change: transform, opacity;
+		transform: translate3d(0, 112%, 0);
+		will-change: transform;
 	}
 
-	@keyframes preloader-wipe-flip {
+	.preloader.ready .preloader-letter span {
+		animation: preloader-letter-in 620ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+		animation-delay: var(--letter-delay);
+	}
+
+	@keyframes preloader-word-in {
 		0% {
 			opacity: 0;
-			transform: translateY(115%) rotateX(-88deg);
+			transform: translate3d(0, 8px, 0);
 		}
 
 		100% {
 			opacity: 1;
-			transform: translateY(0) rotateX(0deg);
+			transform: translate3d(0, 0, 0);
+		}
+	}
+
+	@keyframes preloader-letter-in {
+		100% {
+			transform: translate3d(0, 0, 0);
+		}
+	}
+
+	@keyframes preloader-fallback-out {
+		100% {
+			opacity: 0;
+			visibility: hidden;
+			pointer-events: none;
+		}
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.preloader,
+		.preloader-word,
+		.preloader-letter span {
+			animation: none;
+			transition: none;
+		}
+
+		.preloader-word,
+		.preloader-letter span {
+			opacity: 1;
+			transform: none;
 		}
 	}
 
@@ -1164,6 +1241,10 @@ const shareImage = `${siteUrl}/moovy-showcase.svg`;
 		margin-top: 0;
 	}
 
+	.site-main.tonight-page {
+		padding-bottom: 0;
+	}
+
 	.mobile-bottom-nav {
 		display: none;
 	}
@@ -1382,7 +1463,7 @@ const shareImage = `${siteUrl}/moovy-showcase.svg`;
 
 	@media (max-width: 720px) and (pointer: coarse) {
 		.preloader-word {
-			font-size: clamp(3.3rem, 16vw, 7rem);
+			font-size: clamp(2.8rem, 14vw, 5.2rem);
 		}
 
 		.mobile-nav-inner {

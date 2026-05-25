@@ -50,9 +50,17 @@
 			options: [
 				{ value: 'dark', label: 'Sombre', genres: ['Thriller', 'Crime', 'Psychologique'] },
 				{ value: 'emotional', label: 'Émotive', genres: ['Drame', 'Romance'] },
-				{ value: 'spectacular', label: 'Spectaculaire', genres: ['Action', 'Aventure', 'Science-fiction'] },
+				{
+					value: 'spectacular',
+					label: 'Spectaculaire',
+					genres: ['Action', 'Aventure', 'Science-fiction']
+				},
 				{ value: 'light', label: 'Légère', genres: ['Comedie', 'Romance'] },
-				{ value: 'thoughtful', label: 'Qui fait réfléchir', genres: ['Science-fiction', 'Drame', 'Mystere'] }
+				{
+					value: 'thoughtful',
+					label: 'Qui fait réfléchir',
+					genres: ['Science-fiction', 'Drame', 'Mystere']
+				}
 			]
 		}
 	];
@@ -133,7 +141,9 @@
 			const selectedOptions = answers[questionId] ?? [];
 			if (!selectedOptions.length) continue;
 
-			const bestQuestionScore = Math.max(...selectedOptions.map((option) => scoreOption(movie, option)));
+			const bestQuestionScore = Math.max(
+				...selectedOptions.map((option) => scoreOption(movie, option))
+			);
 			score += bestQuestionScore;
 			if (bestQuestionScore > 0) matchedQuestions += 1;
 		}
@@ -155,7 +165,9 @@
 		$posterVersion;
 		if (!answeredQuestions) return [];
 
-		const activeCriteria = criterionPriority.filter((questionId) => (answers[questionId] ?? []).length > 0);
+		const activeCriteria = criterionPriority.filter(
+			(questionId) => (answers[questionId] ?? []).length > 0
+		);
 		const rankedMovies = tonightMoviePool
 			.map((movie) => ({ movie, data: scoreMovie(movie) }))
 			.sort((left, right) => {
@@ -179,7 +191,9 @@
 			return strictMatches.slice(0, 10).map(({ movie }) => movie);
 		}
 
-		const fallbackCriteria = fallbackPriority.filter((questionId) => (answers[questionId] ?? []).length > 0);
+		const fallbackCriteria = fallbackPriority.filter(
+			(questionId) => (answers[questionId] ?? []).length > 0
+		);
 		const fallbackRankedMovies = rankedMovies
 			.filter(({ data }) => fallbackCriteria.some((questionId) => data.matches[questionId]))
 			.sort((left, right) => {
@@ -229,13 +243,19 @@
 		if (criteriaOpen || selectedFilm) return;
 
 		if (stage === 'quiz') {
-			activeQuestionIndex = Math.max(0, Math.min(questions.length - 1, activeQuestionIndex + direction));
+			activeQuestionIndex = Math.max(
+				0,
+				Math.min(questions.length - 1, activeQuestionIndex + direction)
+			);
 			return;
 		}
 
 		if (!suggestedMovies.length) return;
 
-		activeResultIndex = Math.max(0, Math.min(suggestedMovies.length - 1, activeResultIndex + direction));
+		activeResultIndex = Math.max(
+			0,
+			Math.min(suggestedMovies.length - 1, activeResultIndex + direction)
+		);
 	}
 
 	/** @param {WheelEvent} event */
@@ -357,7 +377,9 @@
 							<div class="question-options">
 								{#each question.options as option}
 									<button
-										class:active={(answers[question.id] ?? []).some((entry) => entry.value === option.value)}
+										class:active={(answers[question.id] ?? []).some(
+											(entry) => entry.value === option.value
+										)}
 										type="button"
 										onclick={() => toggleOption(question.id, option)}
 									>
@@ -399,7 +421,6 @@
 			>
 				Valider mes critères
 			</button>
-
 		</section>
 	{:else}
 		<section class="results-stage" transition:fade={{ duration: 420 }}>
@@ -434,12 +455,19 @@
 									<p><span>Avec</span> {film.cast.slice(0, 3).join(', ')}</p>
 								</div>
 								<div class="film-actions">
-									<button class="primary-button" type="button" onclick={() => openFilm(film)}>Voir</button>
+									<button class="primary-button" type="button" onclick={() => openFilm(film)}
+										>Voir</button
+									>
 								</div>
 							</div>
 
 							<div class="film-poster-wrap">
-								<img class="film-poster" src={film.image ?? heroImage} alt={film.title} loading="lazy" />
+								<img
+									class="film-poster"
+									src={film.image ?? heroImage}
+									alt={film.title}
+									loading="lazy"
+								/>
 							</div>
 						</div>
 					</article>
@@ -492,7 +520,12 @@
 				transition:fly={{ y: -34, duration: 240 }}
 			>
 				<div class="criteria-panel-head">
-					<button class="panel-close" type="button" aria-label="Fermer" onclick={() => (criteriaOpen = false)}>
+					<button
+						class="panel-close"
+						type="button"
+						aria-label="Fermer"
+						onclick={() => (criteriaOpen = false)}
+					>
 						<span aria-hidden="true">×</span>
 					</button>
 				</div>
@@ -504,7 +537,9 @@
 							<div class="criteria-options">
 								{#each question.options as option}
 									<button
-										class:active={(answers[question.id] ?? []).some((entry) => entry.value === option.value)}
+										class:active={(answers[question.id] ?? []).some(
+											(entry) => entry.value === option.value
+										)}
 										type="button"
 										onclick={() => toggleOption(question.id, option)}
 									>
@@ -531,7 +566,8 @@
 	.tonight-experience {
 		position: relative;
 		--stage-height: 100svh;
-		margin: -10px;
+		width: 100%;
+		margin: 0;
 		height: var(--stage-height);
 		background: #05070b;
 		color: #f4f7ff;
@@ -873,7 +909,13 @@
 
 	.film-overlay {
 		background:
-			linear-gradient(90deg, rgba(5, 7, 11, 0.96) 0%, rgba(5, 7, 11, 0.86) 35%, rgba(5, 7, 11, 0.42) 62%, rgba(5, 7, 11, 0.7) 100%),
+			linear-gradient(
+				90deg,
+				rgba(5, 7, 11, 0.96) 0%,
+				rgba(5, 7, 11, 0.86) 35%,
+				rgba(5, 7, 11, 0.42) 62%,
+				rgba(5, 7, 11, 0.7) 100%
+			),
 			linear-gradient(180deg, rgba(5, 7, 11, 0.34) 0%, rgba(5, 7, 11, 0.74) 100%);
 	}
 
@@ -1106,6 +1148,10 @@
 	}
 
 	@media (max-width: 800px) {
+		.tonight-experience {
+			--stage-height: 100dvh;
+		}
+
 		.tonight-experience,
 		.quiz-stage,
 		.results-stage,
@@ -1135,11 +1181,24 @@
 
 	@media (max-width: 640px) {
 		.quiz-stage {
-			padding: 4.4rem 0.95rem 3.75rem;
+			padding: 4.15rem 0.95rem calc(3.8rem + env(safe-area-inset-bottom));
+		}
+
+		.question-stepper {
+			top: 50%;
+			left: 0.55rem;
+			grid-auto-flow: row;
+			grid-template-columns: 28px;
+			gap: 0.38rem;
+			transform: translateY(-50%);
 		}
 
 		.question-card {
 			padding: 0;
+			width: calc(100% - 3.5rem);
+			max-width: 23rem;
+			margin-right: 0;
+			margin-left: 3.25rem;
 		}
 
 		.question-options button,
@@ -1158,13 +1217,15 @@
 		}
 
 		.film-grid {
-			gap: 0.75rem;
-			padding: 4.9rem 0.95rem 3.7rem;
+			align-content: end;
+			align-items: end;
+			gap: 0;
+			padding: 5.2rem 1rem calc(4rem + env(safe-area-inset-bottom));
 		}
 
 		.film-logo {
-			max-width: min(15rem, 84vw);
-			max-height: 52px;
+			max-width: min(15rem, 82vw);
+			max-height: 56px;
 		}
 
 		.film-copy h2 {
@@ -1181,6 +1242,12 @@
 
 		.film-meta {
 			margin-top: 0.85rem;
+			gap: 0.32rem;
+		}
+
+		.film-meta span {
+			min-height: 25px;
+			padding: 0.28rem 0.46rem;
 		}
 
 		.film-credits {
@@ -1191,25 +1258,86 @@
 			margin-top: 1rem;
 		}
 
-		.film-poster {
-			width: min(34vw, 128px);
-			border-radius: 3px;
+		.film-poster-wrap {
+			display: none;
 		}
 
 		.results-nav {
-			right: 50%;
-			bottom: 0.7rem;
+			top: 50%;
+			right: 0.4rem;
+			left: 0.4rem;
+			bottom: auto;
+			justify-content: space-between;
+			transform: translateY(-50%);
+			pointer-events: none;
+		}
+
+		.results-nav .nav-arrow {
+			pointer-events: auto;
 		}
 
 		.quiz-nav {
 			top: 50%;
-			right: 0.6rem;
+			right: auto;
 			bottom: auto;
+			left: 0.25rem;
+			flex-direction: column;
+			justify-content: center;
+			gap: min(24svh, 9rem);
+			transform: translateY(-50%);
+			pointer-events: auto;
+		}
+
+		.quiz-nav .nav-arrow {
+			width: 38px;
+			height: 38px;
+		}
+
+		.quiz-nav .chevron {
+			width: 18px;
+			height: 18px;
+			border-width: 2px;
+		}
+
+		.quiz-nav .nav-arrow {
+			pointer-events: auto;
+		}
+
+		.film-overlay {
+			background:
+				linear-gradient(
+					180deg,
+					rgba(5, 7, 11, 0.16) 0%,
+					rgba(5, 7, 11, 0.38) 22%,
+					rgba(5, 7, 11, 0.72) 54%,
+					rgba(5, 7, 11, 0.92) 100%
+				),
+				rgba(5, 7, 11, 0.2);
+		}
+
+		.criteria-toggle {
+			top: calc(4.4rem + env(safe-area-inset-top));
+			right: 0.95rem;
+			bottom: auto;
+			min-height: 38px;
+			padding: 0.58rem 0.82rem;
+			font-size: 0.72rem;
+			box-shadow: 0 14px 36px rgba(15, 39, 96, 0.32);
 		}
 
 		.stage-dots {
-			left: 0.95rem;
-			bottom: 1.2rem;
+			left: 50%;
+			bottom: calc(0.8rem + env(safe-area-inset-bottom));
+			max-width: calc(100vw - 2rem);
+			justify-content: center;
+			gap: 0.34rem;
+			transform: translateX(-50%);
+		}
+
+		.stage-dots span {
+			width: 7px;
+			height: 7px;
+			border-radius: 999px;
 		}
 
 		.nav-arrow {
@@ -1219,6 +1347,34 @@
 
 		.criteria-layer {
 			padding: 10px;
+		}
+	}
+
+	@media (max-width: 640px) and (max-height: 700px) {
+		.film-grid {
+			padding-top: 4.6rem;
+			padding-bottom: calc(3.35rem + env(safe-area-inset-bottom));
+		}
+
+		.film-logo {
+			max-height: 44px;
+		}
+
+		.film-copy h2 {
+			font-size: 1.42rem;
+		}
+
+		.film-summary {
+			-webkit-line-clamp: 2;
+			line-clamp: 2;
+		}
+
+		.film-credits {
+			display: none;
+		}
+
+		.film-actions {
+			margin-top: 0.75rem;
 		}
 	}
 </style>
