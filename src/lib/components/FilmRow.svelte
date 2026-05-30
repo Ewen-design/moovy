@@ -118,7 +118,7 @@
 		top: 50%;
 		z-index: 0;
 		transform: translateY(-50%);
-		font-family: system-ui, sans-serif;
+		font-family: var(--font-body);
 		font-size: clamp(6.7rem, 10vw, 10rem);
 		line-height: 0.82;
 		font-weight: 900;
@@ -152,6 +152,7 @@
 	.credits {
 		margin-top: 0.35rem;
 		font-size: 0.96rem;
+		font-weight: 300;
 		color: var(--muted-text-strong);
 		transition: color var(--theme-duration) var(--theme-ease);
 	}
@@ -175,7 +176,7 @@
 		background: var(--accent-blue);
 		color: #ffffff;
 		font-size: 0.92rem;
-		font-weight: 200;
+		font-weight: 500;
 		text-decoration: none;
 		transition:
 			background-color 320ms cubic-bezier(0.22, 1, 0.36, 1),

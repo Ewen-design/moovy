@@ -101,7 +101,7 @@
 	<section class="catalog-shell" id="list" bind:this={listSection}>
 		<div class="catalog-head">
 			<div>
-				<h2>Notre top 100</h2>
+				<h2>NOTRE TOP 100</h2>
 			</div>
 			<span>{currentPage * 20 + 1}-{Math.min((currentPage + 1) * 20, 100)} / 100</span>
 		</div>
@@ -173,7 +173,7 @@
 	.catalog-head span {
 		font-size: 0.95rem;
 		color: var(--muted-text);
-		font-weight: 380;
+		font-weight: 300;
 	}
 
 	.pager {
@@ -230,13 +230,13 @@
 	}
 
 	.catalog-shell :global(.film-row h3) {
-		font-weight: 560;
+		font-weight: 600;
 	}
 
 	.catalog-shell :global(.film-row .meta),
 	.catalog-shell :global(.film-row .description),
 	.catalog-shell :global(.film-row .credits) {
-		font-weight: 380;
+		font-weight: 300;
 	}
 
 	.catalog-shell :global(.film-row .row-action) {

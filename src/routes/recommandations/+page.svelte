@@ -117,13 +117,13 @@
 	}
 
 	.recommend-shell :global(.film-row h3) {
-		font-weight: 560;
+		font-weight: 600;
 	}
 
 	.recommend-shell :global(.film-row .meta),
 	.recommend-shell :global(.film-row .description),
 	.recommend-shell :global(.film-row .credits) {
-		font-weight: 380;
+		font-weight: 300;
 	}
 
 	.recommend-shell :global(.film-row .row-action) {

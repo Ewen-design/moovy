@@ -191,6 +191,7 @@
 	.results-head span {
 		color: var(--muted-text);
 		font-size: 0.98rem;
+		font-weight: 300;
 	}
 
 	.search-field {

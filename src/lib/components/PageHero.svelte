@@ -246,7 +246,7 @@
 	.hero-copy p {
 		margin-bottom: 0.7rem;
 		font-size: 0.78rem;
-		font-weight: 600;
+		font-weight: 500;
 		letter-spacing: 0.16em;
 		text-transform: uppercase;
 		opacity: 0.84;

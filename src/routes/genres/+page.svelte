@@ -189,13 +189,13 @@
 	}
 
 	.genre-shell :global(.film-row h3) {
-		font-weight: 560;
+		font-weight: 600;
 	}
 
 	.genre-shell :global(.film-row .meta),
 	.genre-shell :global(.film-row .description),
 	.genre-shell :global(.film-row .credits) {
-		font-weight: 380;
+		font-weight: 300;
 	}
 
 	.genre-shell :global(.film-row .row-action) {

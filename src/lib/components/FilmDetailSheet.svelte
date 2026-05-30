@@ -328,6 +328,7 @@
 
 	.meta {
 		font-size: 1rem;
+		font-weight: 300;
 		color: var(--muted-text-strong);
 	}
 
@@ -413,6 +414,7 @@
 	.sheet-side p {
 		margin-top: 0.35rem;
 		font-size: 0.95rem;
+		font-weight: 300;
 		color: var(--muted-text-strong);
 		line-height: 1.5;
 	}
@@ -422,6 +424,7 @@
 	}
 
 	.similar-section h3 {
+		font-family: var(--font-display);
 		font-size: 2.2rem;
 		letter-spacing: -0.04em;
 	}
@@ -516,6 +519,7 @@
 		display: flex;
 		gap: 0.8rem;
 		color: var(--muted-text-strong);
+		font-weight: 300;
 	}
 
 	.similar-copy h4 {

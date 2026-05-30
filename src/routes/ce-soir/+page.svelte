@@ -674,7 +674,7 @@
 		color: rgba(255, 255, 255, 0.32);
 		font: inherit;
 		font-size: 1rem;
-		font-weight: 560;
+		font-weight: 600;
 		cursor: pointer;
 		transition: color 180ms ease;
 	}
@@ -847,7 +847,7 @@
 		z-index: 50;
 		padding: 0.82rem 1.1rem;
 		font-size: 0.88rem;
-		font-weight: 560;
+		font-weight: 600;
 		box-shadow: 0 20px 50px rgba(15, 39, 96, 0.35);
 		transition:
 			background-color 340ms cubic-bezier(0.22, 1, 0.36, 1),
@@ -864,7 +864,7 @@
 		min-height: 40px;
 		padding: 0.62rem 1.05rem;
 		font-size: 0.82rem;
-		font-weight: 560;
+		font-weight: 600;
 		transform: translateX(-50%);
 		transition:
 			background-color 320ms cubic-bezier(0.22, 1, 0.36, 1),
@@ -965,6 +965,7 @@
 		gap: 0.45rem;
 		margin-top: 1.25rem;
 		font-size: 0.78rem;
+		font-weight: 300;
 		color: rgba(244, 247, 255, 0.7);
 	}
 
@@ -995,6 +996,7 @@
 		gap: 0.38rem;
 		margin-top: 1.25rem;
 		font-size: 0.78rem;
+		font-weight: 300;
 		line-height: 1.35;
 		color: rgba(244, 247, 255, 0.66);
 	}
@@ -1017,7 +1019,7 @@
 		min-height: 42px;
 		padding: 0.62rem 1.05rem;
 		font-size: 0.82rem;
-		font-weight: 560;
+		font-weight: 600;
 		box-shadow: 0 18px 46px rgba(25, 57, 146, 0.3);
 		transition:
 			background-color 320ms cubic-bezier(0.22, 1, 0.36, 1),

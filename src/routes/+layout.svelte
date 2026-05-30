@@ -233,7 +233,7 @@
 		};
 
 		Promise.race([
-			document.fonts?.load('800 72px "Panchang Preloader"') ?? Promise.resolve(),
+			document.fonts?.load('800 72px "Montserrat Preloader"') ?? Promise.resolve(),
 			new Promise((resolve) => window.setTimeout(resolve, 420))
 		])
 			.catch(() => undefined)
@@ -510,17 +510,27 @@
 
 <style>
 	@font-face {
-		font-family: 'Panchang';
-		src: url('/fonts/Panchang-Variable.woff2') format('woff2');
-		font-weight: 200 800;
+		font-family: 'Montserrat';
+		src: url('/Montserrat/Montserrat-Variable.woff2') format('woff2');
+		font-weight: 100 900;
 		font-style: normal;
+		font-display: swap;
+	}
+
+	@font-face {
+		font-family: 'Montserrat';
+		src: url('/Montserrat/Montserrat-VariableItalic.woff2') format('woff2');
+		font-weight: 100 900;
+		font-style: italic;
 		font-display: swap;
 	}
 
 	:global(body) {
 		margin: 0;
-		font-family: 'Panchang', 'Helvetica Neue', Arial, sans-serif;
-		font-weight: 450;
+		font-family: 'Montserrat', 'Helvetica Neue', Arial, sans-serif;
+		font-weight: 400;
+		--font-display: 'Montserrat', 'Helvetica Neue', Arial, sans-serif;
+		--font-body: 'Montserrat', 'Helvetica Neue', Arial, sans-serif;
 		--accent-blue: #2f6bff;
 		--page-bg: #f5f5f7;
 		--page-text: #111111;
@@ -581,17 +591,32 @@
 		h5,
 		h6
 	) {
-		font-family: 'Panchang', 'Helvetica Neue', Arial, sans-serif;
+		font-family: var(--font-body);
+	}
+
+	:global(h1),
+	:global(h2),
+	:global(.site-header),
+	:global(.site-header *) {
+		font-family: var(--font-display);
+	}
+
+	:global(h1),
+	:global(h2) {
+		font-weight: 800;
 	}
 
 	:global(p),
-	:global(small),
 	:global(label),
 	:global(input),
 	:global(textarea),
 	:global(select),
 	:global(li) {
-		font-weight: 380;
+		font-weight: 400;
+	}
+
+	:global(small) {
+		font-weight: 300;
 	}
 
 	:global(body.menu-open) {
@@ -709,7 +734,7 @@
 		align-items: center;
 		justify-content: center;
 		color: var(--accent-blue);
-		font-family: 'Panchang Preloader', 'Panchang', 'Helvetica Neue', Arial, sans-serif;
+		font-family: 'Montserrat Preloader', 'Montserrat', 'Helvetica Neue', Arial, sans-serif;
 		font-size: clamp(2.65rem, 10vw, 5.65rem);
 		font-weight: 800;
 		line-height: 1;
@@ -1113,6 +1138,7 @@
 
 	.search-results span {
 		font-size: 0.82rem;
+		font-weight: 300;
 		color: var(--search-results-muted);
 	}
 
@@ -1230,6 +1256,7 @@
 	.mobile-nav-copy small {
 		color: rgba(255, 255, 255, 0.42);
 		font-size: 0.76rem;
+		font-weight: 300;
 		line-height: 1.35;
 		letter-spacing: 0.08em;
 		text-transform: uppercase;
@@ -1290,6 +1317,7 @@
 		gap: 0.8rem 1.1rem;
 		margin-top: 0.5rem;
 		font-size: 0.78rem;
+		font-weight: 300;
 		color: var(--muted-text-soft);
 	}
 

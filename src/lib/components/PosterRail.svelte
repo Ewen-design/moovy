@@ -371,6 +371,7 @@
 
 	h3 {
 		margin: 0;
+		font-family: var(--font-display);
 		font-size: 1.05rem;
 		font-weight: 700;
 		letter-spacing: -0.02em;
@@ -479,6 +480,7 @@
 		gap: 0.8rem;
 		color: var(--muted-text-strong);
 		font-size: 0.98rem;
+		font-weight: 300;
 	}
 
 	.rail-preview-copy p {
@@ -596,7 +598,7 @@
 		top: 50%;
 		z-index: 1;
 		transform: translateY(-50%);
-		font-family: system-ui, sans-serif;
+		font-family: var(--font-body);
 		font-size: clamp(13.4rem, 18vw, 21rem);
 		line-height: 0.82;
 		font-weight: 900;
@@ -621,7 +623,7 @@
 		top: 50%;
 		z-index: 2;
 		transform: translateY(-50%);
-		font-family: system-ui, sans-serif;
+		font-family: var(--font-body);
 		font-size: clamp(13.4rem, 18vw, 21rem);
 		line-height: 0.82;
 		font-weight: 900;
@@ -699,11 +701,11 @@
 	.rail-rank-digits {
 		display: inline-flex;
 		gap: 0;
-		font-family: system-ui, sans-serif;
+		font-family: var(--font-body);
 	}
 
 	.rail-rank-digits span {
-		font-family: system-ui, sans-serif;
+		font-family: var(--font-body);
 	}
 
 	.rail-rank-shadow .rail-rank-digits {
@@ -778,7 +780,7 @@
 
 	.rail-copy span {
 		font-size: 0.72rem;
-		font-weight: 600;
+		font-weight: 500;
 		letter-spacing: 0.12em;
 		text-transform: uppercase;
 		opacity: 0.88;
