@@ -137,6 +137,12 @@
 		white-space: nowrap;
 	}
 
+	@media (min-width: 721px) {
+		.rank-backdrop {
+			text-shadow: none;
+		}
+	}
+
 	h3,
 	p {
 		margin: 0;

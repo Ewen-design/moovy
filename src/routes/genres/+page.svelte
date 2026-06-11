@@ -177,12 +177,6 @@
 		box-shadow: 0 12px 28px rgba(47, 107, 255, 0.14);
 	}
 
-	:global(body.theme-dark) .genre-tabs button.active {
-		background: transparent;
-		color: var(--accent-blue);
-		border-color: var(--accent-blue);
-	}
-
 	.film-list {
 		display: grid;
 		gap: 10px;

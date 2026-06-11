@@ -120,19 +120,6 @@
 	}
 
 	.page-hero.simpleBottom .hero-bottom-overlay.lightBottom {
-		height: 34%;
-		background: linear-gradient(
-			180deg,
-			rgba(245, 245, 247, 0) 0%,
-			rgba(245, 245, 247, 0.02) 26%,
-			rgba(245, 245, 247, 0.08) 52%,
-			rgba(245, 245, 247, 0.22) 74%,
-			rgba(245, 245, 247, 0.5) 90%,
-			var(--page-bg) 100%
-		);
-	}
-
-	:global(body.theme-dark) .page-hero.simpleBottom .hero-bottom-overlay.lightBottom {
 		height: 72%;
 		background: linear-gradient(
 			180deg,
@@ -149,9 +136,9 @@
 	.hero-bottom-overlay.lightBottom {
 		background: linear-gradient(
 			180deg,
-			rgba(245, 245, 247, 0) 0%,
-			rgba(245, 245, 247, 0.18) 34%,
-			rgba(245, 245, 247, 0.52) 62%,
+			rgba(11, 13, 17, 0) 0%,
+			rgba(11, 13, 17, 0.32) 34%,
+			rgba(11, 13, 17, 0.72) 62%,
 			var(--page-bg) 100%
 		);
 	}

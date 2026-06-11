@@ -367,12 +367,6 @@
 		box-shadow: 0 12px 28px rgba(47, 107, 255, 0.14);
 	}
 
-	:global(body.theme-dark) .trailer-button:hover {
-		background: transparent;
-		color: var(--accent-blue);
-		border-color: var(--accent-blue);
-	}
-
 	.cast-grid {
 		display: grid;
 		grid-template-columns: repeat(3, minmax(0, 1fr));

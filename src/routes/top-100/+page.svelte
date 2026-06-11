@@ -208,12 +208,6 @@
 		box-shadow: 0 12px 28px rgba(47, 107, 255, 0.14);
 	}
 
-	:global(body.theme-dark) .pager button.active {
-		background: transparent;
-		color: var(--accent-blue);
-		border-color: var(--accent-blue);
-	}
-
 	.pager button:disabled {
 		opacity: 0.4;
 		cursor: default;

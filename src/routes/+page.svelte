@@ -236,14 +236,6 @@
 		font-size: 1.4rem;
 	}
 
-	:global(body:not(.theme-dark)) .bottom-slider :global(h3) {
-		color: #111111;
-	}
-
-	:global(body:not(.theme-dark)) .hero-rail :global(h3) {
-		color: #ffffff;
-	}
-
 	.feature-grid {
 		display: grid;
 		grid-template-columns: repeat(2, minmax(0, 1fr));

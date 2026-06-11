@@ -34,20 +34,18 @@
 		{ href: '/recherche', label: 'Recherche', icon: 'search' }
 	];
 	const isTonightPage = $derived(page.url.pathname === '/ce-soir');
-	const mobileBreakpoint = '(max-width: 720px)';
-	const preloaderLetters = ['M', 'O', 'O', 'V', 'Y'];
 	let scrolled = $state(false);
 	let searchQuery = $state('');
 	let searchOpen = $state(false);
 	let mobileMenuOpen = $state(false);
 	let mobileMenuClosing = $state(false);
-	let isMobileViewport = $state(false);
-	let theme = $state('light');
 	let showPreloader = $state(true);
 	let preloaderReady = $state(false);
 	let preloaderLeaving = $state(false);
 	/** @type {HTMLElement | null} */
 	let headerElement = $state(null);
+	/** @type {HTMLImageElement | null} */
+	let preloaderLogoElement = $state(null);
 	/** @type {HTMLDivElement | null} */
 	let searchBox = $state(null);
 	/** @type {HTMLInputElement | null} */
@@ -98,39 +96,6 @@
 		selectedFilm = null;
 	};
 
-	/** @param {'light' | 'dark'} nextTheme */
-	const applyTheme = (nextTheme, persist = true) => {
-		const resolvedTheme = isMobileViewport ? 'dark' : nextTheme;
-		theme = resolvedTheme;
-		if (!browser) return;
-		document.body.classList.toggle('theme-dark', resolvedTheme === 'dark');
-		if (persist && !isMobileViewport) {
-			localStorage.setItem('moovy-theme', resolvedTheme);
-		}
-	};
-
-	const syncViewportTheme = () => {
-		if (!browser) return;
-		const savedTheme = localStorage.getItem('moovy-theme');
-		const nextTheme =
-			savedTheme === 'dark' || savedTheme === 'light' ? savedTheme : getDefaultTheme();
-		applyTheme(nextTheme, false);
-	};
-
-	const setMobileViewport = (matches) => {
-		isMobileViewport = matches;
-		if (matches) {
-			searchOpen = false;
-			searchQuery = '';
-		}
-		syncViewportTheme();
-	};
-
-	const toggleTheme = () => {
-		if (isMobileViewport) return;
-		applyTheme(theme === 'dark' ? 'light' : 'dark');
-	};
-
 	const finalizeMobileMenuClose = () => {
 		mobileMenuOpen = false;
 		mobileMenuClosing = false;
@@ -167,8 +132,6 @@
 		mobileMenuClosing = false;
 		mobileMenuOpen = true;
 	};
-
-	const getDefaultTheme = () => 'dark';
 
 	const toggleSearch = async () => {
 		searchOpen = !searchOpen;
@@ -207,8 +170,6 @@
 
 	onMount(() => {
 		seedPosterLibrary();
-		const mediaQuery = window.matchMedia(mobileBreakpoint);
-		setMobileViewport(mediaQuery.matches);
 		/** @type {ReturnType<typeof window.setTimeout> | undefined} */
 		let leaveTimer;
 		/** @type {ReturnType<typeof window.setTimeout> | undefined} */
@@ -233,7 +194,7 @@
 		};
 
 		Promise.race([
-			document.fonts?.load('800 72px "Montserrat Preloader"') ?? Promise.resolve(),
+			preloaderLogoElement?.decode() ?? Promise.resolve(),
 			new Promise((resolve) => window.setTimeout(resolve, 420))
 		])
 			.catch(() => undefined)
@@ -261,14 +222,8 @@
 			requestCloseMobileMenu();
 		};
 
-		/** @param {MediaQueryListEvent} event */
-		const handleViewportChange = (event) => {
-			setMobileViewport(event.matches);
-		};
-
 		document.addEventListener('pointerdown', handlePointerDown);
 		document.addEventListener('keydown', handleKeydown);
-		mediaQuery.addEventListener('change', handleViewportChange);
 
 		return () => {
 			disposed = true;
@@ -278,7 +233,6 @@
 			if (mobileMenuCloseTimer) window.clearTimeout(mobileMenuCloseTimer);
 			document.removeEventListener('pointerdown', handlePointerDown);
 			document.removeEventListener('keydown', handleKeydown);
-			mediaQuery.removeEventListener('change', handleViewportChange);
 		};
 	});
 </script>
@@ -319,12 +273,14 @@
 		aria-hidden="true"
 	>
 		<div class="preloader-mark">
-			<div class="preloader-word">
-				{#each preloaderLetters as letter, index}
-					<span class="preloader-letter" style={`--letter-delay:${index * 70}ms;`}>
-						<span>{letter}</span>
-					</span>
-				{/each}
+			<div class="preloader-logo-frame">
+				<img
+					bind:this={preloaderLogoElement}
+					class="preloader-logo"
+					src="/logo.webp"
+					alt=""
+					fetchpriority="high"
+				/>
 			</div>
 		</div>
 	</div>
@@ -338,7 +294,9 @@
 		class="site-header"
 	>
 		<div class="header-left">
-			<a class="brand" href="/">MOOVY</a>
+			<a class="brand" href="/" aria-label="Moovy - Accueil">
+				<img src="/logo.webp" alt="Moovy" />
+			</a>
 
 			<nav class="site-nav" aria-label="Navigation principale">
 				{#each navItems as item}
@@ -375,24 +333,6 @@
 					</div>
 				{/if}
 			</div>
-
-			{#if !isMobileViewport}
-				<button
-					class="theme-toggle"
-					type="button"
-					aria-label={theme === 'dark' ? 'Passer en mode clair' : 'Passer en mode nuit'}
-					onclick={toggleTheme}
-				>
-					<span
-						class:moon={theme !== 'dark'}
-						class:sun={theme === 'dark'}
-						class="theme-icon"
-						aria-hidden="true"
-					>
-						{theme === 'dark' ? '☀' : '☾'}
-					</span>
-				</button>
-			{/if}
 
 			<button
 				class="menu-toggle"
@@ -532,33 +472,33 @@
 		--font-display: 'Montserrat', 'Helvetica Neue', Arial, sans-serif;
 		--font-body: 'Montserrat', 'Helvetica Neue', Arial, sans-serif;
 		--accent-blue: #2f6bff;
-		--page-bg: #f5f5f7;
-		--page-text: #111111;
-		--muted-text: #6f7683;
-		--muted-text-strong: #75757c;
-		--muted-text-soft: #8f8f94;
-		--surface-card: #fbfbfc;
-		--surface-card-strong: #ffffff;
-		--rank-number: var(--page-bg);
+		--page-bg: #0b0d11;
+		--page-text: #f2f5fb;
+		--muted-text: #97a2b7;
+		--muted-text-strong: #a5afc2;
+		--muted-text-soft: #8993a6;
+		--surface-card: #141820;
+		--surface-card-strong: #181d26;
+		--rank-number: #000000;
 		--rank-number-stroke: var(--accent-blue);
-		--surface-elevated: #ffffff;
-		--surface-subtle: #eef3ff;
-		--surface-subtle-hover: #dde8ff;
+		--surface-elevated: #181818;
+		--surface-subtle: #232323;
+		--surface-subtle-hover: #353535;
 		--surface-inverse: #181818;
-		--sheet-surface: var(--page-bg);
-		--sheet-block: var(--surface-card);
-		--sheet-block-hover: #f1f4fa;
-		--sheet-gradient-end: #f5f5f7;
-		--sheet-shadow: 0 24px 72px rgba(18, 24, 35, 0.12);
-		--border-soft: rgba(18, 24, 35, 0.1);
-		--shadow-soft: 0 24px 72px rgba(18, 24, 35, 0.12);
-		--search-border: rgba(255, 255, 255, 0.16);
+		--sheet-surface: #181818;
+		--sheet-block: #232323;
+		--sheet-block-hover: #353535;
+		--sheet-gradient-end: #181818;
+		--sheet-shadow: 0 30px 120px rgba(0, 0, 0, 0.45);
+		--border-soft: rgba(255, 255, 255, 0.08);
+		--shadow-soft: 0 26px 86px rgba(0, 0, 0, 0.42);
+		--search-border: rgba(255, 255, 255, 0.14);
 		--search-bg: rgba(255, 255, 255, 0.08);
 		--search-text: #ffffff;
-		--search-placeholder: rgba(255, 255, 255, 0.62);
-		--search-results-bg: rgba(255, 255, 255, 0.98);
-		--search-results-text: #111111;
-		--search-results-muted: #5f6675;
+		--search-placeholder: rgba(255, 255, 255, 0.56);
+		--search-results-bg: rgba(15, 17, 22, 0.98);
+		--search-results-text: #f2f5fb;
+		--search-results-muted: #9aa4b8;
 		--theme-duration: 560ms;
 		--theme-ease: cubic-bezier(0.22, 1, 0.36, 1);
 		background: var(--page-bg);
@@ -621,36 +561,6 @@
 
 	:global(body.menu-open) {
 		overflow: hidden;
-	}
-
-	:global(body.theme-dark) {
-		--page-bg: #0b0d11;
-		--page-text: #f2f5fb;
-		--muted-text: #97a2b7;
-		--muted-text-strong: #a5afc2;
-		--muted-text-soft: #8993a6;
-		--surface-card: #141820;
-		--surface-card-strong: #181d26;
-		--rank-number: #000000;
-		--rank-number-stroke: var(--accent-blue);
-		--surface-elevated: #181818;
-		--surface-subtle: #232323;
-		--surface-subtle-hover: #353535;
-		--surface-inverse: #181818;
-		--sheet-surface: #181818;
-		--sheet-block: #232323;
-		--sheet-block-hover: #353535;
-		--sheet-gradient-end: #181818;
-		--sheet-shadow: 0 30px 120px rgba(0, 0, 0, 0.45);
-		--border-soft: rgba(255, 255, 255, 0.08);
-		--shadow-soft: 0 26px 86px rgba(0, 0, 0, 0.42);
-		--search-border: rgba(255, 255, 255, 0.14);
-		--search-bg: rgba(255, 255, 255, 0.08);
-		--search-text: #ffffff;
-		--search-placeholder: rgba(255, 255, 255, 0.56);
-		--search-results-bg: rgba(15, 17, 22, 0.98);
-		--search-results-text: #f2f5fb;
-		--search-results-muted: #9aa4b8;
 	}
 
 	:global(html) {
@@ -723,52 +633,37 @@
 	.preloader-mark {
 		display: grid;
 		place-items: center;
-		width: min(82vw, 31rem);
-		height: clamp(3.25rem, 12vw, 6.4rem);
+		width: clamp(8.5rem, 24vw, 13rem);
+		aspect-ratio: 1;
 		overflow: visible;
 		transform: translateZ(0);
 	}
 
-	.preloader-word {
-		display: inline-flex;
-		align-items: center;
-		justify-content: center;
-		color: var(--accent-blue);
-		font-family: 'Montserrat Preloader', 'Montserrat', 'Helvetica Neue', Arial, sans-serif;
-		font-size: clamp(2.65rem, 10vw, 5.65rem);
-		font-weight: 800;
-		line-height: 1;
-		letter-spacing: 0 !important;
-		font-synthesis: none;
-		text-rendering: geometricPrecision;
-		white-space: nowrap;
+	.preloader-logo-frame {
+		width: 100%;
+		height: 100%;
+		overflow: hidden;
 		backface-visibility: hidden;
 		opacity: 0;
 		will-change: opacity;
 	}
 
-	.preloader.ready .preloader-word {
+	.preloader.ready .preloader-logo-frame {
 		animation: preloader-word-in 180ms ease forwards;
 	}
 
-	.preloader-letter {
-		display: inline-block;
-		overflow: hidden;
-		padding-block: 0.08em;
-		line-height: 1;
-	}
-
-	.preloader-letter span {
-		display: inline-block;
-		line-height: 1;
+	.preloader-logo {
+		display: block;
+		width: 100%;
+		height: 100%;
+		object-fit: contain;
 		transform: translate3d(0, 112%, 0);
 		backface-visibility: hidden;
 		will-change: transform;
 	}
 
-	.preloader.ready .preloader-letter span {
+	.preloader.ready .preloader-logo {
 		animation: preloader-letter-in 620ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
-		animation-delay: var(--letter-delay);
 	}
 
 	@keyframes preloader-word-in {
@@ -797,14 +692,14 @@
 
 	@media (prefers-reduced-motion: reduce) {
 		.preloader,
-		.preloader-word,
-		.preloader-letter span {
+		.preloader-logo-frame,
+		.preloader-logo {
 			animation: none;
 			transition: none;
 		}
 
-		.preloader-word,
-		.preloader-letter span {
+		.preloader-logo-frame,
+		.preloader-logo {
 			opacity: 1;
 			transform: none;
 		}
@@ -849,7 +744,7 @@
 	}
 
 	.site-header::after {
-		background: rgba(10, 10, 10, 0.96);
+		background: #000000;
 		opacity: 0;
 	}
 
@@ -868,11 +763,18 @@
 	.brand {
 		position: relative;
 		z-index: 3;
-		color: var(--accent-blue);
-		font-size: 1.7rem;
-		font-weight: 800;
-		letter-spacing: -0.06em;
+		display: grid;
+		place-items: center;
+		width: 48px;
+		height: 48px;
 		text-decoration: none;
+	}
+
+	.brand img {
+		display: block;
+		width: 100%;
+		height: 100%;
+		object-fit: contain;
 	}
 
 	.header-left,
@@ -895,8 +797,8 @@
 		align-items: center;
 		justify-content: center;
 		padding: 0.5rem 0.9rem;
-		font-size: 0.76rem;
-		font-weight: 600;
+		font-size: 0.86rem;
+		font-weight: 400;
 		letter-spacing: 0.08em;
 		text-transform: uppercase;
 		text-decoration: none;
@@ -906,29 +808,6 @@
 
 	.site-nav a.active {
 		color: #ffffff;
-	}
-
-	.theme-toggle {
-		position: relative;
-		z-index: 3;
-		display: inline-flex;
-		align-items: center;
-		justify-content: center;
-		width: 56px;
-		height: 56px;
-		padding: 0;
-		border: 0;
-		border-radius: 999px;
-		background: transparent;
-		color: #ffffff;
-		font: inherit;
-		font-size: 1rem;
-		line-height: 1;
-		cursor: pointer;
-		transition:
-			background-color var(--theme-duration) var(--theme-ease),
-			border-color var(--theme-duration) var(--theme-ease),
-			color var(--theme-duration) var(--theme-ease);
 	}
 
 	.menu-toggle {
@@ -989,26 +868,6 @@
 
 	.menu-toggle-bars.open::after {
 		transform: translateY(-7px) rotate(-45deg);
-	}
-
-	.theme-icon {
-		display: inline-flex;
-		align-items: center;
-		justify-content: center;
-		width: 28px;
-		height: 28px;
-		font-size: 1.4rem;
-		line-height: 1;
-		transform: translateY(-4px);
-	}
-
-	.theme-icon.sun {
-		font-size: 1.36rem;
-	}
-
-	.theme-icon.moon {
-		font-size: 1.36rem;
-		transform: translateY(-4px) translateX(0.5px);
 	}
 
 	.search-box {
@@ -1339,47 +1198,7 @@
 		box-shadow: 0 12px 28px rgba(47, 107, 255, 0.14);
 	}
 
-	:global(body.theme-dark .page-hero .hero-copy a:hover),
-	:global(body.theme-dark .film-row:hover .row-action),
-	:global(body.theme-dark .feature-block:hover .feature-copy span) {
-		background: transparent;
-		color: var(--accent-blue);
-		border-color: var(--accent-blue);
-	}
-
 	@media (max-width: 720px) {
-		:global(body) {
-			--page-bg: #0b0d11;
-			--page-text: #f2f5fb;
-			--muted-text: #97a2b7;
-			--muted-text-strong: #a5afc2;
-			--muted-text-soft: #8993a6;
-			--surface-card: #141820;
-			--surface-card-strong: #181d26;
-			--rank-number: #000000;
-			--rank-number-stroke: var(--accent-blue);
-			--surface-elevated: #181818;
-			--surface-subtle: #232323;
-			--surface-subtle-hover: #353535;
-			--surface-inverse: #181818;
-			--sheet-surface: #181818;
-			--sheet-block: #232323;
-			--sheet-block-hover: #353535;
-			--sheet-gradient-end: #181818;
-			--sheet-shadow: 0 30px 120px rgba(0, 0, 0, 0.45);
-			--border-soft: rgba(255, 255, 255, 0.08);
-			--shadow-soft: 0 26px 86px rgba(0, 0, 0, 0.42);
-			--search-border: rgba(255, 255, 255, 0.14);
-			--search-bg: rgba(255, 255, 255, 0.08);
-			--search-text: #ffffff;
-			--search-placeholder: rgba(255, 255, 255, 0.56);
-			--search-results-bg: rgba(15, 17, 22, 0.98);
-			--search-results-text: #f2f5fb;
-			--search-results-muted: #9aa4b8;
-			background: var(--page-bg);
-			color: var(--page-text);
-		}
-
 		.app-shell {
 			padding: 8px;
 		}
@@ -1436,8 +1255,8 @@
 		}
 
 		.brand {
-			font-size: 1.72rem;
-			transform: translateY(5px);
+			width: 50px;
+			height: 50px;
 		}
 
 		.menu-toggle,
@@ -1449,15 +1268,9 @@
 			padding-top: 0;
 		}
 
-		.theme-toggle,
 		.menu-toggle {
 			width: 48px;
 			height: 48px;
-		}
-
-		.theme-icon {
-			transform: none;
-			font-size: 1.2rem;
 		}
 
 		.site-main {
@@ -1515,12 +1328,7 @@
 
 	@media (max-width: 720px) and (pointer: coarse) {
 		.preloader-mark {
-			width: min(84vw, 22rem);
-			height: clamp(3rem, 15vw, 5.4rem);
-		}
-
-		.preloader-word {
-			font-size: clamp(2.65rem, 13vw, 4.85rem);
+			width: clamp(8rem, 38vw, 11rem);
 		}
 
 		.mobile-nav-inner {
@@ -1544,8 +1352,8 @@
 		}
 
 		.brand {
-			font-size: 1.88rem;
-			transform: translateY(7px);
+			width: 48px;
+			height: 48px;
 		}
 
 		.mobile-bottom-nav {

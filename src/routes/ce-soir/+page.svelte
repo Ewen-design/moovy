@@ -1046,7 +1046,7 @@
 	.criteria-layer {
 		position: fixed;
 		inset: 0;
-		z-index: 120;
+		z-index: 240;
 		display: grid;
 		align-items: start;
 		justify-items: center;
