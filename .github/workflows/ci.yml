@@ -45,17 +45,17 @@ jobs:
       - run: npm ci --ignore-scripts --no-audit --no-fund
       - run: npx svelte-kit sync
 
-      - name: Lint (prettier + eslint)
-        run: npm run lint
+      - name: Format check (prettier)
+        run: npx prettier --check .
+
+      - name: Lint (eslint)
+        run: npx eslint .
 
       - name: Audit production dependencies
         run: npm audit --omit=dev --audit-level=high
 
-      # 70 pre-existing type errors (recherche/recommandations pages).
-      # Drop continue-on-error once they are fixed to make this a gate.
       - name: Type check (svelte-check)
         run: npm run check
-        continue-on-error: true
 
   image:
     runs-on: ubuntu-24.04
@@ -106,10 +106,14 @@ jobs:
 
       - name: Smoke test
         run: |
+          # Mirror the production compose hardening so the smoke test
+          # exercises what actually ships (read-only rootfs, tmpfs /tmp).
           docker run -d --name moovy \
             -p 8080:8080 \
             -e ORIGIN=http://localhost:8080 \
             -e TVDB_API_KEY=ci-dummy \
+            --read-only --tmpfs /tmp:size=64m,mode=1777 \
+            --cap-drop ALL --security-opt no-new-privileges \
             ${{ env.IMAGE }}:ci
 
           echo "Waiting for healthcheck..."

@@ -1,5 +1,10 @@
 import { applyFallbackArtwork, applyMovieArtwork } from '$lib/data/catalog';
-import { genreMovieCollections, recommendationMovies, supplementalMovies, top100Movies } from '$lib/data/catalog';
+import {
+	genreMovieCollections,
+	recommendationMovies,
+	supplementalMovies,
+	top100Movies
+} from '$lib/data/catalog';
 
 const searchableMovies = [
 	...top100Movies,

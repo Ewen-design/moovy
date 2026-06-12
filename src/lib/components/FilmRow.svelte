@@ -475,6 +475,5 @@
 		.film-row.mobile-card.mobile-expanded .film-copy {
 			gap: 0.58rem;
 		}
-
 	}
 </style>

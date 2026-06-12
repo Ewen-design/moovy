@@ -1,6 +1,7 @@
 <script>
 	import { browser } from '$app/environment';
 	import { page } from '$app/state';
+	import { resolve } from '$app/paths';
 	import { onMount, tick } from 'svelte';
 	import FilmDetailSheet from '$lib/components/FilmDetailSheet.svelte';
 	import PosterRail from '$lib/components/PosterRail.svelte';
@@ -21,6 +22,7 @@
 	const siteUrl = 'https://moovy.agence3terres.fr';
 	const shareImage = `${siteUrl}/moovy-showcase.svg`;
 
+	/** @type {{ href: import('$app/types').Pathname, label: string }[]} */
 	const navItems = [
 		{ href: '/', label: 'Accueil' },
 		{ href: '/ce-soir', label: 'Pour ce soir' },
@@ -29,6 +31,7 @@
 		{ href: '/genres', label: 'Par genres' }
 	];
 	const mobileMenuItems = navItems.filter((item) => item.href !== '/');
+	/** @type {{ href: import('$app/types').Pathname, label: string, icon: string }[]} */
 	const mobileBottomNavItems = [
 		{ href: '/', label: 'Accueil', icon: 'home' },
 		{ href: '/recherche', label: 'Recherche', icon: 'search' }
@@ -52,7 +55,8 @@
 	let searchInput = $state(null);
 	/** @type {{ id: string, title: string, genres: string[] } | null} */
 	let selectedFilm = $state(null);
-	let mobileMenuCloseTimer;
+	/** @type {number | null} */
+	let mobileMenuCloseTimer = null;
 
 	const searchableMovies = [
 		...top100Movies,
@@ -153,7 +157,7 @@
 	});
 
 	$effect(() => {
-		const nextPathname = page.url.pathname;
+		if (!page.url.pathname) return;
 		finalizeMobileMenuClose();
 		searchOpen = false;
 		searchQuery = '';
@@ -170,11 +174,11 @@
 
 	onMount(() => {
 		seedPosterLibrary();
-		/** @type {ReturnType<typeof window.setTimeout> | undefined} */
+		/** @type {number | undefined} */
 		let leaveTimer;
-		/** @type {ReturnType<typeof window.setTimeout> | undefined} */
+		/** @type {number | undefined} */
 		let hideTimer;
-		/** @type {ReturnType<typeof window.requestAnimationFrame> | undefined} */
+		/** @type {number | undefined} */
 		let preloaderFrame;
 		let preloaderStarted = false;
 		let disposed = false;
@@ -294,13 +298,15 @@
 		class="site-header"
 	>
 		<div class="header-left">
-			<a class="brand" href="/" aria-label="Moovy - Accueil">
+			<a class="brand" href={resolve('/')} aria-label="Moovy - Accueil">
 				<img src="/logo.webp" alt="Moovy" />
 			</a>
 
 			<nav class="site-nav" aria-label="Navigation principale">
-				{#each navItems as item}
-					<a class:active={page.url.pathname === item.href} href={item.href}>{item.label}</a>
+				{#each navItems as item (item.href)}
+					<a class:active={page.url.pathname === item.href} href={resolve(item.href)}
+						>{item.label}</a
+					>
 				{/each}
 			</nav>
 		</div>
@@ -324,7 +330,7 @@
 
 				{#if searchOpen && filteredMovies.length}
 					<div class="search-results">
-						{#each filteredMovies as movie}
+						{#each filteredMovies as movie (movie.title)}
 							<button type="button" onclick={() => openFilm(movie)}>
 								<strong>{movie.title}</strong>
 								<span>{movie.year} · {movie.genres.join(', ')}</span>
@@ -355,10 +361,10 @@
 		>
 			<div class="mobile-nav-inner">
 				<nav class="mobile-nav" aria-label="Navigation mobile">
-					{#each mobileMenuItems as item, index}
+					{#each mobileMenuItems as item, index (item.href)}
 						<a
 							class:active={page.url.pathname === item.href}
-							href={item.href}
+							href={resolve(item.href)}
 							onclick={closeMobileMenu}
 							style={`--nav-index:${index};--nav-out-index:${mobileMenuItems.length - index - 1};`}
 						>
@@ -406,10 +412,10 @@
 
 	{#if !isTonightPage}
 		<nav class="mobile-bottom-nav" aria-label="Navigation mobile principale">
-			{#each mobileBottomNavItems as item}
+			{#each mobileBottomNavItems as item (item.href)}
 				<a
 					class:active={page.url.pathname === item.href}
-					href={item.href}
+					href={resolve(item.href)}
 					aria-current={page.url.pathname === item.href ? 'page' : undefined}
 				>
 					{#if item.icon === 'home'}
@@ -431,7 +437,7 @@
 		<footer class="site-footer">
 			<p>Moovy</p>
 			<div class="footer-meta">
-				<a href="/mentions-legales">Mentions legales</a>
+				<a href={resolve('/mentions-legales')}>Mentions legales</a>
 				<span>2026</span>
 				<a href="https://agence3terres.fr" target="_blank" rel="noreferrer">
 					Developpe par Agence 3 Terres

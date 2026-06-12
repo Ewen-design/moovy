@@ -62,7 +62,9 @@
 					movie.title.toLowerCase().includes(normalizedQuery) ||
 					movie.genres.some((genre) => genre.toLowerCase().includes(normalizedQuery)) ||
 					String(movie.year).includes(normalizedQuery) ||
-					String(movie.director ?? '').toLowerCase().includes(normalizedQuery)
+					String(movie.director ?? '')
+						.toLowerCase()
+						.includes(normalizedQuery)
 			)
 			.slice(0, 24);
 	});
@@ -109,7 +111,7 @@
 
 				{#if visibleMovies.length}
 					<div class="results-grid">
-						{#each visibleMovies as movie}
+						{#each visibleMovies as movie (movie.title)}
 							<button class="result-card" type="button" onclick={() => openFilm(movie)}>
 								<img src={movie.image} alt={movie.title} loading="lazy" decoding="async" />
 								<div class="result-overlay"></div>
@@ -122,7 +124,7 @@
 			</section>
 		{:else}
 			<section class="search-discovery">
-				{#each searchSections as section}
+				{#each searchSections as section (section.title)}
 					<div class="discovery-block">
 						<h2>{section.title}</h2>
 						<PosterRail

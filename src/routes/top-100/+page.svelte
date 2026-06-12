@@ -108,7 +108,7 @@
 
 		<nav class="pager" aria-label="Pagination du top 100">
 			<button type="button" onclick={previousPage} disabled={currentPage === 0}>←</button>
-			{#each pages as page}
+			{#each pages as page (page)}
 				<button class:active={page === currentPage} type="button" onclick={() => goToPage(page)}>
 					{page + 1}
 				</button>
@@ -117,14 +117,14 @@
 		</nav>
 
 		<div class="film-list">
-			{#each visibleMovies as film}
+			{#each visibleMovies as film (film.title)}
 				<FilmRow {film} rank={film.rank} onSelect={openFilm} />
 			{/each}
 		</div>
 
 		<nav class="pager bottom" aria-label="Pagination du top 100 bas de page">
 			<button type="button" onclick={previousPage} disabled={currentPage === 0}>←</button>
-			{#each pages as page}
+			{#each pages as page (page)}
 				<button class:active={page === currentPage} type="button" onclick={() => goToPage(page)}>
 					{page + 1}
 				</button>
