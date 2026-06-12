@@ -114,17 +114,17 @@ nginx config:
 
 - **quality**: `npm ci --ignore-scripts` (blocks postinstall supply-chain
   payloads), prettier + eslint, `npm audit` gate on production deps
-  (high+), svelte-check (non-blocking until the 70 pre-existing type
-  errors are fixed)
+  (high+), svelte-check — all blocking; formatting is applied locally by
+  the pre-commit hook (`.githooks/`), CI only verifies
 - **image**: buildx build (GHA layer cache), smoke test of the running
   container (`/healthz`, CSP header, page 200), trivy scan gating on
   CRITICAL/HIGH fixable CVEs, then push to `ghcr.io/ewen-design/moovy`
   (`latest` + `sha-…`, provenance `mode=max` + SBOM attestations) —
   push skipped on PRs, so fork PRs run the full pipeline harmlessly.
   After the push, a signed webhook (HMAC GitHub-style) notifies **Komodo**
-  which pulls and redeploys — config: repo variable `KOMODO_WEBHOOK_URL`
-  + repo secret `KOMODO_WEBHOOK_SECRET` (must match the procedure's
-  webhook secret in Komodo)
+  which pulls and redeploys — configured via the repo variable
+  `KOMODO_WEBHOOK_URL` and the repo secret `KOMODO_WEBHOOK_SECRET`
+  (must match the procedure's webhook secret in Komodo)
 
 Hardening of the pipeline itself: zero default `permissions` (granted
 per job), actions pinned by commit SHA, no untrusted event input

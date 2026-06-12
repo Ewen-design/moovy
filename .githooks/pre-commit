@@ -1,0 +1,14 @@
+#!/bin/sh
+# Formats staged files with prettier before each commit, so the CI format
+# check is only a backstop, never the place where formatting gets fixed.
+# Activated by `npm install` (prepare script → git config core.hooksPath).
+set -e
+
+staged=$(git diff --cached --name-only --diff-filter=ACMR)
+[ -z "$staged" ] && exit 0
+
+# --ignore-unknown skips binaries etc.; .prettierignore is honored.
+git diff --cached --name-only --diff-filter=ACMR -z |
+	xargs -0 npx prettier --write --ignore-unknown --log-level warn
+
+git diff --cached --name-only --diff-filter=ACMR -z | xargs -0 git add
