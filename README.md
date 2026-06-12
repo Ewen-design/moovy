@@ -63,6 +63,7 @@ here (compose v2, buildx, CI) builds through BuildKit.
 ### Hardening
 
 Image (supply chain + attack surface):
+
 - Base image pinned by tag **and digest** — refresh with
   `docker buildx imagetools inspect node:<tag>`
 - `apk upgrade` at build + version-pinned `nginx`/`tini`
@@ -78,6 +79,7 @@ Image (supply chain + attack surface):
 - Healthcheck via `/healthz` exposed by nginx
 
 Runtime (compose):
+
 - `read_only` rootfs + tmpfs `/tmp` (nginx writes only here — paths overridden in `nginx.conf`)
 - All Linux capabilities dropped (`cap_drop: ALL`), `no-new-privileges: true`
 - No published port — the container is only reachable through the shared
@@ -89,6 +91,7 @@ Runtime (compose):
 - Rotated json-file logs (10 MB × 3)
 
 nginx config:
+
 - Security headers on **every** response via `snippets/security-headers.conf`
   included per location (nginx drops inherited `add_header` as soon as a
   location defines its own — a classic silent failure)
@@ -124,6 +127,7 @@ per job), actions pinned by commit SHA, no untrusted event input
 interpolated in `run:` blocks, concurrency cancellation on PRs.
 
 Base image freshness, two mechanisms:
+
 - `.github/dependabot.yml` bumps the digest-pinned `NODE_IMAGE` weekly
   (plus the SHA-pinned actions and npm deps); CI validates each PR
 - a **monthly scheduled rebuild** republishes even without a bump, with

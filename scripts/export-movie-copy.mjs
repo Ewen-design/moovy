@@ -5,12 +5,8 @@ if (!key) {
 	process.exit(1);
 }
 
-const {
-	top100Movies,
-	recommendationMovies,
-	supplementalMovies,
-	genreMovieCollections
-} = await import('../src/lib/data/catalog.js');
+const { top100Movies, recommendationMovies, supplementalMovies, genreMovieCollections } =
+	await import('../src/lib/data/catalog.js');
 
 const TITLE_ALIASES = {
 	'Les Évadés': ['The Shawshank Redemption'],
@@ -41,7 +37,7 @@ const TITLE_ALIASES = {
 	'Seul contre tous': ['Concussion'],
 	'Monuments Men': ['The Monuments Men'],
 	'Le Come Back': ['Music and Lyrics'],
-	'Insaisissables': ['Now You See Me'],
+	Insaisissables: ['Now You See Me'],
 	'Insaisissables 2': ['Now You See Me 2'],
 	'La Môme': ['La Vie en Rose', 'La Mome'],
 	'Le Cercle des poètes disparus': ['Dead Poets Society'],
@@ -54,7 +50,7 @@ const TITLE_ALIASES = {
 	'Ocean’s Eleven': ["Ocean's Eleven"],
 	'Ocean’s Twelve': ["Ocean's Twelve"],
 	'Ocean’s Thirteen': ["Ocean's Thirteen"],
-	'Le Mans 66': ["Ford v Ferrari", "Le Mans '66"],
+	'Le Mans 66': ['Ford v Ferrari', "Le Mans '66"],
 	'Le Pianiste': ['The Pianist'],
 	'La Haine': ['La haine'],
 	'Il était une fois dans l’Ouest': ['Once Upon a Time in the West'],
@@ -182,7 +178,9 @@ for (const title of titles) {
 	const moviePayload = await movieResponse.json();
 	const movie = moviePayload?.data;
 	const overviewTranslations = movie?.translations?.overviewTranslations ?? [];
-	const frenchOverview = overviewTranslations.find((entry) => entry?.language === 'fra')?.overview?.trim();
+	const frenchOverview = overviewTranslations
+		.find((entry) => entry?.language === 'fra')
+		?.overview?.trim();
 	const englishOverview =
 		overviewTranslations.find((entry) => entry?.language === 'eng')?.overview?.trim() ??
 		movie?.overview?.trim() ??

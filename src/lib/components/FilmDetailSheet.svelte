@@ -80,12 +80,7 @@
 						<p class="meta">{film.year} · {film.duration} · {film.maturity ?? '13+'}</p>
 						<p class="summary">{film.summary ?? film.description}</p>
 						{#if film.trailerUrl}
-							<a
-								class="trailer-button"
-								href={film.trailerUrl}
-								target="_blank"
-								rel="noreferrer"
-							>
+							<a class="trailer-button" href={film.trailerUrl} target="_blank" rel="noreferrer">
 								Bande-annonce
 							</a>
 						{/if}
@@ -472,7 +467,12 @@
 		position: absolute;
 		inset: 0;
 		background:
-			linear-gradient(180deg, rgba(8, 8, 10, 0.04) 0%, rgba(8, 8, 10, 0.16) 48%, rgba(8, 8, 10, 0.78) 100%),
+			linear-gradient(
+				180deg,
+				rgba(8, 8, 10, 0.04) 0%,
+				rgba(8, 8, 10, 0.16) 48%,
+				rgba(8, 8, 10, 0.78) 100%
+			),
 			linear-gradient(90deg, rgba(8, 8, 10, 0.18) 0%, rgba(8, 8, 10, 0.04) 100%);
 	}
 

@@ -238,7 +238,12 @@
 	{/if}
 
 	{#if enableHoverPreview && previewItem}
-		<article class:visible={previewVisible} class="rail-preview-card" style={previewStyle} aria-hidden="true">
+		<article
+			class:visible={previewVisible}
+			class="rail-preview-card"
+			style={previewStyle}
+			aria-hidden="true"
+		>
 			<div class="rail-preview-visual">
 				<img
 					src={previewItem.backdrop ?? previewItem.image ?? heroImage}
@@ -271,11 +276,7 @@
 		</article>
 	{/if}
 
-	<div
-		class="rail-viewport"
-		bind:this={viewport}
-		onscroll={handleViewportScrollActivity}
-	>
+	<div class="rail-viewport" bind:this={viewport} onscroll={handleViewportScrollActivity}>
 		<div
 			class:instant={instant || isScrollable}
 			class:mobile-track={isScrollable}
@@ -318,20 +319,10 @@
 									{item.rank}
 								{/if}
 							</span>
-							<img
-								src={item.image ?? heroImage}
-								alt={item.title}
-								loading="lazy"
-								decoding="async"
-							/>
+							<img src={item.image ?? heroImage} alt={item.title} loading="lazy" decoding="async" />
 						</div>
 					{:else}
-						<img
-							src={item.image ?? heroImage}
-							alt={item.title}
-							loading="lazy"
-							decoding="async"
-						/>
+						<img src={item.image ?? heroImage} alt={item.title} loading="lazy" decoding="async" />
 						<div class="rail-overlay"></div>
 						{#if showClearlogoOverlay && item.clearlogo}
 							<div class="rail-clearlogo-wrap">
@@ -433,7 +424,12 @@
 		position: absolute;
 		inset: 0;
 		background:
-			linear-gradient(180deg, rgba(8, 8, 10, 0.04) 0%, rgba(8, 8, 10, 0.16) 48%, rgba(8, 8, 10, 0.78) 100%),
+			linear-gradient(
+				180deg,
+				rgba(8, 8, 10, 0.04) 0%,
+				rgba(8, 8, 10, 0.16) 48%,
+				rgba(8, 8, 10, 0.78) 100%
+			),
 			linear-gradient(90deg, rgba(8, 8, 10, 0.18) 0%, rgba(8, 8, 10, 0.04) 100%);
 	}
 
@@ -631,21 +627,18 @@
 		color: transparent;
 		white-space: nowrap;
 		pointer-events: none;
-		background:
-			linear-gradient(
-				90deg,
-				rgba(5, 8, 12, 0) 0%,
-				rgba(5, 8, 12, 0.07) 18%,
-				rgba(5, 8, 12, 0.2) 40%,
-				rgba(5, 8, 12, 0.46) 64%,
-				rgba(5, 8, 12, 0.72) 100%
-			);
+		background: linear-gradient(
+			90deg,
+			rgba(5, 8, 12, 0) 0%,
+			rgba(5, 8, 12, 0.07) 18%,
+			rgba(5, 8, 12, 0.2) 40%,
+			rgba(5, 8, 12, 0.46) 64%,
+			rgba(5, 8, 12, 0.72) 100%
+		);
 		-webkit-background-clip: text;
 		background-clip: text;
 		-webkit-text-fill-color: transparent;
-		filter:
-			blur(0.5px)
-			drop-shadow(7px 0 7px rgba(0, 0, 0, 0.16))
+		filter: blur(0.5px) drop-shadow(7px 0 7px rgba(0, 0, 0, 0.16))
 			drop-shadow(12px 0 10px rgba(0, 0, 0, 0.1));
 		opacity: 0.9;
 	}
@@ -676,10 +669,8 @@
 			22px 0 22px rgba(0, 0, 0, 0.42),
 			34px 0 44px rgba(0, 0, 0, 0.34),
 			52px 0 92px rgba(0, 0, 0, 0.28);
-		filter:
-			drop-shadow(12px 0 12px rgba(0, 0, 0, 0.34))
-			drop-shadow(24px 0 30px rgba(0, 0, 0, 0.26))
-			drop-shadow(40px 0 68px rgba(0, 0, 0, 0.2));
+		filter: drop-shadow(12px 0 12px rgba(0, 0, 0, 0.34))
+			drop-shadow(24px 0 30px rgba(0, 0, 0, 0.26)) drop-shadow(40px 0 68px rgba(0, 0, 0, 0.2));
 	}
 
 	.poster-rail.topTen .rail-rank-shadow {
@@ -729,7 +720,12 @@
 
 	.poster-rail.homeOverlay .rail-overlay {
 		background:
-			linear-gradient(180deg, rgba(8, 8, 8, 0.01) 0%, rgba(8, 8, 8, 0.14) 40%, rgba(8, 8, 8, 0.52) 100%),
+			linear-gradient(
+				180deg,
+				rgba(8, 8, 8, 0.01) 0%,
+				rgba(8, 8, 8, 0.14) 40%,
+				rgba(8, 8, 8, 0.52) 100%
+			),
 			linear-gradient(90deg, rgba(8, 8, 8, 0.18) 0%, rgba(8, 8, 8, 0.04) 100%);
 	}
 
@@ -761,9 +757,7 @@
 		max-height: 52%;
 		object-fit: contain;
 		object-position: center;
-		filter:
-			drop-shadow(0 10px 24px rgba(0, 0, 0, 0.42))
-			drop-shadow(0 2px 10px rgba(0, 0, 0, 0.24));
+		filter: drop-shadow(0 10px 24px rgba(0, 0, 0, 0.42)) drop-shadow(0 2px 10px rgba(0, 0, 0, 0.24));
 	}
 
 	.rail-copy span {

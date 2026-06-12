@@ -13,7 +13,12 @@
 		recommendationMovies.find((movie) => movie.title === 'Ocean’s Eleven'),
 		recommendationMovies.find((movie) => movie.title === 'Legend')
 	].filter(Boolean);
-	const featureShowcaseMovies = [top100Movies[2], top100Movies[17], top100Movies[63], top100Movies[54]];
+	const featureShowcaseMovies = [
+		top100Movies[2],
+		top100Movies[17],
+		top100Movies[63],
+		top100Movies[54]
+	];
 	const heroSlides = $derived.by(() => {
 		heroVersion;
 		$posterVersion;
@@ -89,7 +94,10 @@
 	/** @param {{ id: string, title: string, genres: string[] }} film */
 	const openFilm = (film) => {
 		selectedFilm = film;
-		hydrateMoviePosters([film, ...getSimilarMovies([...recommendationMovies, ...top100Movies], film, 6)]);
+		hydrateMoviePosters([
+			film,
+			...getSimilarMovies([...recommendationMovies, ...top100Movies], film, 6)
+		]);
 	};
 
 	const closeFilm = () => {
@@ -155,7 +163,12 @@
 	<section class="feature-grid" aria-label="Entrees de navigation">
 		{#each featureBlocks as block}
 			<a class="feature-block" href={block.href}>
-				<img src={block.image ?? '/telephone2_parfum.webp'} alt={block.title} loading="lazy" decoding="async" />
+				<img
+					src={block.image ?? '/telephone2_parfum.webp'}
+					alt={block.title}
+					loading="lazy"
+					decoding="async"
+				/>
 				<div class="feature-overlay"></div>
 				<div class="feature-copy">
 					<span>{block.title}</span>
@@ -263,7 +276,12 @@
 		position: absolute;
 		inset: 0;
 		background:
-			linear-gradient(180deg, rgba(8, 8, 10, 0.02) 0%, rgba(8, 8, 10, 0.22) 36%, rgba(8, 8, 10, 0.82) 100%),
+			linear-gradient(
+				180deg,
+				rgba(8, 8, 10, 0.02) 0%,
+				rgba(8, 8, 10, 0.22) 36%,
+				rgba(8, 8, 10, 0.82) 100%
+			),
 			linear-gradient(90deg, rgba(8, 8, 10, 0.42) 0%, rgba(8, 8, 10, 0.14) 100%);
 	}
 

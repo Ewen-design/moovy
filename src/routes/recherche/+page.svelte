@@ -62,7 +62,9 @@
 					movie.title.toLowerCase().includes(normalizedQuery) ||
 					movie.genres.some((genre) => genre.toLowerCase().includes(normalizedQuery)) ||
 					String(movie.year).includes(normalizedQuery) ||
-					String(movie.director ?? '').toLowerCase().includes(normalizedQuery)
+					String(movie.director ?? '')
+						.toLowerCase()
+						.includes(normalizedQuery)
 			)
 			.slice(0, 24);
 	});

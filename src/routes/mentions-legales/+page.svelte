@@ -18,17 +18,17 @@
 			<div>
 				<h2>Presentation</h2>
 				<p>
-					Moovy est un projet editorial et demonstratif dedie a la recommandation de films,
-					a la mise en scene de selections cinematographiques et a l exploration de parcours
-					de navigation inspires des plateformes de streaming premium.
+					Moovy est un projet editorial et demonstratif dedie a la recommandation de films, a la
+					mise en scene de selections cinematographiques et a l exploration de parcours de
+					navigation inspires des plateformes de streaming premium.
 				</p>
 			</div>
 			<div class="legal-note">
 				<strong>Nature du site</strong>
 				<p>
-					Le site a une vocation de demonstration, de direction artistique et de prototypage
-					d interface. Il ne constitue pas un service officiel d exploitation ou de diffusion
-					d oeuvres cinematographiques.
+					Le site a une vocation de demonstration, de direction artistique et de prototypage d
+					interface. Il ne constitue pas un service officiel d exploitation ou de diffusion d
+					oeuvres cinematographiques.
 				</p>
 			</div>
 		</section>
@@ -36,9 +36,9 @@
 		<section class="legal-section">
 			<h2>Editeur</h2>
 			<p>
-				Moovy est edite comme un projet de vitrine et de conception web. Les contenus textuels,
-				la structure editoriale, l organisation des parcours et l habillage de l interface
-				sont produits pour cette demonstration.
+				Moovy est edite comme un projet de vitrine et de conception web. Les contenus textuels, la
+				structure editoriale, l organisation des parcours et l habillage de l interface sont
+				produits pour cette demonstration.
 			</p>
 		</section>
 
@@ -50,8 +50,8 @@
 			<div>
 				<h2>Hebergement</h2>
 				<p>
-					L hebergement du projet depend de l environnement de deploiement retenu pour
-					l application SvelteKit et peut varier selon les besoins techniques du site.
+					L hebergement du projet depend de l environnement de deploiement retenu pour l application
+					SvelteKit et peut varier selon les besoins techniques du site.
 				</p>
 			</div>
 		</section>
@@ -59,15 +59,14 @@
 		<section class="legal-section">
 			<h2>Sources, donnees et visuels</h2>
 			<p>
-				Moovy assemble des donnees editoriales internes et peut s appuyer sur des services
-				tiers pour enrichir les fiches films, les affiches, les fonds visuels et certains
-				elements graphiques associes aux oeuvres referencees.
+				Moovy assemble des donnees editoriales internes et peut s appuyer sur des services tiers
+				pour enrichir les fiches films, les affiches, les fonds visuels et certains elements
+				graphiques associes aux oeuvres referencees.
 			</p>
 			<p>
 				Les affiches, backdrops et clearlogos peuvent notamment provenir de la base
-				<strong> TheTVDB (TVDB)</strong> ou de sources equivalentes lorsque ces ressources
-				sont disponibles. Ces elements restent soumis aux droits et conditions de leurs
-				ayants droit et fournisseurs respectifs.
+				<strong> TheTVDB (TVDB)</strong> ou de sources equivalentes lorsque ces ressources sont disponibles.
+				Ces elements restent soumis aux droits et conditions de leurs ayants droit et fournisseurs respectifs.
 			</p>
 		</section>
 
@@ -75,17 +74,17 @@
 			<div>
 				<h2>Propriete intellectuelle</h2>
 				<p>
-					Le design du site, son architecture, ses textes originaux, son systeme de navigation
-					et ses choix editoriaux sont proteges par le droit applicable. Toute reproduction,
-					adaptation ou reutilisation non autorisee de ces elements peut etre interdite.
+					Le design du site, son architecture, ses textes originaux, son systeme de navigation et
+					ses choix editoriaux sont proteges par le droit applicable. Toute reproduction, adaptation
+					ou reutilisation non autorisee de ces elements peut etre interdite.
 				</p>
 			</div>
 			<div>
 				<h2>Marques et oeuvres citees</h2>
 				<p>
 					Les titres de films, noms d oeuvres, logos, affiches et visuels mentionnes sur le site
-					restent la propriete de leurs titulaires respectifs et sont utilises ici dans un cadre
-					de presentation, de demonstration ou de reference editoriale.
+					restent la propriete de leurs titulaires respectifs et sont utilises ici dans un cadre de
+					presentation, de demonstration ou de reference editoriale.
 				</p>
 			</div>
 		</section>
@@ -103,9 +102,9 @@
 		<section class="legal-section compact">
 			<h2>Contact</h2>
 			<p>
-				Pour toute demande relative au projet, a son design, a ses contenus ou a l utilisation
-				de ses elements editoriaux, la prise de contact se fait via l entite mentionnee dans le
-				footer du site.
+				Pour toute demande relative au projet, a son design, a ses contenus ou a l utilisation de
+				ses elements editoriaux, la prise de contact se fait via l entite mentionnee dans le footer
+				du site.
 			</p>
 		</section>
 	</div>

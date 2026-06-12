@@ -58,7 +58,13 @@
 							<p>{slide.kicker}</p>
 						{/if}
 						{#if slide.logo}
-							<img class="hero-logo" src={slide.logo} alt={slide.title} loading="lazy" decoding="async" />
+							<img
+								class="hero-logo"
+								src={slide.logo}
+								alt={slide.title}
+								loading="lazy"
+								decoding="async"
+							/>
 						{:else}
 							<h1>{slide.title}</h1>
 						{/if}
@@ -99,7 +105,12 @@
 		bottom: 0;
 		z-index: 1;
 		height: 42%;
-		background: linear-gradient(180deg, rgba(10, 10, 10, 0) 0%, rgba(10, 10, 10, 0.22) 38%, rgba(10, 10, 10, 0.94) 100%);
+		background: linear-gradient(
+			180deg,
+			rgba(10, 10, 10, 0) 0%,
+			rgba(10, 10, 10, 0.22) 38%,
+			rgba(10, 10, 10, 0.94) 100%
+		);
 		pointer-events: none;
 		transition:
 			background var(--theme-duration) var(--theme-ease),
