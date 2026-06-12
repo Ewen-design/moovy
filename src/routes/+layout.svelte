@@ -13,14 +13,14 @@
 		supplementalMovies,
 		top100Movies
 	} from '$lib/data/catalog';
-	import favicon from '$lib/assets/favicon.svg';
 	import { hydrateMoviePosters, seedPosterLibrary } from '$lib/posters';
 	import { posterVersion } from '$lib/poster-state';
 	import { fade } from 'svelte/transition';
 
 	let { children, data } = $props();
 	const siteUrl = 'https://moovy.agence3terres.fr';
-	const shareImage = `${siteUrl}/moovy-showcase.svg`;
+	const shareImage = `${siteUrl}/moovy_mobile.webp`;
+	const faviconPath = '/favicon.png';
 
 	/** @type {{ href: import('$app/types').Pathname, label: string }[]} */
 	const navItems = [
@@ -257,6 +257,9 @@
 	<meta property="og:type" content="website" />
 	<meta property="og:url" content={`${siteUrl}${page.url.pathname}`} />
 	<meta property="og:image" content={shareImage} />
+	<meta property="og:image:width" content="1800" />
+	<meta property="og:image:height" content="1773" />
+	<meta property="og:image:alt" content="Moovy" />
 	<meta name="twitter:card" content="summary_large_image" />
 	<meta name="twitter:title" content="Moovy" />
 	<meta
@@ -264,7 +267,9 @@
 		content="Moovy propose une home cinema moderne avec selections, top films, genres et recommandations."
 	/>
 	<meta name="twitter:image" content={shareImage} />
-	<link rel="icon" href={favicon} />
+	<meta name="twitter:image:alt" content="Moovy" />
+	<link rel="icon" type="image/png" href={faviconPath} />
+	<link rel="apple-touch-icon" href={faviconPath} />
 </svelte:head>
 
 <svelte:window onscroll={() => (scrolled = window.scrollY > 28)} />
