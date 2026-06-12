@@ -1,0 +1,71 @@
+# Everything by default — explicit allow list below
+**
+
+# Allow source tree needed at build time
+!package.json
+!package-lock.json
+!svelte.config.js
+!vite.config.js
+!jsconfig.json
+!eslint.config.js
+!.npmrc
+!src/**
+!static/**
+!scripts/**
+
+# Never ship these into the build context
+node_modules
+.svelte-kit
+build
+dist
+.vercel
+.netlify
+coverage
+.nyc_output
+
+# VCS
+.git
+.gitignore
+.gitattributes
+.github
+
+# IDE / OS
+.vscode
+.idea
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Secrets / env
+.env
+.env.*
+!.env.example
+
+# Docs / tooling not used at build time
+README.md
+LICENSE
+*.md
+.prettierrc
+.prettierignore
+.editorconfig
+
+# Docker artifacts themselves
+docker
+Dockerfile*
+compose.yaml
+compose.yml
+docker-compose*.yml
+.dockerignore
+
+# …but the runtime config files are copied during the build
+!docker/nginx.conf
+!docker/security-headers.conf
+!docker/entrypoint.sh

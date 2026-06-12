@@ -1,9 +1,15 @@
 import { json } from '@sveltejs/kit';
-import { TVDB_API_KEY } from '$env/static/private';
+import { env } from '$env/dynamic/private';
 import { top100Movies } from '$lib/data/catalog';
+
+const { TVDB_API_KEY } = env;
 
 const TVDB_BASE_URL = 'https://api4.thetvdb.com/v4';
 const TOKEN_TTL_MS = 28 * 24 * 60 * 60 * 1000;
+// The layout preload legitimately requests the whole catalog (~85 titles);
+// anything far beyond that is abuse and would fan out to TVDB unbounded.
+const MAX_TITLES_PER_REQUEST = 150;
+const MAX_CACHE_ENTRIES = 1000;
 const DEFAULT_TITLES = [
 	'Les Évadés',
 	'Le Parrain',
@@ -229,10 +235,25 @@ function buildSearchQueries(title) {
 /** @param {URL} url */
 function pickTitles(url) {
 	const titles = url.searchParams.getAll('title').map((title) => title.trim()).filter(Boolean);
-	if (titles.length) return [...new Set(titles)];
+	if (titles.length) return [...new Set(titles)].slice(0, MAX_TITLES_PER_REQUEST);
 
 	const limit = Number.parseInt(url.searchParams.get('limit') ?? `${DEFAULT_TITLES.length}`, 10);
 	return DEFAULT_TITLES.slice(0, Number.isFinite(limit) ? limit : DEFAULT_TITLES.length);
+}
+
+/**
+ * FIFO eviction keeps the cache bounded even when an attacker requests
+ * endless unique titles (each entry would otherwise live forever).
+ * @param {string} key
+ * @param {MovieRecord} value
+ */
+function cacheMovie(key, value) {
+	if (movieCache.size >= MAX_CACHE_ENTRIES) {
+		const oldestKey = movieCache.keys().next().value;
+		movieCache.delete(oldestKey);
+	}
+
+	movieCache.set(key, value);
 }
 
 /** @param {string} title */
@@ -358,7 +379,7 @@ async function fetchMovieByTitle(fetch, title) {
 		}
 
 		if (!movieId) {
-			movieCache.set(cacheKey, null);
+			cacheMovie(cacheKey, null);
 			return null;
 		}
 
@@ -397,11 +418,11 @@ async function fetchMovieByTitle(fetch, title) {
 				}
 			: null;
 
-		movieCache.set(cacheKey, record);
+		cacheMovie(cacheKey, record);
 		return record;
 	} catch (error) {
 		console.error(`TVDB lookup failed for "${title}"`, error);
-		movieCache.set(cacheKey, null);
+		cacheMovie(cacheKey, null);
 		return null;
 	}
 }
