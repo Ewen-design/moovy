@@ -21,26 +21,36 @@
 			if (f1Movie && legendMovie) return [f1Movie, legendMovie];
 		}
 		if (activeGenre === 'Comedie') {
-			const kingsmanMovie = genreMovieCollections['Comedie']?.find((movie) => movie.title === 'Kingsman');
-			const trumanShowMovie = genreMovieCollections['Comedie']?.find((movie) => movie.title === 'The Truman Show');
+			const kingsmanMovie = genreMovieCollections['Comedie']?.find(
+				(movie) => movie.title === 'Kingsman'
+			);
+			const trumanShowMovie = genreMovieCollections['Comedie']?.find(
+				(movie) => movie.title === 'The Truman Show'
+			);
 			if (kingsmanMovie && trumanShowMovie) return [kingsmanMovie, trumanShowMovie];
 		}
 		if (activeGenre === 'Science-fiction') {
 			const customSciFiHero = top100Movies.filter((movie) =>
 				['Interstellar'].includes(movie.title)
 			);
-			const avatarMovie = genreMovieCollections['Science-fiction']?.find((movie) => movie.title === 'Avatar');
+			const avatarMovie = genreMovieCollections['Science-fiction']?.find(
+				(movie) => movie.title === 'Avatar'
+			);
 			if (customSciFiHero.length === 1 && avatarMovie) return [avatarMovie, customSciFiHero[0]];
 		}
 		if (activeGenre === 'Romance') {
-			const ilEtaitTempsMovie = genreMovieCollections['Romance']?.find((movie) => movie.title === 'Il était temps');
+			const ilEtaitTempsMovie = genreMovieCollections['Romance']?.find(
+				(movie) => movie.title === 'Il était temps'
+			);
 			const titanicMovie = top100Movies.find((movie) => movie.title === 'Titanic');
 			if (ilEtaitTempsMovie && titanicMovie) return [ilEtaitTempsMovie, titanicMovie];
 		}
 		const matches = top100Movies.filter(
 			(movie) => movie.genres.includes(activeGenre) && movie.backdrop && movie.clearlogo
 		);
-		return matches.length ? matches.slice(0, 2) : top100Movies.filter((movie) => movie.backdrop && movie.clearlogo).slice(0, 2);
+		return matches.length
+			? matches.slice(0, 2)
+			: top100Movies.filter((movie) => movie.backdrop && movie.clearlogo).slice(0, 2);
 	});
 	const heroSlides = $derived.by(() => {
 		heroVersion;
@@ -97,7 +107,7 @@
 		</div>
 
 		<div class="genre-tabs">
-			{#each genres as genre}
+			{#each genres as genre (genre)}
 				<button
 					class:active={genre === activeGenre}
 					type="button"
@@ -110,7 +120,7 @@
 
 		{#key activeGenre}
 			<div class="film-list" transition:fade={{ duration: 220 }}>
-				{#each activeMovies as film}
+				{#each activeMovies as film (film.title)}
 					<FilmRow {film} mobileCard={true} onSelect={openFilm} />
 				{/each}
 			</div>

@@ -186,6 +186,7 @@ function capitalizeFirst(value) {
 	return value ? `${value.charAt(0).toUpperCase()}${value.slice(1)}` : value;
 }
 
+/** @type {Record<string, string>} */
 const manualQuickCopyByTitle = {
 	'Ocean’s Eleven': 'braquage · casino · argent',
 	'Ocean’s Twelve': 'braquage · équipe · revanche',
@@ -203,7 +204,10 @@ const manualQuickCopyByTitle = {
 };
 
 const quickKeywordRules = [
-	{ label: 'braquage', pattern: /braquage|cambriol|cambrioler|hold-up|casse|voler|malfrat|pickpocket/i },
+	{
+		label: 'braquage',
+		pattern: /braquage|cambriol|cambrioler|hold-up|casse|voler|malfrat|pickpocket/i
+	},
 	{ label: 'casino', pattern: /casino|las vegas|bellagio|mirage|mgm/i },
 	{ label: 'argent', pattern: /dollars|argent|fortune|finance|wall street/i },
 	{ label: 'mafia', pattern: /mafia|parrain|clan|gangster|crime organis/i },
@@ -226,7 +230,10 @@ const quickKeywordRules = [
 	{ label: 'guerre', pattern: /guerre|soldat|arm[eé]e|camp|d[eé]port|naz|r[eé]sistant/i },
 	{ label: 'amour', pattern: /amour|amoureux|bien-aim[eé]e|romance|femme|mari/i },
 	{ label: 'sacrifice', pattern: /sacrifice|sauver|prot[eé]ger|pour son fils|pour eux/i },
-	{ label: 'espionnage', pattern: /espion|renseignement|mission|agent secret|service de l'ennemi/i },
+	{
+		label: 'espionnage',
+		pattern: /espion|renseignement|mission|agent secret|service de l'ennemi/i
+	},
 	{ label: 'enquête', pattern: /enqu[eê]te|inspecteur|police|indices|affaire/i },
 	{ label: 'meurtre', pattern: /meurtre|assassin|homicide|tueur/i },
 	{ label: 'justice', pattern: /proc[eè]s|tribunal|juge|avocat|justice/i },
@@ -327,6 +334,7 @@ function makeMovie(title, index) {
 		image: /** @type {string | null} */ (null),
 		backdrop: /** @type {string | null} */ (null),
 		clearlogo: /** @type {string | null} */ (null),
+		trailerUrl: /** @type {string | null} */ (null),
 		rank: index + 1,
 		year: baseYear,
 		duration: minutesToDuration(duration),
@@ -408,7 +416,12 @@ const recommendationTitles = [
 ];
 
 const supplementalMovieSpecs = [
-	{ title: '2001 : l’Odyssée de l’espace', year: 1968, duration: 149, genres: ['Science-fiction', 'Drame'] },
+	{
+		title: '2001 : l’Odyssée de l’espace',
+		year: 1968,
+		duration: 149,
+		genres: ['Science-fiction', 'Drame']
+	},
 	{ title: 'Matrix', year: 1999, duration: 136, genres: ['Science-fiction', 'Action'] },
 	{ title: 'Orange mécanique', year: 1971, duration: 136, genres: ['Science-fiction', 'Crime'] },
 	{ title: 'Unstoppable', year: 2010, duration: 98, genres: ['Action', 'Thriller'] },
@@ -442,7 +455,12 @@ const supplementalMovieSpecs = [
 	{ title: 'Notting Hill', year: 1999, duration: 124, genres: ['Romance', 'Comedie'] },
 	{ title: 'Love Actually', year: 2003, duration: 135, genres: ['Romance', 'Comedie'] },
 	{ title: 'The Holiday', year: 2006, duration: 136, genres: ['Romance', 'Comedie'] },
-	{ title: 'The Curious Case of Benjamin Button', year: 2008, duration: 166, genres: ['Drame', 'Romance'] },
+	{
+		title: 'The Curious Case of Benjamin Button',
+		year: 2008,
+		duration: 166,
+		genres: ['Drame', 'Romance']
+	},
 	{ title: 'Dumb and Dumber', year: 1994, duration: 107, genres: ['Comedie'] },
 	{ title: 'Little Miss Sunshine', year: 2006, duration: 101, genres: ['Comedie', 'Drame'] },
 	{ title: 'Les Visiteurs', year: 1993, duration: 107, genres: ['Comedie', 'Fantastique'] },
@@ -480,7 +498,12 @@ const supplementalMovieSpecs = [
 	{ title: 'Coach Carter', year: 2005, duration: 136, genres: ['Drame'] },
 	{ title: 'Fighter', year: 2010, duration: 116, genres: ['Drame'] },
 	{ title: 'Kingsman', year: 2014, duration: 129, genres: ['Action', 'Comedie'] },
-	{ title: 'La vie rêvée de Walter Mitty', year: 2013, duration: 114, genres: ['Comedie', 'Aventure'] },
+	{
+		title: 'La vie rêvée de Walter Mitty',
+		year: 2013,
+		duration: 114,
+		genres: ['Comedie', 'Aventure']
+	},
 	{ title: 'L’avare', year: 1980, duration: 125, genres: ['Comedie'] },
 	{ title: 'Le Murder Club du jeudi', year: 2025, duration: 118, genres: ['Comedie', 'Crime'] },
 	{ title: 'Le Nouveau Stagiaire', year: 2015, duration: 121, genres: ['Comedie'] },
@@ -491,21 +514,41 @@ const supplementalMovieSpecs = [
 	{ title: 'Spotlight', year: 2015, duration: 129, genres: ['Drame', 'Historique'] }
 ];
 
+/**
+ * @param {{ title: string, year: number, duration: number, genres: string[] }} spec
+ * @param {number} index
+ */
 function makeSupplementalMovie(spec, index) {
-	const cast = ['Emma Stone', 'Ryan Gosling', 'Denzel Washington', 'Marion Cotillard', 'Matt Damon'];
+	const cast = [
+		'Emma Stone',
+		'Ryan Gosling',
+		'Denzel Washington',
+		'Marion Cotillard',
+		'Matt Damon'
+	];
 	return {
 		id: `extra-${index + 1}`,
 		title: spec.title,
 		image: /** @type {string | null} */ (null),
 		backdrop: /** @type {string | null} */ (null),
 		clearlogo: /** @type {string | null} */ (null),
+		trailerUrl: /** @type {string | null} */ (null),
 		rank: /** @type {number | undefined} */ (undefined),
 		year: spec.year,
 		duration: minutesToDuration(spec.duration),
 		rating: `${(8.6 - (index % 12) * 0.09).toFixed(1).replace('.', ',')}`,
-		votes: index < 24 ? `${(2.4 - index * 0.05).toFixed(1).replace('.', ',')} M` : `${Math.max(120, 920 - index * 9)} k`,
+		votes:
+			index < 24
+				? `${(2.4 - index * 0.05).toFixed(1).replace('.', ',')} M`
+				: `${Math.max(120, 920 - index * 9)} k`,
 		genres: spec.genres,
-		director: ['Ridley Scott', 'Christopher Nolan', 'Steven Spielberg', 'Nancy Meyers', 'Tony Scott'][index % 5],
+		director: [
+			'Ridley Scott',
+			'Christopher Nolan',
+			'Steven Spielberg',
+			'Nancy Meyers',
+			'Tony Scott'
+		][index % 5],
 		cast: cast.slice(0, 3),
 		castMembers: cast.slice(0, 3).map((name, castIndex) => ({
 			name,
@@ -526,61 +569,22 @@ const recommendationSourceMovies = [...top100Movies, ...supplementalMovies].filt
 );
 
 export const recommendationMovies = recommendationTitles
-	.map((title) => recommendationSourceMovies.find((movie) => movie.title === title))
-	.filter(Boolean)
+	.flatMap((title) => {
+		// flatMap (vs filter(Boolean)) narrows away `undefined` for the checker
+		const movie = recommendationSourceMovies.find((item) => item.title === title);
+		return movie ? [movie] : [];
+	})
 	.map((movie, index) => ({
 		...movie,
 		id: `rec-${index + 1}`,
 		...buildMovieCopy(movie.title, movie.genres, movie.summary)
 	}));
 
-/**
- * @param {string[]} prefixes
- * @param {string[]} suffixes
- */
-function buildGenreTitles(prefixes, suffixes) {
-	return prefixes.flatMap((prefix) => suffixes.map((suffix) => `${prefix} ${suffix}`));
-}
-
-/**
- * @param {string} genre
- * @param {string} title
- * @param {number} index
- */
-function makeGenreMovie(genre, title, index) {
-	const cast = ['Adele Exarchopoulos', 'Tahar Rahim', 'Noemie Merlant'];
-
-	return {
-		id: `${genre}-${index + 1}`,
-		title,
-		image: /** @type {string | null} */ (null),
-		backdrop: /** @type {string | null} */ (null),
-		clearlogo: /** @type {string | null} */ (null),
-		year: 1982 + ((index * 3) % 43),
-		duration: minutesToDuration(92 + ((index * 5) % 64)),
-		rating: `${(8.9 - index * 0.016).toFixed(1).replace('.', ',')}`,
-		votes:
-			index < 15
-				? `${(1.8 - index * 0.05).toFixed(1).replace('.', ',')} M`
-				: `${980 - index * 11} k`,
-		genres: [genre],
-		director: ['Julia Ducournau', 'Celine Sciamma', 'Cedric Klapisch'][index % 3],
-		cast,
-		castMembers: cast.map((name, castIndex) => ({
-			name,
-			role: ['Role principal', 'Second role', 'Distribution'][castIndex],
-			image: actorPortrait(name, castIndex)
-		})),
-		maturity: ['13+', '16+', '10+'][index % 3],
-		quality: 'HD',
-		...buildMovieCopy(title, [genre])
-	};
-}
-
 const genreSourceMovies = [...top100Movies, ...recommendationMovies, ...supplementalMovies].filter(
 	(movie, index, list) => index === list.findIndex((item) => item.title === movie.title)
 );
 
+/** @type {Record<string, { include: string[], exclude: string[] }>} */
 const genreCurations = {
 	Action: {
 		include: [
@@ -793,7 +797,7 @@ const genreCurations = {
 
 /**
  * @param {string} genre
- * @param {typeof top100Movies[number]} movie
+ * @param {(typeof genreSourceMovies)[number]} movie
  * @param {number} index
  */
 function cloneMovieForGenre(genre, movie, index) {
@@ -903,7 +907,9 @@ export function applyMovieArtwork(entries) {
 	/** @type {Map<string, PosterEntry>} */
 	const byTitle = new Map(
 		entries
-			.map((entry) => /** @type {[string, PosterEntry]} */ ([normalizeMovieTitle(entry.title), entry]))
+			.map(
+				(entry) => /** @type {[string, PosterEntry]} */ ([normalizeMovieTitle(entry.title), entry])
+			)
 			.filter(([, entry]) => Boolean(entry?.poster))
 	);
 
@@ -960,7 +966,8 @@ export function applyFallbackArtwork() {
 
 			const genrePool = movie.genres.flatMap((genre) => postersByGenre.get(genre) ?? []);
 			const pool = genrePool.length ? genrePool : globalPosters;
-			movie.image = pool[hashValue(`${movie.title}-${movie.genres.join('-')}`) % pool.length] ?? null;
+			movie.image =
+				pool[hashValue(`${movie.title}-${movie.genres.join('-')}`) % pool.length] ?? null;
 		}
 	}
 }

@@ -36,7 +36,7 @@ const TITLE_ALIASES = {
 	'La Liste de Schindler': ["Schindler's List"],
 	'Les Affranchis': ['Goodfellas'],
 	'Le Silence des agneaux': ['The Silence of the Lambs'],
-	'Se7en': ['Seven'],
+	Se7en: ['Seven'],
 	'Le Voyage de Chihiro': ['Spirited Away', 'Sen to Chihiro no kamikakushi'],
 	'La Ligne verte': ['The Green Mile'],
 	'La vie est belle': ['La vita è bella', 'La vita e bella', 'Life Is Beautiful'],
@@ -56,7 +56,7 @@ const TITLE_ALIASES = {
 	'Seul contre tous': ['Concussion'],
 	'Monuments Men': ['The Monuments Men'],
 	'Le Come Back': ['Music and Lyrics'],
-	'Insaisissables': ['Now You See Me'],
+	Insaisissables: ['Now You See Me'],
 	'Insaisissables 2': ['Now You See Me 2'],
 	'La Môme': ['La Vie en Rose', 'La Mome'],
 	'Le Cercle des poètes disparus': ['Dead Poets Society'],
@@ -69,13 +69,13 @@ const TITLE_ALIASES = {
 	'Ocean’s Eleven': ["Ocean's Eleven"],
 	'Ocean’s Twelve': ["Ocean's Twelve"],
 	'Ocean’s Thirteen': ["Ocean's Thirteen"],
-	'Le Mans 66': ["Ford v Ferrari", "Le Mans '66"],
+	'Le Mans 66': ['Ford v Ferrari', "Le Mans '66"],
 	'Le Pianiste': ['The Pianist'],
 	'La Haine': ['La haine'],
 	'Il était une fois dans l’Ouest': ['Once Upon a Time in the West'],
 	'Bruce tout-puissant': ['Bruce Almighty'],
 	Alliés: ['Allied'],
-	'Shining': ['The Shining']
+	Shining: ['The Shining']
 };
 /** @type {Record<string, string | number>} */
 const TITLE_OVERRIDES = {
@@ -234,7 +234,10 @@ function buildSearchQueries(title) {
 
 /** @param {URL} url */
 function pickTitles(url) {
-	const titles = url.searchParams.getAll('title').map((title) => title.trim()).filter(Boolean);
+	const titles = url.searchParams
+		.getAll('title')
+		.map((title) => title.trim())
+		.filter(Boolean);
 	if (titles.length) return [...new Set(titles)].slice(0, MAX_TITLES_PER_REQUEST);
 
 	const limit = Number.parseInt(url.searchParams.get('limit') ?? `${DEFAULT_TITLES.length}`, 10);
@@ -259,10 +262,7 @@ function cacheMovie(key, value) {
 /** @param {string} title */
 function canonicalTitle(title) {
 	const normalized = normalizeTitle(title);
-	return (
-		top100Movies.find((movie) => normalizeTitle(movie.title) === normalized)?.title ??
-		title
-	);
+	return top100Movies.find((movie) => normalizeTitle(movie.title) === normalized)?.title ?? title;
 }
 
 /** @param {typeof fetch} fetch */
@@ -324,15 +324,16 @@ async function tvdbFetch(fetch, path) {
 function pickBestMatch(results, requestedTitle) {
 	const normalizedRequestedTitle = normalizeTitle(requestedTitle);
 	/** @param {TvdbSearchResult} result */
-	const getCandidateLabels = (result) => [
-		result?.name,
-		result?.title,
-		result?.extended_title,
-		...(result?.aliases ?? []),
-		...Object.values(result?.translations ?? {})
-	]
-		.filter((value) => typeof value === 'string' && value.length > 0)
-		.map((value) => normalizeTitle(/** @type {string} */ (value)));
+	const getCandidateLabels = (result) =>
+		[
+			result?.name,
+			result?.title,
+			result?.extended_title,
+			...(result?.aliases ?? []),
+			...Object.values(result?.translations ?? {})
+		]
+			.filter((value) => typeof value === 'string' && value.length > 0)
+			.map((value) => normalizeTitle(/** @type {string} */ (value)));
 
 	return (
 		results.find((result) => getCandidateLabels(result).includes(normalizedRequestedTitle)) ??
@@ -457,9 +458,9 @@ export async function GET({ fetch, url }) {
 
 	try {
 		const titles = pickTitles(url);
-		const movies = (await mapWithLimit(titles, 4, (title) => fetchMovieByTitle(fetch, title))).filter(
-			Boolean
-		);
+		const movies = (
+			await mapWithLimit(titles, 4, (title) => fetchMovieByTitle(fetch, title))
+		).filter(Boolean);
 
 		return json(movies);
 	} catch (error) {

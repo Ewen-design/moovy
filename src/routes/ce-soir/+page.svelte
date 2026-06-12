@@ -353,7 +353,7 @@
 			</div>
 
 			<nav class="question-stepper" aria-label="Questions">
-				{#each questions as _, index}
+				{#each questions, index (index)}
 					<button
 						class:active={index === activeQuestionIndex}
 						type="button"
@@ -366,7 +366,7 @@
 			</nav>
 
 			<div class="question-rail">
-				{#each questions as question, index}
+				{#each questions as question, index (question.id)}
 					<section
 						class:active={activeQuestionIndex === index}
 						class="question-slide"
@@ -375,7 +375,7 @@
 						<div class="question-card">
 							<h2>{question.question}</h2>
 							<div class="question-options">
-								{#each question.options as option}
+								{#each question.options as option (option.value)}
 									<button
 										class:active={(answers[question.id] ?? []).some(
 											(entry) => entry.value === option.value
@@ -431,7 +431,7 @@
 				class="result-rail"
 				style={`transform: translate3d(-${activeResultIndex * 100}%, 0, 0);`}
 			>
-				{#each suggestedMovies as film, index}
+				{#each suggestedMovies as film, index (film.title)}
 					<article class="film-slide" aria-hidden={activeResultIndex !== index}>
 						<div class="film-background">
 							<img src={film.backdrop ?? film.image ?? heroImage} alt={film.title} loading="lazy" />
@@ -495,7 +495,7 @@
 			</div>
 
 			<div class="stage-dots" aria-hidden="true">
-				{#each suggestedMovies as _, index}
+				{#each suggestedMovies, index (index)}
 					<span class:active={index === activeResultIndex}></span>
 				{/each}
 			</div>
@@ -531,11 +531,11 @@
 				</div>
 
 				<div class="criteria-grid">
-					{#each questions as question}
+					{#each questions as question (question.id)}
 						<section class="criteria-card">
 							<h3>{question.question}</h3>
 							<div class="criteria-options">
-								{#each question.options as option}
+								{#each question.options as option (option.value)}
 									<button
 										class:active={(answers[question.id] ?? []).some(
 											(entry) => entry.value === option.value

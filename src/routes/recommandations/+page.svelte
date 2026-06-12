@@ -10,9 +10,7 @@
 	let heroVersion = $state(0);
 	const heroMovies = $derived.by(() => {
 		$posterVersion;
-		return recommendationMovies.filter((movie) =>
-			['Le Prestige', 'Drive'].includes(movie.title)
-		);
+		return recommendationMovies.filter((movie) => ['Le Prestige', 'Drive'].includes(movie.title));
 	});
 	const heroSlides = $derived.by(() => {
 		heroVersion;
@@ -71,7 +69,7 @@
 		</div>
 
 		<div class="film-list">
-			{#each visibleMovies as film}
+			{#each visibleMovies as film (film.title)}
 				<FilmRow
 					{film}
 					detailed={true}

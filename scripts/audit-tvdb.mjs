@@ -12,9 +12,7 @@ const aliases = {
 	'Le Parrain': ['The Godfather'],
 	'Le Parrain, 2e partie': ['The Godfather Part II', 'The Godfather: Part II'],
 	'12 Hommes en colere': ['12 Angry Men'],
-	'Le Seigneur des anneaux : Le Retour du roi': [
-		'The Lord of the Rings: The Return of the King'
-	],
+	'Le Seigneur des anneaux : Le Retour du roi': ['The Lord of the Rings: The Return of the King'],
 	'La Liste de Schindler': ["Schindler's List"],
 	'Les Affranchis': ['Goodfellas'],
 	'Le Silence des agneaux': ['The Silence of the Lambs'],
@@ -32,7 +30,7 @@ const aliases = {
 	'La Haine': ['La haine'],
 	'Memories of Murder': ['Salinui chueok'],
 	'Decision to Leave': ['Heojil kyolshim'],
-	'Burning': ['Beoning'],
+	Burning: ['Beoning'],
 	'The Handmaiden': ['Ah-ga-ssi'],
 	'Perfect Days': ['Pafekuto Deizu', 'Pāfekuto Deizu']
 };
@@ -134,18 +132,26 @@ for (const movie of top100Movies) {
 		continue;
 	}
 
-	const response = await fetch(`https://api4.thetvdb.com/v4/movies/${movieId}/extended?short=true`, {
-		headers: {
-			accept: 'application/json',
-			authorization: `Bearer ${token}`
+	const response = await fetch(
+		`https://api4.thetvdb.com/v4/movies/${movieId}/extended?short=true`,
+		{
+			headers: {
+				accept: 'application/json',
+				authorization: `Bearer ${token}`
+			}
 		}
-	});
+	);
 	const payload = await response.json();
 	const name = payload?.data?.name ?? found?.name ?? null;
 	const acceptable = [movie.title, ...(aliases[movie.title] ?? [])].map(normalize);
 
 	if (!name || !acceptable.includes(normalize(name))) {
-		bad.push({ title: movie.title, matched: name, year: payload?.data?.year ?? found?.year ?? null, id: movieId });
+		bad.push({
+			title: movie.title,
+			matched: name,
+			year: payload?.data?.year ?? found?.year ?? null,
+			id: movieId
+		});
 	}
 }
 

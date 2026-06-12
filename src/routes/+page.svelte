@@ -1,5 +1,6 @@
 <script>
 	import { onMount } from 'svelte';
+	import { resolve } from '$app/paths';
 	import FilmDetailSheet from '$lib/components/FilmDetailSheet.svelte';
 	import PageHero from '$lib/components/PageHero.svelte';
 	import PosterRail from '$lib/components/PosterRail.svelte';
@@ -8,12 +9,19 @@
 	import { posterVersion } from '$lib/poster-state';
 
 	let heroVersion = $state(0);
-	const heroShowcaseMovies = [
-		recommendationMovies.find((movie) => movie.title === 'Once Upon a Time in Hollywood'),
-		recommendationMovies.find((movie) => movie.title === 'Ocean’s Eleven'),
-		recommendationMovies.find((movie) => movie.title === 'Legend')
-	].filter(Boolean);
-	const featureShowcaseMovies = [top100Movies[2], top100Movies[17], top100Movies[63], top100Movies[54]];
+	const heroShowcaseMovies = ['Once Upon a Time in Hollywood', 'Ocean’s Eleven', 'Legend'].flatMap(
+		(title) => {
+			// flatMap (vs filter(Boolean)) narrows away `undefined` for the checker
+			const movie = recommendationMovies.find((item) => item.title === title);
+			return movie ? [movie] : [];
+		}
+	);
+	const featureShowcaseMovies = [
+		top100Movies[2],
+		top100Movies[17],
+		top100Movies[63],
+		top100Movies[54]
+	];
 	const heroSlides = $derived.by(() => {
 		heroVersion;
 		$posterVersion;
@@ -45,7 +53,7 @@
 	const featureBlocks = $derived.by(() => {
 		heroVersion;
 		$posterVersion;
-		return [
+		return /** @type {{ title: string, href: import('$app/types').Pathname, image: string | null }[]} */ ([
 			{
 				title: 'Pour ce soir',
 				href: '/ce-soir',
@@ -66,7 +74,7 @@
 				href: '/genres',
 				image: featureShowcaseMovies[3].backdrop ?? featureShowcaseMovies[3].image
 			}
-		];
+		]);
 	});
 
 	const heroRailItems = $derived.by(() => {
@@ -89,7 +97,10 @@
 	/** @param {{ id: string, title: string, genres: string[] }} film */
 	const openFilm = (film) => {
 		selectedFilm = film;
-		hydrateMoviePosters([film, ...getSimilarMovies([...recommendationMovies, ...top100Movies], film, 6)]);
+		hydrateMoviePosters([
+			film,
+			...getSimilarMovies([...recommendationMovies, ...top100Movies], film, 6)
+		]);
 	};
 
 	const closeFilm = () => {
@@ -153,9 +164,14 @@
 	</section>
 
 	<section class="feature-grid" aria-label="Entrees de navigation">
-		{#each featureBlocks as block}
-			<a class="feature-block" href={block.href}>
-				<img src={block.image ?? '/telephone2_parfum.webp'} alt={block.title} loading="lazy" decoding="async" />
+		{#each featureBlocks as block (block.href)}
+			<a class="feature-block" href={resolve(block.href)}>
+				<img
+					src={block.image ?? '/telephone2_parfum.webp'}
+					alt={block.title}
+					loading="lazy"
+					decoding="async"
+				/>
 				<div class="feature-overlay"></div>
 				<div class="feature-copy">
 					<span>{block.title}</span>
@@ -263,7 +279,12 @@
 		position: absolute;
 		inset: 0;
 		background:
-			linear-gradient(180deg, rgba(8, 8, 10, 0.02) 0%, rgba(8, 8, 10, 0.22) 36%, rgba(8, 8, 10, 0.82) 100%),
+			linear-gradient(
+				180deg,
+				rgba(8, 8, 10, 0.02) 0%,
+				rgba(8, 8, 10, 0.22) 36%,
+				rgba(8, 8, 10, 0.82) 100%
+			),
 			linear-gradient(90deg, rgba(8, 8, 10, 0.42) 0%, rgba(8, 8, 10, 0.14) 100%);
 	}
 
