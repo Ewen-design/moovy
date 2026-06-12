@@ -69,7 +69,7 @@
 		</div>
 
 		<div class="film-list">
-			{#each visibleMovies as film}
+			{#each visibleMovies as film (film.title)}
 				<FilmRow
 					{film}
 					detailed={true}

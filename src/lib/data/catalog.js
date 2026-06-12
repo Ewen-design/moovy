@@ -186,6 +186,7 @@ function capitalizeFirst(value) {
 	return value ? `${value.charAt(0).toUpperCase()}${value.slice(1)}` : value;
 }
 
+/** @type {Record<string, string>} */
 const manualQuickCopyByTitle = {
 	'Ocean’s Eleven': 'braquage · casino · argent',
 	'Ocean’s Twelve': 'braquage · équipe · revanche',
@@ -333,6 +334,7 @@ function makeMovie(title, index) {
 		image: /** @type {string | null} */ (null),
 		backdrop: /** @type {string | null} */ (null),
 		clearlogo: /** @type {string | null} */ (null),
+		trailerUrl: /** @type {string | null} */ (null),
 		rank: index + 1,
 		year: baseYear,
 		duration: minutesToDuration(duration),
@@ -512,6 +514,10 @@ const supplementalMovieSpecs = [
 	{ title: 'Spotlight', year: 2015, duration: 129, genres: ['Drame', 'Historique'] }
 ];
 
+/**
+ * @param {{ title: string, year: number, duration: number, genres: string[] }} spec
+ * @param {number} index
+ */
 function makeSupplementalMovie(spec, index) {
 	const cast = [
 		'Emma Stone',
@@ -526,6 +532,7 @@ function makeSupplementalMovie(spec, index) {
 		image: /** @type {string | null} */ (null),
 		backdrop: /** @type {string | null} */ (null),
 		clearlogo: /** @type {string | null} */ (null),
+		trailerUrl: /** @type {string | null} */ (null),
 		rank: /** @type {number | undefined} */ (undefined),
 		year: spec.year,
 		duration: minutesToDuration(spec.duration),
@@ -562,61 +569,22 @@ const recommendationSourceMovies = [...top100Movies, ...supplementalMovies].filt
 );
 
 export const recommendationMovies = recommendationTitles
-	.map((title) => recommendationSourceMovies.find((movie) => movie.title === title))
-	.filter(Boolean)
+	.flatMap((title) => {
+		// flatMap (vs filter(Boolean)) narrows away `undefined` for the checker
+		const movie = recommendationSourceMovies.find((item) => item.title === title);
+		return movie ? [movie] : [];
+	})
 	.map((movie, index) => ({
 		...movie,
 		id: `rec-${index + 1}`,
 		...buildMovieCopy(movie.title, movie.genres, movie.summary)
 	}));
 
-/**
- * @param {string[]} prefixes
- * @param {string[]} suffixes
- */
-function buildGenreTitles(prefixes, suffixes) {
-	return prefixes.flatMap((prefix) => suffixes.map((suffix) => `${prefix} ${suffix}`));
-}
-
-/**
- * @param {string} genre
- * @param {string} title
- * @param {number} index
- */
-function makeGenreMovie(genre, title, index) {
-	const cast = ['Adele Exarchopoulos', 'Tahar Rahim', 'Noemie Merlant'];
-
-	return {
-		id: `${genre}-${index + 1}`,
-		title,
-		image: /** @type {string | null} */ (null),
-		backdrop: /** @type {string | null} */ (null),
-		clearlogo: /** @type {string | null} */ (null),
-		year: 1982 + ((index * 3) % 43),
-		duration: minutesToDuration(92 + ((index * 5) % 64)),
-		rating: `${(8.9 - index * 0.016).toFixed(1).replace('.', ',')}`,
-		votes:
-			index < 15
-				? `${(1.8 - index * 0.05).toFixed(1).replace('.', ',')} M`
-				: `${980 - index * 11} k`,
-		genres: [genre],
-		director: ['Julia Ducournau', 'Celine Sciamma', 'Cedric Klapisch'][index % 3],
-		cast,
-		castMembers: cast.map((name, castIndex) => ({
-			name,
-			role: ['Role principal', 'Second role', 'Distribution'][castIndex],
-			image: actorPortrait(name, castIndex)
-		})),
-		maturity: ['13+', '16+', '10+'][index % 3],
-		quality: 'HD',
-		...buildMovieCopy(title, [genre])
-	};
-}
-
 const genreSourceMovies = [...top100Movies, ...recommendationMovies, ...supplementalMovies].filter(
 	(movie, index, list) => index === list.findIndex((item) => item.title === movie.title)
 );
 
+/** @type {Record<string, { include: string[], exclude: string[] }>} */
 const genreCurations = {
 	Action: {
 		include: [
@@ -829,7 +797,7 @@ const genreCurations = {
 
 /**
  * @param {string} genre
- * @param {typeof top100Movies[number]} movie
+ * @param {(typeof genreSourceMovies)[number]} movie
  * @param {number} index
  */
 function cloneMovieForGenre(genre, movie, index) {

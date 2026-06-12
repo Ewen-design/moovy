@@ -80,13 +80,14 @@
 						<p class="meta">{film.year} · {film.duration} · {film.maturity ?? '13+'}</p>
 						<p class="summary">{film.summary ?? film.description}</p>
 						{#if film.trailerUrl}
+							<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -- URL externe TVDB/YouTube -->
 							<a class="trailer-button" href={film.trailerUrl} target="_blank" rel="noreferrer">
 								Bande-annonce
 							</a>
 						{/if}
 
 						<div class="cast-grid">
-							{#each film.castMembers ?? [] as member}
+							{#each film.castMembers ?? [] as member (member.name)}
 								<article class="cast-card">
 									<img
 										src={member.image ?? '/photo.webp'}
@@ -113,7 +114,7 @@
 				<div class="similar-section">
 					<h3>Titres similaires</h3>
 					<div class="similar-grid">
-						{#each similarMovies as movie}
+						{#each similarMovies as movie (movie.title)}
 							<button class="similar-card" type="button" onclick={() => handleSimilarSelect(movie)}>
 								<div class="similar-visual">
 									<img
@@ -390,8 +391,7 @@
 	}
 
 	.cast-card h3,
-	.similar-section h3,
-	.similar-copy h4 {
+	.similar-section h3 {
 		margin: 0;
 	}
 
@@ -514,11 +514,6 @@
 		gap: 0.8rem;
 		color: var(--muted-text-strong);
 		font-weight: 300;
-	}
-
-	.similar-copy h4 {
-		margin-top: 0.6rem;
-		font-size: 1.2rem;
 	}
 
 	.similar-copy p {

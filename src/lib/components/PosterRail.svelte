@@ -3,8 +3,22 @@
 	import { onMount } from 'svelte';
 	import { heroImage } from '$lib/data/catalog';
 
+	/**
+	 * @typedef {{
+	 *   title: string,
+	 *   rank?: number,
+	 *   image?: string | null,
+	 *   backdrop?: string | null,
+	 *   clearlogo?: string | null,
+	 *   duration?: string,
+	 *   year?: number,
+	 *   description?: string,
+	 *   summary?: string
+	 * }} RailItem
+	 */
+
 	let {
-		items = [],
+		items = /** @type {RailItem[]} */ ([]),
 		title = '',
 		dark = false,
 		variant = 'large',
@@ -25,7 +39,7 @@
 	const previewDelayMs = 1000;
 	const scrollSettleDelayMs = 180;
 
-	/** @type {HTMLDivElement | undefined} */
+	/** @type {HTMLElement | undefined} */
 	let railRoot;
 	/** @type {HTMLDivElement | undefined} */
 	let viewport;
@@ -39,13 +53,18 @@
 	let isMobileViewport = $state(false);
 	let paused = $state(false);
 	let previewVisible = $state(false);
-	let previewItem = $state(null);
+	let previewItem = $state(/** @type {RailItem | null} */ (null));
 	let previewStyle = $state('');
+	/** @type {ReturnType<typeof setTimeout> | null} */
 	let hoverTimer = null;
+	/** @type {ReturnType<typeof setTimeout> | null} */
 	let previewUnmountTimer = null;
+	/** @type {ReturnType<typeof setTimeout> | null} */
 	let scrollSettleTimer = null;
 	let suppressHoverUntil = 0;
+	/** @type {HTMLElement | null} */
 	let hoveredCard = null;
+	/** @type {RailItem | null} */
 	let hoveredItem = null;
 
 	const isScrollable = $derived(isMobileViewport || desktopScrollable);
@@ -145,7 +164,10 @@
 		}, scrollSettleDelayMs);
 	};
 
-	/** @param {{ currentTarget: EventTarget | null }} event */
+	/**
+	 * @param {RailItem} item
+	 * @param {{ currentTarget: EventTarget | null }} event
+	 */
 	const handleCardEnter = (item, event) => {
 		const target = event.currentTarget;
 		if (!(target instanceof HTMLElement)) return;
@@ -181,6 +203,7 @@
 	onMount(() => {
 		if (!browser) return;
 		const mediaQuery = window.matchMedia('(max-width: 720px)');
+		/** @param {boolean} matches */
 		const syncViewport = (matches) => {
 			isMobileViewport = matches;
 			if (matches || !useInfiniteTrack) {
@@ -287,7 +310,8 @@
 				? undefined
 				: `transform: translate3d(-${Math.max(0, index * (cardWidth + gap) - offset)}px, 0, 0);`}
 		>
-			{#each renderedItems as item}
+			<!-- key = index: renderedItems duplicates items for the infinite track -->
+			{#each renderedItems as item, itemIndex (itemIndex)}
 				<button
 					class="rail-card"
 					type="button"
@@ -300,7 +324,7 @@
 							<span class:double-rank={item.rank >= 10} class="rail-rank-shadow" aria-hidden="true">
 								{#if item.rank >= 10}
 									<span class="rail-rank-digits">
-										{#each String(item.rank).split('') as digit}
+										{#each String(item.rank).split('') as digit, digitIndex (digitIndex)}
 											<span>{digit}</span>
 										{/each}
 									</span>
@@ -311,7 +335,7 @@
 							<span class:double-rank={item.rank >= 10} class="rail-rank" aria-hidden="true">
 								{#if item.rank >= 10}
 									<span class="rail-rank-digits">
-										{#each String(item.rank).split('') as digit}
+										{#each String(item.rank).split('') as digit, digitIndex (digitIndex)}
 											<span>{digit}</span>
 										{/each}
 									</span>

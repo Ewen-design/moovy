@@ -107,7 +107,7 @@
 		</div>
 
 		<div class="genre-tabs">
-			{#each genres as genre}
+			{#each genres as genre (genre)}
 				<button
 					class:active={genre === activeGenre}
 					type="button"
@@ -120,7 +120,7 @@
 
 		{#key activeGenre}
 			<div class="film-list" transition:fade={{ duration: 220 }}>
-				{#each activeMovies as film}
+				{#each activeMovies as film (film.title)}
 					<FilmRow {film} mobileCard={true} onSelect={openFilm} />
 				{/each}
 			</div>

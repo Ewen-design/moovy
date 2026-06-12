@@ -36,7 +36,7 @@
 	aria-label="Selection editoriale"
 >
 	<div class="hero-track" style={`transform: translateX(-${currentSlide * 100}%);`}>
-		{#each slides as slide}
+		{#each slides as slide (slide.title)}
 			<article class={`hero-slide ${slide.tint ?? 'tint-blue'}`}>
 				<img
 					src={slide.image ?? heroImage}
@@ -69,6 +69,7 @@
 							<h1>{slide.title}</h1>
 						{/if}
 						{#if slide.button}
+							<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -- href fourni résolu par la page appelante -->
 							<a href={slide.href ?? '#'}>{slide.button}</a>
 						{/if}
 					</div>

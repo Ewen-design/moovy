@@ -136,7 +136,7 @@ const movieCopy = {};
 const missing = [];
 
 for (const title of titles) {
-	let bestMatch = null;
+	let bestMatch;
 	let movieId = TITLE_OVERRIDES[title] ?? null;
 
 	if (!movieId) {
