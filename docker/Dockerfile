@@ -45,7 +45,10 @@ RUN apk upgrade --no-cache \
            /usr/local/bin/npm /usr/local/bin/npx /usr/local/bin/corepack \
            /sbin/apk /etc/apk /lib/apk /usr/share/apk /var/lib/apk \
  # strip setuid/setgid bits (defense in depth with no-new-privileges)
- && find / -xdev -type f -perm /6000 -exec chmod a-s {} + 2>/dev/null || true
+ && find / -xdev -type f -perm /6000 -exec chmod a-s {} + 2>/dev/null || true \
+ # re-assert /tmp mode: the OCI export of the buildx container driver can
+ # record this layer's /tmp entry without the sticky/world-writable bits
+ && chmod 1777 /tmp
 
 WORKDIR /app
 
