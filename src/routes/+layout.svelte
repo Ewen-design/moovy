@@ -40,7 +40,7 @@
 		{ href: '/recommandations', label: 'Recommandations' },
 		{ href: '/genres', label: 'Par genres' }
 	];
-	const mobileMenuItems = navItems.filter((item) => item.href !== '/');
+	const mobileMenuItems = navItems;
 	/** @type {{ href: import('$app/types').Pathname, label: string, icon: string }[]} */
 	const mobileBottomNavItems = [
 		{ href: '/', label: 'Accueil', icon: 'home' },
@@ -379,21 +379,13 @@
 					{#each mobileMenuItems as item, index (item.href)}
 						<a
 							class:active={page.url.pathname === item.href}
+							class:long-label={item.label.length > 12}
 							href={resolve(item.href)}
 							onclick={closeMobileMenu}
 							style={`--nav-index:${index};--nav-out-index:${mobileMenuItems.length - index - 1};`}
 						>
 							<span class="mobile-nav-copy">
 								<strong>{item.label}</strong>
-								<small>
-									{item.href === '/ce-soir'
-										? 'Selection par humeur'
-										: item.href === '/top-100'
-											? 'Classement complet'
-											: item.href === '/recommandations'
-												? 'Nos suggestions'
-												: 'Explorer par genres'}
-								</small>
 							</span>
 						</a>
 					{/each}
@@ -1023,6 +1015,9 @@
 	}
 
 	.mobile-nav-panel {
+		--menu-rail-bottom: calc(82px + env(safe-area-inset-bottom));
+		--menu-nav-offset: clamp(10px, 2svh, 22px);
+		--menu-side: clamp(24px, 5vw, 72px);
 		position: fixed;
 		inset: 0;
 		z-index: 1;
@@ -1056,38 +1051,37 @@
 
 	.mobile-nav-inner {
 		position: absolute;
-		top: 72px;
-		left: 0;
-		right: 0;
-		bottom: 0;
+		inset: 0;
 		display: grid;
-		place-items: center;
-		padding: 24px;
+		grid-template-rows: minmax(0, 1fr) auto;
+		padding: 0;
 	}
 
 	.mobile-nav {
-		display: grid;
+		position: relative;
 		align-self: center;
+		justify-self: start;
+		display: grid;
 		align-content: center;
-		justify-items: center;
-		gap: 1.7rem;
-		width: min(100%, 420px);
+		justify-items: start;
+		gap: clamp(0.95rem, 2.2svh, 1.75rem);
+		width: calc(100% - var(--menu-side) - var(--menu-side));
+		max-width: 820px;
 		padding: 0;
-		margin: 0 auto;
-		transform: translateY(-112px);
+		margin: 0 0 0 var(--menu-side);
+		transform: translateY(var(--menu-nav-offset));
 	}
 
 	.mobile-nav a {
 		display: grid;
-		justify-items: center;
-		gap: 0.32rem;
+		justify-items: start;
 		width: 100%;
 		padding: 0;
-		color: #ffffff;
+		color: rgba(84, 96, 119, 0.72);
 		text-decoration: none;
-		text-align: center;
+		text-align: left;
 		transform: translateY(72%) rotateX(-72deg);
-		transform-origin: center bottom;
+		transform-origin: left bottom;
 		opacity: 0;
 		transition:
 			transform 460ms cubic-bezier(0.22, 1, 0.36, 1),
@@ -1115,39 +1109,30 @@
 
 	.mobile-nav-copy {
 		display: grid;
-		gap: 0.22rem;
 		min-width: 0;
-		justify-items: center;
+		justify-items: start;
 	}
 
-	.mobile-nav-copy strong,
-	.mobile-nav-copy small {
+	.mobile-nav-copy strong {
 		display: block;
 	}
 
 	.mobile-nav-copy strong {
-		font-size: clamp(1.16rem, 4.2vw, 1.68rem);
-		font-weight: 700;
-		line-height: 0.98;
-		letter-spacing: 0.02em;
+		max-width: 100%;
+		font-size: 4.15rem;
+		font-weight: 800;
+		line-height: 0.9;
+		letter-spacing: 0;
 		text-transform: uppercase;
-	}
-
-	.mobile-nav-copy small {
-		color: rgba(255, 255, 255, 0.42);
-		font-size: 0.76rem;
-		font-weight: 300;
-		line-height: 1.35;
-		letter-spacing: 0.08em;
-		text-transform: uppercase;
+		white-space: normal;
+		word-break: normal;
 	}
 
 	.mobile-menu-rail {
-		position: absolute;
-		left: 0;
-		right: 0;
-		bottom: calc(82px + env(safe-area-inset-bottom));
+		position: relative;
+		align-self: end;
 		padding: 0 16px;
+		margin-bottom: var(--menu-rail-bottom);
 	}
 
 	.mobile-menu-rail :global(.poster-rail) {
@@ -1286,7 +1271,13 @@
 		}
 
 		.mobile-nav-panel {
+			--menu-side: 18px;
 			padding-top: 0;
+		}
+
+		.mobile-nav-copy strong {
+			font-size: 2.9rem;
+			line-height: 0.92;
 		}
 
 		.menu-toggle {
@@ -1351,10 +1342,6 @@
 		.preloader-mark {
 			width: clamp(8rem, 38vw, 11rem);
 		}
-
-		.mobile-nav-inner {
-			top: 76px;
-		}
 	}
 
 	@media (max-width: 480px) {
@@ -1363,12 +1350,25 @@
 			padding-inline: 10px;
 		}
 
-		.mobile-nav-inner {
-			top: 58px;
+		.mobile-nav-panel {
+			--menu-rail-bottom: calc(74px + env(safe-area-inset-bottom));
+			--menu-side: 14px;
+		}
+
+		.mobile-nav {
+			gap: clamp(0.72rem, 1.8svh, 1.15rem);
+		}
+
+		.mobile-nav-copy strong {
+			font-size: 2.05rem;
+			line-height: 0.94;
+		}
+
+		.mobile-nav a.long-label .mobile-nav-copy strong {
+			font-size: 1.88rem;
 		}
 
 		.mobile-menu-rail {
-			bottom: calc(74px + env(safe-area-inset-bottom));
 			padding: 0 10px;
 		}
 
@@ -1394,6 +1394,16 @@
 
 		.footer-meta a:last-child {
 			margin-left: 0;
+		}
+	}
+
+	@media (max-width: 360px) {
+		.mobile-nav-copy strong {
+			font-size: 1.92rem;
+		}
+
+		.mobile-nav a.long-label .mobile-nav-copy strong {
+			font-size: 1.58rem;
 		}
 	}
 </style>
