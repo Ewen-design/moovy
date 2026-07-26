@@ -1,5 +1,8 @@
 <script>
+	import { browser } from '$app/environment';
+	import { onMount } from 'svelte';
 	import { heroImage } from '$lib/data/catalog';
+	import { handleImageError, imageSource, hideBrokenImage } from '$lib/image-fallback';
 
 	let {
 		slides = [],
@@ -12,10 +15,17 @@
 	} = $props();
 
 	let currentSlide = $state(0);
+	let isMobileViewport = $state(false);
 
 	const nextSlide = () => {
 		currentSlide = (currentSlide + 1) % slides.length;
 	};
+
+	/** @param {{ image?: string | null, mobileImage?: string | null }} slide */
+	const getSlideImage = (slide) => imageSource(isMobileViewport ? (slide.mobileImage ?? slide.image) : slide.image);
+
+	/** @param {{ title: string, mobileTitle?: string }} slide */
+	const getSlideAlt = (slide) => (isMobileViewport ? (slide.mobileTitle ?? slide.title) : slide.title);
 
 	$effect(() => {
 		if (slides.length <= 1) return;
@@ -23,6 +33,21 @@
 		const interval = setInterval(nextSlide, 5600);
 
 		return () => clearInterval(interval);
+	});
+
+	onMount(() => {
+		if (!browser) return;
+		const mediaQuery = window.matchMedia('(max-width: 640px)');
+		const syncViewport = () => {
+			isMobileViewport = mediaQuery.matches;
+		};
+
+		syncViewport();
+		mediaQuery.addEventListener('change', syncViewport);
+
+		return () => {
+			mediaQuery.removeEventListener('change', syncViewport);
+		};
 	});
 </script>
 
@@ -36,14 +61,19 @@
 	aria-label="Selection editoriale"
 >
 	<div class="hero-track" style={`transform: translateX(-${currentSlide * 100}%);`}>
-		{#each slides as slide (slide.title)}
-			<article class={`hero-slide ${slide.tint ?? 'tint-blue'}`}>
+		{#each slides as slide, index (slide.title)}
+			<article
+				class:mobileImageRight={isMobileViewport && slide.mobileObjectPosition === 'right'}
+				class={`hero-slide ${slide.tint ?? 'tint-blue'}`}
+			>
 				<img
-					src={slide.image ?? heroImage}
-					alt={slide.title}
-					loading="eager"
+					src={getSlideImage(slide)}
+					alt={getSlideAlt(slide)}
+					loading={index === 0 ? 'eager' : 'lazy'}
 					decoding="async"
-					fetchpriority="high"
+					fetchpriority={index === 0 ? 'high' : 'auto'}
+					referrerpolicy="no-referrer"
+					onerror={(event) => handleImageError(event, heroImage)}
 				/>
 				{#if imageOverlay === 'full' || imageOverlay === 'vertical'}
 					<div class="hero-overlay"></div>
@@ -60,10 +90,12 @@
 						{#if slide.logo}
 							<img
 								class="hero-logo"
-								src={slide.logo}
+								src={imageSource(slide.logo)}
 								alt={slide.title}
 								loading="lazy"
 								decoding="async"
+								referrerpolicy="no-referrer"
+								onerror={hideBrokenImage}
 							/>
 						{:else}
 							<h1>{slide.title}</h1>
@@ -174,7 +206,12 @@
 		width: 100%;
 		height: 100%;
 		object-fit: cover;
+		object-position: center center;
 		display: block;
+	}
+
+	.hero-slide.mobileImageRight img {
+		object-position: 80% center;
 	}
 
 	.hero-overlay {

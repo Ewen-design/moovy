@@ -910,15 +910,15 @@ export function applyMovieArtwork(entries) {
 			.map(
 				(entry) => /** @type {[string, PosterEntry]} */ ([normalizeMovieTitle(entry.title), entry])
 			)
-			.filter(([, entry]) => Boolean(entry?.poster))
+			.filter(([, entry]) => Boolean(entry?.poster || entry?.backdrop))
 	);
 
 	for (const collection of allMovieCollections) {
 		for (const movie of collection) {
 			const match = byTitle.get(normalizeMovieTitle(movie.title));
-			if (!match?.poster) continue;
-			movie.image = match.poster;
-			movie.backdrop = match.backdrop ?? null;
+			if (!match?.poster && !match?.backdrop) continue;
+			movie.image = match.poster ?? match.backdrop ?? movie.image;
+			movie.backdrop = match.backdrop ?? match.poster ?? movie.backdrop ?? movie.image;
 			movie.clearlogo = match.clearlogo ?? null;
 			movie.year = match.year ?? movie.year;
 			movie.duration = match.duration ?? movie.duration;
@@ -958,16 +958,26 @@ export function applyFallbackArtwork() {
 		}
 	}
 
-	if (!globalPosters.length) return;
+	if (!globalPosters.length) {
+		for (const collection of allMovieCollections) {
+			for (const movie of collection) {
+				movie.image = movie.image ?? heroImage;
+				movie.backdrop = movie.backdrop ?? movie.image ?? heroImage;
+			}
+		}
+		return;
+	}
 
 	for (const collection of allMovieCollections) {
 		for (const movie of collection) {
-			if (movie.image) continue;
+			if (!movie.image) {
+				const genrePool = movie.genres.flatMap((genre) => postersByGenre.get(genre) ?? []);
+				const pool = genrePool.length ? genrePool : globalPosters;
+				movie.image =
+					pool[hashValue(`${movie.title}-${movie.genres.join('-')}`) % pool.length] ?? heroImage;
+			}
 
-			const genrePool = movie.genres.flatMap((genre) => postersByGenre.get(genre) ?? []);
-			const pool = genrePool.length ? genrePool : globalPosters;
-			movie.image =
-				pool[hashValue(`${movie.title}-${movie.genres.join('-')}`) % pool.length] ?? null;
+			movie.backdrop = movie.backdrop ?? movie.image ?? heroImage;
 		}
 	}
 }

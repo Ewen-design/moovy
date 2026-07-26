@@ -18,6 +18,16 @@
 	import { fade } from 'svelte/transition';
 
 	let { children, data } = $props();
+
+	function syncInitialPosters() {
+		const initialPosters = data?.posters ?? [];
+		if (!browser || !initialPosters.length) return;
+		applyMovieArtwork(initialPosters);
+		applyFallbackArtwork();
+	}
+
+	syncInitialPosters();
+
 	const siteUrl = 'https://moovy.agence3terres.fr';
 	const shareImage = `${siteUrl}/moovy_mobile.webp`;
 	const faviconPath = '/favicon.png';

@@ -5,6 +5,7 @@
 	import PageHero from '$lib/components/PageHero.svelte';
 	import PosterRail from '$lib/components/PosterRail.svelte';
 	import { getSimilarMovies, recommendationMovies, top100Movies } from '$lib/data/catalog';
+	import { handleImageError, imageSource } from '$lib/image-fallback';
 	import { hydrateMoviePosters } from '$lib/posters';
 	import { posterVersion } from '$lib/poster-state';
 
@@ -16,6 +17,10 @@
 			return movie ? [movie] : [];
 		}
 	);
+	const mobileHeroShowcaseMovies = ['Le Mans 66', 'Fight Club', 'La Haine'].flatMap((title) => {
+		const movie = [...recommendationMovies, ...top100Movies].find((item) => item.title === title);
+		return movie ? [movie] : [];
+	});
 	const featureShowcaseMovies = [
 		top100Movies[2],
 		top100Movies[17],
@@ -30,6 +35,9 @@
 				kicker: 'Moovy',
 				title: heroShowcaseMovies[0].title,
 				image: heroShowcaseMovies[0].backdrop ?? heroShowcaseMovies[0].image,
+				mobileTitle: mobileHeroShowcaseMovies[0]?.title,
+				mobileImage: mobileHeroShowcaseMovies[0]?.backdrop ?? mobileHeroShowcaseMovies[0]?.image,
+				mobileObjectPosition: 'right',
 				href: '/recommandations',
 				tint: 'tint-blue'
 			},
@@ -37,6 +45,8 @@
 				kicker: 'Moovy',
 				title: heroShowcaseMovies[1].title,
 				image: heroShowcaseMovies[1].backdrop ?? heroShowcaseMovies[1].image,
+				mobileTitle: mobileHeroShowcaseMovies[1]?.title,
+				mobileImage: mobileHeroShowcaseMovies[1]?.backdrop ?? mobileHeroShowcaseMovies[1]?.image,
 				href: '/recommandations',
 				tint: 'tint-silver'
 			},
@@ -44,6 +54,8 @@
 				kicker: 'Moovy',
 				title: heroShowcaseMovies[2].title,
 				image: heroShowcaseMovies[2].backdrop ?? heroShowcaseMovies[2].image,
+				mobileTitle: mobileHeroShowcaseMovies[2]?.title,
+				mobileImage: mobileHeroShowcaseMovies[2]?.backdrop ?? mobileHeroShowcaseMovies[2]?.image,
 				href: '/top-100',
 				tint: 'tint-amber'
 			}
@@ -120,6 +132,7 @@
 				...bottomRailItems,
 				...bottomMiniRailItems,
 				...heroShowcaseMovies,
+				...mobileHeroShowcaseMovies,
 				...featureShowcaseMovies
 			]);
 			heroVersion += 1;
@@ -167,10 +180,12 @@
 		{#each featureBlocks as block (block.href)}
 			<a class="feature-block" href={resolve(block.href)}>
 				<img
-					src={block.image ?? '/telephone2_parfum.webp'}
+					src={imageSource(block.image)}
 					alt={block.title}
 					loading="lazy"
 					decoding="async"
+					referrerpolicy="no-referrer"
+					onerror={handleImageError}
 				/>
 				<div class="feature-overlay"></div>
 				<div class="feature-copy">

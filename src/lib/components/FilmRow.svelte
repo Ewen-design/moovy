@@ -1,5 +1,6 @@
 <script>
 	import { heroImage } from '$lib/data/catalog';
+	import { handleImageError, imageSource } from '$lib/image-fallback';
 
 	let {
 		film,
@@ -26,16 +27,23 @@
 		{#if rank}
 			<span class="rank-backdrop" aria-hidden="true">{rank}</span>
 		{/if}
-		<img src={film.image ?? heroImage} alt={film.title} loading="lazy" decoding="async" />
+		<img
+			src={imageSource(film.image, heroImage)}
+			alt={film.title}
+			loading="lazy"
+			decoding="async"
+			referrerpolicy="no-referrer"
+			onerror={(event) => handleImageError(event, heroImage)}
+		/>
 	</div>
 
 	<div class="content-stack">
 		<div class="film-copy">
 			<h3>{film.title}</h3>
-			<p class="meta">{film.year} · {film.duration} · {film.genres.join(', ')}</p>
+			<p class="meta">{film.year} · {film.duration} · {(film.genres ?? []).join(', ')}</p>
 			{#if detailed}
 				<p class="description">{film.editorial}</p>
-				<p class="credits">De {film.director} · Avec {film.cast.join(', ')}</p>
+				<p class="credits">De {film.director} · Avec {(film.cast ?? []).join(', ')}</p>
 			{:else}
 				<p class="description">{film.description}</p>
 			{/if}

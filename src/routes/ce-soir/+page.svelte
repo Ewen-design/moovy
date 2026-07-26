@@ -3,6 +3,7 @@
 	import { fade, fly } from 'svelte/transition';
 	import FilmDetailSheet from '$lib/components/FilmDetailSheet.svelte';
 	import { getSimilarMovies, heroImage, tonightMoviePool } from '$lib/data/catalog';
+	import { handleImageError, hideBrokenImage, imageSource } from '$lib/image-fallback';
 	import { hydrateMoviePosters } from '$lib/posters';
 	import { posterVersion } from '$lib/poster-state';
 
@@ -434,13 +435,28 @@
 				{#each suggestedMovies as film, index (film.title)}
 					<article class="film-slide" aria-hidden={activeResultIndex !== index}>
 						<div class="film-background">
-							<img src={film.backdrop ?? film.image ?? heroImage} alt={film.title} loading="lazy" />
+							<img
+								src={imageSource(film.backdrop ?? film.image, heroImage)}
+								alt={film.title}
+								loading="lazy"
+								decoding="async"
+								referrerpolicy="no-referrer"
+								onerror={(event) => handleImageError(event, heroImage)}
+							/>
 						</div>
 						<div class="film-overlay"></div>
 						<div class="film-grid">
 							<div class="film-copy">
 								{#if film.clearlogo}
-									<img class="film-logo" src={film.clearlogo} alt={film.title} loading="lazy" />
+									<img
+										class="film-logo"
+										src={imageSource(film.clearlogo)}
+										alt={film.title}
+										loading="lazy"
+										decoding="async"
+										referrerpolicy="no-referrer"
+										onerror={hideBrokenImage}
+									/>
 								{:else}
 									<h2>{film.title}</h2>
 								{/if}
@@ -464,9 +480,12 @@
 							<div class="film-poster-wrap">
 								<img
 									class="film-poster"
-									src={film.image ?? heroImage}
+									src={imageSource(film.image, heroImage)}
 									alt={film.title}
 									loading="lazy"
+									decoding="async"
+									referrerpolicy="no-referrer"
+									onerror={(event) => handleImageError(event, heroImage)}
 								/>
 							</div>
 						</div>

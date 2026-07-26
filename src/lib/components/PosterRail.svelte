@@ -2,6 +2,7 @@
 	import { browser } from '$app/environment';
 	import { onMount } from 'svelte';
 	import { heroImage } from '$lib/data/catalog';
+	import { handleImageError, hideBrokenImage, imageSource } from '$lib/image-fallback';
 
 	/**
 	 * @typedef {{
@@ -269,20 +270,24 @@
 		>
 			<div class="rail-preview-visual">
 				<img
-					src={previewItem.backdrop ?? previewItem.image ?? heroImage}
+					src={imageSource(previewItem.backdrop ?? previewItem.image, heroImage)}
 					alt={previewItem.title}
 					loading="lazy"
 					decoding="async"
+					referrerpolicy="no-referrer"
+					onerror={(event) => handleImageError(event, heroImage)}
 				/>
 				<div class="rail-preview-overlay"></div>
 				<div class="rail-preview-brand">
 					{#if previewItem.clearlogo}
 						<img
 							class="rail-preview-clearlogo"
-							src={previewItem.clearlogo}
+							src={imageSource(previewItem.clearlogo)}
 							alt={previewItem.title}
 							loading="lazy"
 							decoding="async"
+							referrerpolicy="no-referrer"
+							onerror={hideBrokenImage}
 						/>
 					{:else}
 						<h4>{previewItem.title}</h4>
@@ -343,19 +348,35 @@
 									{item.rank}
 								{/if}
 							</span>
-							<img src={item.image ?? heroImage} alt={item.title} loading="lazy" decoding="async" />
+							<img
+								src={imageSource(item.image, heroImage)}
+								alt={item.title}
+								loading="lazy"
+								decoding="async"
+								referrerpolicy="no-referrer"
+								onerror={(event) => handleImageError(event, heroImage)}
+							/>
 						</div>
 					{:else}
-						<img src={item.image ?? heroImage} alt={item.title} loading="lazy" decoding="async" />
+						<img
+							src={imageSource(item.image, heroImage)}
+							alt={item.title}
+							loading="lazy"
+							decoding="async"
+							referrerpolicy="no-referrer"
+							onerror={(event) => handleImageError(event, heroImage)}
+						/>
 						<div class="rail-overlay"></div>
 						{#if showClearlogoOverlay && item.clearlogo}
 							<div class="rail-clearlogo-wrap">
 								<img
 									class="rail-clearlogo"
-									src={item.clearlogo}
+									src={imageSource(item.clearlogo)}
 									alt={item.title}
 									loading="lazy"
 									decoding="async"
+									referrerpolicy="no-referrer"
+									onerror={hideBrokenImage}
 								/>
 							</div>
 						{:else if showCardCopy}

@@ -2,6 +2,12 @@
 	import { tick } from 'svelte';
 	import { fly, fade } from 'svelte/transition';
 	import { heroImage } from '$lib/data/catalog';
+	import {
+		handleImageError,
+		hideBrokenImage,
+		imageSource,
+		PERSON_IMAGE_FALLBACK
+	} from '$lib/image-fallback';
 
 	let { film = null, similarMovies = [], onClose = () => {}, onSelect = () => {} } = $props();
 	/** @type {HTMLDivElement | null} */
@@ -53,10 +59,12 @@
 
 				<div class="sheet-hero">
 					<img
-						src={film.backdrop ?? film.image ?? heroImage}
+						src={imageSource(film.backdrop ?? film.image, heroImage)}
 						alt={film.title}
 						loading="lazy"
 						decoding="async"
+						referrerpolicy="no-referrer"
+						onerror={(event) => handleImageError(event, heroImage)}
 					/>
 					<div class="sheet-overlay"></div>
 
@@ -64,10 +72,12 @@
 						{#if film.clearlogo}
 							<img
 								class="clearlogo"
-								src={film.clearlogo}
+								src={imageSource(film.clearlogo)}
 								alt={film.title}
 								loading="lazy"
 								decoding="async"
+								referrerpolicy="no-referrer"
+								onerror={hideBrokenImage}
 							/>
 						{:else}
 							<h2>{film.title}</h2>
@@ -78,7 +88,7 @@
 				<div class="sheet-body">
 					<div class="sheet-main">
 						<p class="meta">{film.year} · {film.duration} · {film.maturity ?? '13+'}</p>
-						<p class="summary">{film.summary ?? film.description}</p>
+						<p class="summary">{film.summary ?? film.description ?? film.overview}</p>
 						{#if film.trailerUrl}
 							<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -- URL externe TVDB/YouTube -->
 							<a class="trailer-button" href={film.trailerUrl} target="_blank" rel="noreferrer">
@@ -87,13 +97,15 @@
 						{/if}
 
 						<div class="cast-grid">
-							{#each film.castMembers ?? [] as member (member.name)}
+							{#each film.castMembers ?? [] as member, memberIndex (`${member.name}-${member.role}-${memberIndex}`)}
 								<article class="cast-card">
 									<img
-										src={member.image ?? '/photo.webp'}
+										src={imageSource(member.image, PERSON_IMAGE_FALLBACK)}
 										alt={member.name}
 										loading="lazy"
 										decoding="async"
+										referrerpolicy="no-referrer"
+										onerror={(event) => handleImageError(event, PERSON_IMAGE_FALLBACK)}
 									/>
 									<div>
 										<h3>{member.name}</h3>
@@ -105,8 +117,8 @@
 					</div>
 
 					<aside class="sheet-side">
-						<p><strong>Distribution :</strong> {film.cast.join(', ')}</p>
-						<p><strong>Genres :</strong> {film.genres.join(', ')}</p>
+						<p><strong>Distribution :</strong> {(film.cast ?? []).join(', ')}</p>
+						<p><strong>Genres :</strong> {(film.genres ?? []).join(', ')}</p>
 						<p><strong>Realisateur :</strong> {film.director}</p>
 					</aside>
 				</div>
@@ -118,20 +130,24 @@
 							<button class="similar-card" type="button" onclick={() => handleSimilarSelect(movie)}>
 								<div class="similar-visual">
 									<img
-										src={movie.backdrop ?? movie.image ?? heroImage}
+										src={imageSource(movie.backdrop ?? movie.image, heroImage)}
 										alt={movie.title}
 										loading="lazy"
 										decoding="async"
+										referrerpolicy="no-referrer"
+										onerror={(event) => handleImageError(event, heroImage)}
 									/>
 									<div class="similar-overlay"></div>
 									<div class="similar-brand">
 										{#if movie.clearlogo}
 											<img
 												class="similar-clearlogo"
-												src={movie.clearlogo}
+												src={imageSource(movie.clearlogo)}
 												alt={movie.title}
 												loading="lazy"
 												decoding="async"
+												referrerpolicy="no-referrer"
+												onerror={hideBrokenImage}
 											/>
 										{:else}
 											<h4>{movie.title}</h4>
@@ -143,7 +159,7 @@
 										<span>{movie.duration}</span>
 										<span>{movie.year}</span>
 									</div>
-									<p>{movie.description}</p>
+									<p>{movie.description ?? movie.summary}</p>
 								</div>
 							</button>
 						{/each}

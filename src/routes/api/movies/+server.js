@@ -211,6 +211,19 @@ function pickPeople(characters, type, peopleType) {
 		.sort((left, right) => (left?.sort ?? 999) - (right?.sort ?? 999));
 }
 
+/** @param {any[]} people */
+function dedupePeopleByName(people) {
+	const seenNames = new Set();
+
+	return people.filter((person) => {
+		const name = person?.personName ?? person?.name ?? '';
+		const normalizedName = normalizeTitle(name);
+		if (!normalizedName || seenNames.has(normalizedName)) return false;
+		seenNames.add(normalizedName);
+		return true;
+	});
+}
+
 /** @param {{ url?: string | null, language?: string | null }[]} trailers */
 function pickTrailer(trailers) {
 	const validTrailers = (trailers ?? []).filter(
@@ -389,7 +402,7 @@ async function fetchMovieByTitle(fetch, title) {
 		const artworks = movie?.artworks ?? [];
 		const trailers = movie?.trailers ?? [];
 		const characters = movie?.characters ?? [];
-		const castMembers = pickPeople(characters, 3, 'Actor')
+		const castMembers = dedupePeopleByName(pickPeople(characters, 3, 'Actor'))
 			.slice(0, 6)
 			.map((member) => ({
 				name: member?.personName ?? member?.name ?? 'Acteur',

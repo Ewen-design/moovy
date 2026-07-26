@@ -5,10 +5,12 @@
 	import {
 		genreMovieCollections,
 		getSimilarMovies,
+		heroImage,
 		recommendationMovies,
 		tonightMoviePool,
 		top100Movies
 	} from '$lib/data/catalog';
+	import { handleImageError, imageSource } from '$lib/image-fallback';
 	import { hydrateMoviePosters } from '$lib/posters';
 	import { posterVersion } from '$lib/poster-state';
 
@@ -113,7 +115,14 @@
 					<div class="results-grid">
 						{#each visibleMovies as movie (movie.title)}
 							<button class="result-card" type="button" onclick={() => openFilm(movie)}>
-								<img src={movie.image} alt={movie.title} loading="lazy" decoding="async" />
+								<img
+									src={imageSource(movie.image, heroImage)}
+									alt={movie.title}
+									loading="lazy"
+									decoding="async"
+									referrerpolicy="no-referrer"
+									onerror={(event) => handleImageError(event, heroImage)}
+								/>
 								<div class="result-overlay"></div>
 							</button>
 						{/each}
