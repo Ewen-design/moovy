@@ -8,7 +8,7 @@ export default defineConfig({
 		allowedHosts: ['moovy.agence3terres.fr']
 	},
 	preview: {
-		port: 5174,
+		port: 5173,
 		strictPort: true,
 		allowedHosts: ['moovy.agence3terres.fr']
 	},
