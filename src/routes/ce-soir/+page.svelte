@@ -1182,6 +1182,10 @@
 	}
 
 	@media (max-width: 640px) {
+		.tonight-experience {
+			--result-poster-space: clamp(0.75rem, 2.4svh, 1.1rem);
+		}
+
 		.quiz-stage {
 			padding: 5.45rem 0.95rem calc(3.8rem + env(safe-area-inset-bottom));
 		}
@@ -1221,6 +1225,7 @@
 		.film-grid {
 			align-content: end;
 			align-items: end;
+			justify-items: stretch;
 			gap: 0;
 			padding: 5.2rem 1rem calc(4rem + env(safe-area-inset-bottom));
 		}
@@ -1261,7 +1266,15 @@
 		}
 
 		.film-poster-wrap {
-			display: none;
+			display: flex;
+			width: 100%;
+			justify-content: center;
+			align-items: center;
+			margin-block: var(--result-poster-space);
+		}
+
+		.film-poster {
+			width: min(43vw, 172px, 23svh);
 		}
 
 		.results-nav {
@@ -1353,9 +1366,17 @@
 	}
 
 	@media (max-width: 640px) and (max-height: 700px) {
+		.tonight-experience {
+			--result-poster-space: clamp(0.55rem, 1.8svh, 0.82rem);
+		}
+
 		.film-grid {
 			padding-top: 4.6rem;
 			padding-bottom: calc(3.35rem + env(safe-area-inset-bottom));
+		}
+
+		.film-poster {
+			width: min(36vw, 136px, 19.5svh);
 		}
 
 		.film-logo {
