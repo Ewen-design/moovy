@@ -75,7 +75,12 @@ const TITLE_ALIASES = {
 	'Il était une fois dans l’Ouest': ['Once Upon a Time in the West'],
 	'Bruce tout-puissant': ['Bruce Almighty'],
 	Alliés: ['Allied'],
-	Shining: ['The Shining']
+	Shining: ['The Shining'],
+	'Seul sur Mars': ['The Martian'],
+	Fighter: ['The Fighter'],
+	Matrix: ['The Matrix'],
+	'Tu ne tueras point': ['Hacksaw Ridge'],
+	'L’avare': ['The Miser']
 };
 /** @type {Record<string, string | number>} */
 const TITLE_OVERRIDES = {
@@ -84,7 +89,16 @@ const TITLE_OVERRIDES = {
 	'La Cité de Dieu': 1733,
 	'Vol au-dessus d’un nid de coucou': 785,
 	'Your Name': 197,
-	Alliés: 1523
+	Alliés: 1523,
+	// TVDB fuzzy search resolves these to the wrong film — pin the exact TVDB movie id.
+	'Seul sur Mars': 132, // The Martian (2015)
+	'Le Fabuleux Destin d’Amélie Poulain': 863, // Amélie (2001)
+	'Le Dîner de cons': 8101, // Le Dîner de cons (1998)
+	Fighter: 1853, // The Fighter (2010)
+	Matrix: 169, // The Matrix (1999)
+	'Tu ne tueras point': 480, // Hacksaw Ridge (2016)
+	'L’avare': 10255, // L'Avare / The Miser (1980)
+	'Le Père Noël est une ordure': 6752 // original 1982 film
 };
 
 let authToken = '';
