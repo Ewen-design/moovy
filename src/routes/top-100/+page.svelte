@@ -15,6 +15,10 @@
 		$posterVersion;
 		return top100Movies.filter((movie) => movie.backdrop && movie.clearlogo).slice(0, 2);
 	});
+	const oppenheimerMovie = $derived.by(() => {
+		$posterVersion;
+		return top100Movies.find((movie) => movie.title === 'Oppenheimer') ?? null;
+	});
 	const heroSlides = $derived.by(() => {
 		heroVersion;
 		$posterVersion;
@@ -22,6 +26,10 @@
 			title: movie.title,
 			logo: movie.clearlogo,
 			image: movie.backdrop ?? movie.image,
+			mobileImage:
+				movie.title === 'Les Évadés'
+					? (oppenheimerMovie?.backdrop ?? oppenheimerMovie?.image ?? null)
+					: null,
 			button: 'Découvrir',
 			href: '#list',
 			tint: index === 0 ? 'tint-blue' : 'tint-silver'
@@ -72,14 +80,18 @@
 
 	$effect(() => {
 		(async () => {
-			await hydrateMoviePosters([...visibleMovies, ...heroMovies]);
+			await hydrateMoviePosters(
+				[...visibleMovies, ...heroMovies, oppenheimerMovie].filter(Boolean)
+			);
 			heroVersion += 1;
 		})();
 	});
 
 	onMount(() => {
 		(async () => {
-			await hydrateMoviePosters([...visibleMovies, ...heroMovies]);
+			await hydrateMoviePosters(
+				[...visibleMovies, ...heroMovies, oppenheimerMovie].filter(Boolean)
+			);
 			heroVersion += 1;
 		})();
 	});
