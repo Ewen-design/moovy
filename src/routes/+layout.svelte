@@ -47,6 +47,7 @@
 		{ href: '/recherche', label: 'Recherche', icon: 'search' }
 	];
 	const isTonightPage = $derived(page.url.pathname === '/ce-soir');
+	const isErrorPage = $derived(Boolean(page.error));
 	let scrolled = $state(false);
 	let searchQuery = $state('');
 	let searchOpen = $state(false);
@@ -305,7 +306,7 @@
 	</div>
 {/if}
 
-<div class:tonight-page={isTonightPage} class="app-shell">
+<div class:tonight-page={isTonightPage} class:error-view={isErrorPage} class="app-shell">
 	<header
 		bind:this={headerElement}
 		class:menu-open={mobileMenuOpen}
@@ -409,7 +410,7 @@
 		</div>
 	</header>
 
-	<main class:tonight-page={isTonightPage} class="site-main">
+	<main class:tonight-page={isTonightPage} class:error-view={isErrorPage} class="site-main">
 		{#key page.url.pathname}
 			<div transition:fade={{ duration: 220 }}>
 				{@render children()}
@@ -417,7 +418,7 @@
 		{/key}
 	</main>
 
-	{#if !isTonightPage}
+	{#if !isTonightPage && !isErrorPage}
 		<nav class="mobile-bottom-nav" aria-label="Navigation mobile principale">
 			{#each mobileBottomNavItems as item (item.href)}
 				<a
@@ -615,7 +616,8 @@
 		padding: 10px;
 	}
 
-	.app-shell.tonight-page {
+	.app-shell.tonight-page,
+	.app-shell.error-view {
 		padding: 0;
 	}
 
@@ -1157,7 +1159,8 @@
 		margin-top: 0;
 	}
 
-	.site-main.tonight-page {
+	.site-main.tonight-page,
+	.site-main.error-view {
 		padding-bottom: 0;
 	}
 

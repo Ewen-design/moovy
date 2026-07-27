@@ -80,18 +80,22 @@
 
 	$effect(() => {
 		(async () => {
-			await hydrateMoviePosters(
-				[...visibleMovies, ...heroMovies, oppenheimerMovie].filter(Boolean)
-			);
+			await hydrateMoviePosters([
+				...visibleMovies,
+				...heroMovies,
+				...(oppenheimerMovie ? [oppenheimerMovie] : [])
+			]);
 			heroVersion += 1;
 		})();
 	});
 
 	onMount(() => {
 		(async () => {
-			await hydrateMoviePosters(
-				[...visibleMovies, ...heroMovies, oppenheimerMovie].filter(Boolean)
-			);
+			await hydrateMoviePosters([
+				...visibleMovies,
+				...heroMovies,
+				...(oppenheimerMovie ? [oppenheimerMovie] : [])
+			]);
 			heroVersion += 1;
 		})();
 	});
